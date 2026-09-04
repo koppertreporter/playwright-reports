@@ -1,0 +1,71 @@
+# Page snapshot
+
+```yaml
+- generic [ref=e3]:
+  - generic [ref=e4]: You're on DEVELOPMENT OR STAGE
+  - generic [ref=e6]:
+    - img [ref=e7] [cursor=pointer]
+    - menu
+    - generic [ref=e15] [cursor=pointer]:
+      - img "user" [ref=e16]:
+        - img [ref=e17]
+      - text: Playwright DudeDBtAhzP
+  - generic [ref=e19]:
+    - complementary [ref=e21]:
+      - menu [ref=e23]:
+        - menuitem "swap Side Effects" [ref=e24] [cursor=pointer]:
+          - img "swap" [ref=e25]:
+            - img [ref=e26]
+          - link "Side Effects" [ref=e29]:
+            - /url: /apps/protect/side-effects
+      - img "right" [ref=e31] [cursor=pointer]:
+        - img [ref=e32]
+    - main [ref=e34]:
+      - generic [ref=e35]:
+        - generic [ref=e36]:
+          - generic [ref=e37]:
+            - generic [ref=e39]: Beneficial
+            - button "Select product" [ref=e40] [cursor=pointer]:
+              - generic [ref=e41]: Select product
+          - generic [ref=e42]:
+            - generic [ref=e43]:
+              - generic [ref=e44]: Active ingredient
+              - generic [ref=e45]: 4 items
+            - button "Select product" [ref=e46] [cursor=pointer]:
+              - generic [ref=e47]: Select product
+            - generic [ref=e48]:
+              - generic [ref=e49]:
+                - img [ref=e51]
+                - text: 2 4 D Dicamba
+                - img "close" [ref=e54] [cursor=pointer]:
+                  - img [ref=e55]
+              - generic [ref=e57]:
+                - img [ref=e59]
+                - text: A Rest
+                - img "close" [ref=e62] [cursor=pointer]:
+                  - img [ref=e63]
+              - generic [ref=e65]:
+                - img [ref=e67]
+                - text: Aa Karzol
+                - img "close" [ref=e70] [cursor=pointer]:
+                  - img [ref=e71]
+              - generic [ref=e73]:
+                - img [ref=e75]
+                - text: Aaphytora
+                - img "close" [ref=e78] [cursor=pointer]:
+                  - img [ref=e79]
+          - button "Delete all products" [ref=e81] [cursor=pointer]:
+            - img [ref=e82]
+            - generic [ref=e84]: Delete all products
+        - generic [ref=e85]:
+          - generic "Side Effects" [ref=e89]
+          - generic [ref=e90]:
+            - generic [ref=e92]:
+              - img [ref=e95]
+              - generic [ref=e97]: Nothing has been selected yet
+              - generic [ref=e98]: Select one or more beneficials and active ingredients to show side effects.
+            - button "Digital Assistant" [ref=e100] [cursor=pointer]:
+              - img [ref=e101]
+              - generic [ref=e106]: Digital Assistant
+          - generic [ref=e109]: All rights reserved. © Koppert 2026
+```
