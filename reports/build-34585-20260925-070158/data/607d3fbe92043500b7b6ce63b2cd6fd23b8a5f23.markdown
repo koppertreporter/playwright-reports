@@ -1,0 +1,118 @@
+# Page snapshot
+
+```yaml
+- generic [ref=e1]:
+  - generic [ref=e3]:
+    - generic [ref=e4]: You're on DEVELOPMENT OR STAGE
+    - generic [ref=e6]:
+      - img [ref=e7] [cursor=pointer]
+      - menu [ref=e14]:
+        - menuitem "Order" [ref=e15] [cursor=pointer]:
+          - link "Order" [ref=e17]:
+            - /url: /apps/order
+        - menuitem "Knowledge" [ref=e18] [cursor=pointer]:
+          - link "Knowledge" [ref=e20]:
+            - /url: /apps/protect
+        - menuitem "Scout" [ref=e21] [cursor=pointer]:
+          - link "Scout" [ref=e23]:
+            - /url: https://www.natutecscout.com/apps/scout
+        - menuitem "Organization" [ref=e24] [cursor=pointer]:
+          - link "Organization" [ref=e26]:
+            - /url: /apps/organization
+      - generic [ref=e27]:
+        - generic [ref=e28]: Plkw P. van Geest Maasland B.V.
+        - generic [ref=e29] [cursor=pointer]:
+          - img "user" [ref=e30]:
+            - img [ref=e31]
+          - text: Playwright DudeLIPKGlP
+    - generic [ref=e33]:
+      - complementary [ref=e35]:
+        - menu [ref=e37]:
+          - menuitem "Planner" [ref=e38] [cursor=pointer]:
+            - img [ref=e39]
+            - link "Planner" [ref=e43]:
+              - /url: /apps/order/planner
+          - menuitem "Order list" [ref=e44] [cursor=pointer]:
+            - img [ref=e45]
+            - link "Order list" [ref=e48]:
+              - /url: /apps/order/order-list
+        - img "left" [ref=e50] [cursor=pointer]:
+          - img [ref=e51]
+      - main [ref=e53]:
+        - generic [ref=e55]:
+          - generic [ref=e60]:
+            - link [ref=e61] [cursor=pointer]:
+              - /url: /apps/order/order-list
+              - img [ref=e62]
+            - heading "Create order" [level=2] [ref=e65]
+          - generic [ref=e67]:
+            - separator [ref=e68]
+            - generic [ref=e69]:
+              - generic [ref=e70]:
+                - generic [ref=e71]:
+                  - text: Location
+                  - generic [ref=e74]:
+                    - generic [ref=e76]:
+                      - combobox [ref=e78] [cursor=pointer]
+                      - generic: Plkw P. van Geest B.V. - Loc. Gerbera
+                    - generic:
+                      - generic:
+                        - img
+                - generic [ref=e79]:
+                  - text: Date
+                  - generic [ref=e81]:
+                    - textbox "30-10-2026" [ref=e82]:
+                      - /placeholder: Select date
+                    - generic:
+                      - img "calendar":
+                        - img
+              - generic [ref=e83]:
+                - button "Cancel" [ref=e84] [cursor=pointer]:
+                  - generic [ref=e85]: Cancel
+                - button "Create order" [ref=e86] [cursor=pointer]:
+                  - generic [ref=e87]: Create order
+            - separator [ref=e88]
+            - generic [ref=e90]:
+              - generic [ref=e91]:
+                - generic [ref=e92]:
+                  - generic [ref=e93]: Product name
+                  - generic [ref=e94]: pieces
+                - generic [ref=e95]:
+                  - generic [ref=e100] [cursor=pointer]: Addit/2,5l/NL
+                  - textbox [ref=e102]: "5"
+                  - img "delete" [ref=e103] [cursor=pointer]:
+                    - img [ref=e104]
+              - generic [ref=e107] [cursor=pointer]: + Add product
+              - generic [ref=e108]:
+                - generic [ref=e110]:
+                  - generic "Shipping method" [ref=e112]
+                  - generic [ref=e119]:
+                    - combobox [ref=e123] [cursor=pointer]
+                    - generic:
+                      - generic:
+                        - img
+                - generic [ref=e125]:
+                  - generic "Order reference" [ref=e127]
+                  - textbox [ref=e131]
+                - generic [ref=e133]:
+                  - generic "Order notes" [ref=e135]
+                  - textbox "Start typing..." [ref=e141]
+          - generic [ref=e144]: All rights reserved. © Koppert 2026
+  - generic [ref=e146]:
+    - dialog:
+      - generic [ref=e148]:
+        - generic [ref=e150]:
+          - generic [ref=e151]:
+            - img "warning" [ref=e152]:
+              - img [ref=e153]
+            - generic [ref=e155]: Order confirmation
+          - button [ref=e156] [cursor=pointer]:
+            - img [ref=e157]
+        - text: To prevent you from accidentally ordering, please confirm you want to place the orders for all the new data you put into the Planner.
+        - separator [ref=e159]
+        - generic [ref=e160]:
+          - button "Cancel" [ref=e161] [cursor=pointer]:
+            - generic [ref=e162]: Cancel
+          - button "Confirm" [ref=e163] [cursor=pointer]:
+            - generic [ref=e164]: Confirm
+```
