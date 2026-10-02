@@ -1,0 +1,466 @@
+# Page snapshot
+
+```yaml
+- generic [ref=e1]:
+  - generic [ref=e3]:
+    - generic [ref=e4]: You're on DEVELOPMENT OR STAGE
+    - generic [ref=e6]:
+      - img [ref=e7] [cursor=pointer]
+      - menu [ref=e14]:
+        - menuitem "Order" [ref=e15] [cursor=pointer]:
+          - link "Order" [ref=e17]:
+            - /url: /apps/order
+        - menuitem "Knowledge" [ref=e18] [cursor=pointer]:
+          - link "Knowledge" [ref=e20]:
+            - /url: /apps/protect
+        - menuitem "Scout" [ref=e21] [cursor=pointer]:
+          - link "Scout" [ref=e23]:
+            - /url: https://www.natutecscout.com/apps/scout
+        - menuitem "Organization" [ref=e24] [cursor=pointer]:
+          - link "Organization" [ref=e26]:
+            - /url: /apps/organization
+      - generic [ref=e27]:
+        - generic [ref=e28]: AGROCENTRO ABONOS VELEZ S.L.
+        - generic [ref=e29] [cursor=pointer]:
+          - img "user" [ref=e30]:
+            - img [ref=e31]
+          - text: Playwright DudekOWXZSv
+    - generic [ref=e33]:
+      - complementary [ref=e35]:
+        - menu [ref=e37]:
+          - menuitem "Planner" [ref=e38] [cursor=pointer]:
+            - img [ref=e39]
+            - link "Planner" [ref=e43]:
+              - /url: /apps/order/planner
+          - menuitem "Order list" [ref=e44] [cursor=pointer]:
+            - img [ref=e45]
+            - link "Order list" [ref=e48]:
+              - /url: /apps/order/order-list
+          - menuitem "file-text Invoices" [ref=e49] [cursor=pointer]:
+            - img "file-text" [ref=e50]:
+              - img [ref=e51]
+            - link "Invoices" [ref=e54]:
+              - /url: /apps/order/invoices
+        - img "left" [ref=e56] [cursor=pointer]:
+          - img [ref=e57]
+      - main [ref=e59]:
+        - generic [ref=e61]:
+          - heading "Planner" [level=2] [ref=e68]
+          - generic [ref=e69]:
+            - separator [ref=e71]
+            - generic [ref=e72]:
+              - generic [ref=e75]:
+                - generic [ref=e77]:
+                  - generic [ref=e78]: Locations
+                  - generic [ref=e81]:
+                    - generic [ref=e84]:
+                      - generic [ref=e86]: 10/10 selected
+                      - combobox [ref=e89] [cursor=pointer]
+                    - generic:
+                      - generic:
+                        - img [ref=e90] [cursor=pointer]
+                        - img
+                - generic [ref=e92]:
+                  - switch [checked] [ref=e93] [cursor=pointer]
+                  - generic [ref=e95]: Order mode
+                - generic [ref=e96]:
+                  - generic [ref=e98]:
+                    - textbox "Search..." [ref=e99]
+                    - img [ref=e101]
+                  - generic [ref=e103]:
+                    - generic [ref=e104]: "Week selection:"
+                    - generic [ref=e106]:
+                      - generic [ref=e108]:
+                        - textbox "week 34 - 2026" [ref=e109]:
+                          - /placeholder: Start week
+                        - generic:
+                          - img "calendar":
+                            - img
+                      - text: "-"
+                      - generic [ref=e111]:
+                        - textbox "week 45 - 2026" [ref=e112]:
+                          - /placeholder: End week
+                        - generic:
+                          - img "calendar":
+                            - img
+              - generic [ref=e113]:
+                - generic [ref=e114]:
+                  - generic [ref=e116]:
+                    - generic [ref=e117]:
+                      - generic [ref=e118]:
+                        - img [ref=e120] [cursor=pointer]
+                        - generic [ref=e124] [cursor=pointer]: AGROCENTRO ABONOS VELEZ EL MORCHE
+                      - generic [ref=e130]:
+                        - generic [ref=e131]:
+                          - generic [ref=e132]: week 45
+                          - generic [ref=e133]:
+                            - generic [ref=e135]:
+                              - generic [ref=e136]: Mon
+                              - generic [ref=e137]: 02-11
+                            - generic [ref=e139]:
+                              - generic [ref=e140]: Tue
+                              - generic [ref=e141]: 03-11
+                            - generic [ref=e143]:
+                              - generic [ref=e144]: Wed
+                              - generic [ref=e145]: 04-11
+                            - generic [ref=e147]:
+                              - generic [ref=e148]: Thu
+                              - generic [ref=e149]: 05-11
+                            - generic [ref=e151]:
+                              - generic [ref=e152]: Fri
+                              - generic [ref=e153]: 06-11
+                        - generic [ref=e154]:
+                          - generic [ref=e155]: week 44
+                          - generic [ref=e156]:
+                            - generic [ref=e157]:
+                              - generic [ref=e158]:
+                                - generic [ref=e159]: Mon
+                                - generic [ref=e160]: 26-10
+                              - img [ref=e162] [cursor=pointer]
+                            - generic [ref=e165]:
+                              - generic [ref=e166]: Tue
+                              - generic [ref=e167]: 27-10
+                            - generic [ref=e169]:
+                              - generic [ref=e170]: Wed
+                              - generic [ref=e171]: 28-10
+                            - generic [ref=e173]:
+                              - generic [ref=e174]: Thu
+                              - generic [ref=e175]: 29-10
+                            - generic [ref=e177]:
+                              - generic [ref=e178]: Fri
+                              - generic [ref=e179]: 30-10
+                        - generic [ref=e180]:
+                          - generic [ref=e181]: week 43
+                          - generic [ref=e182]:
+                            - generic [ref=e184]:
+                              - generic [ref=e185]: Mon
+                              - generic [ref=e186]: 19-10
+                            - generic [ref=e188]:
+                              - generic [ref=e189]: Tue
+                              - generic [ref=e190]: 20-10
+                            - generic [ref=e192]:
+                              - generic [ref=e193]: Wed
+                              - generic [ref=e194]: 21-10
+                            - generic [ref=e196]:
+                              - generic [ref=e197]: Thu
+                              - generic [ref=e198]: 22-10
+                            - generic [ref=e200]:
+                              - generic [ref=e201]: Fri
+                              - generic [ref=e202]: 23-10
+                        - generic [ref=e203]:
+                          - generic [ref=e204]: week 42
+                          - generic [ref=e205]:
+                            - generic [ref=e206]:
+                              - generic [ref=e207]:
+                                - generic [ref=e208]: Mon
+                                - generic [ref=e209]: 12-10
+                              - img [ref=e212] [cursor=pointer]
+                            - generic [ref=e214]:
+                              - generic [ref=e215]:
+                                - generic [ref=e216]: Tue
+                                - generic [ref=e217]: 13-10
+                              - img [ref=e220] [cursor=pointer]
+                            - generic [ref=e223]:
+                              - generic [ref=e224]: Wed
+                              - generic [ref=e225]: 14-10
+                            - generic [ref=e227]:
+                              - generic [ref=e228]: Thu
+                              - generic [ref=e229]: 15-10
+                            - generic [ref=e231]:
+                              - generic [ref=e232]: Fri
+                              - generic [ref=e233]: 16-10
+                        - generic [ref=e234]:
+                          - generic [ref=e235]: week 41
+                          - generic [ref=e236]:
+                            - generic [ref=e237]:
+                              - generic [ref=e238]:
+                                - generic [ref=e239]: Mon
+                                - generic [ref=e240]: 05-10
+                              - img [ref=e243] [cursor=pointer]
+                            - generic [ref=e245]:
+                              - generic [ref=e246]:
+                                - generic [ref=e247]: Tue
+                                - generic [ref=e248]: 06-10
+                              - img [ref=e251] [cursor=pointer]
+                            - generic [ref=e253]:
+                              - generic [ref=e254]:
+                                - generic [ref=e255]: Wed
+                                - generic [ref=e256]: 07-10
+                              - img [ref=e259] [cursor=pointer]
+                            - generic [ref=e261]:
+                              - generic [ref=e262]:
+                                - generic [ref=e263]: Thu
+                                - generic [ref=e264]: 08-10
+                              - img [ref=e267] [cursor=pointer]
+                            - generic [ref=e269]:
+                              - generic [ref=e270]:
+                                - generic [ref=e271]: Fri
+                                - generic [ref=e272]: 09-10
+                              - img [ref=e275] [cursor=pointer]
+                        - generic [ref=e277]:
+                          - generic [ref=e278]: week 40
+                          - generic [ref=e279]:
+                            - generic [ref=e280]:
+                              - generic [ref=e281]:
+                                - generic [ref=e282]: Mon
+                                - generic [ref=e283]: 28-09
+                              - img [ref=e286] [cursor=pointer]
+                            - generic [ref=e288]:
+                              - generic [ref=e289]:
+                                - generic [ref=e290]: Tue
+                                - generic [ref=e291]: 29-09
+                              - img [ref=e294] [cursor=pointer]
+                            - generic [ref=e296]:
+                              - generic [ref=e297]:
+                                - generic [ref=e298]: Wed
+                                - generic [ref=e299]: 30-09
+                              - img [ref=e302] [cursor=pointer]
+                            - generic [ref=e304]:
+                              - generic [ref=e305]:
+                                - generic [ref=e306]: Thu
+                                - generic [ref=e307]: 01-10
+                              - img [ref=e310] [cursor=pointer]
+                            - generic [ref=e312]:
+                              - generic [ref=e313]:
+                                - generic [ref=e314]: Fri
+                                - generic [ref=e315]: 02-10
+                              - img [ref=e318] [cursor=pointer]
+                        - generic [ref=e320]:
+                          - generic [ref=e321]: week 39
+                          - generic [ref=e322]:
+                            - generic [ref=e323]:
+                              - generic [ref=e324]:
+                                - generic [ref=e325]: Mon
+                                - generic [ref=e326]: 21-09
+                              - img [ref=e329] [cursor=pointer]
+                            - generic [ref=e331]:
+                              - generic [ref=e332]:
+                                - generic [ref=e333]: Tue
+                                - generic [ref=e334]: 22-09
+                              - img [ref=e337] [cursor=pointer]
+                            - generic [ref=e339]:
+                              - generic [ref=e340]:
+                                - generic [ref=e341]: Wed
+                                - generic [ref=e342]: 23-09
+                              - img [ref=e345] [cursor=pointer]
+                            - generic [ref=e347]:
+                              - generic [ref=e348]:
+                                - generic [ref=e349]: Thu
+                                - generic [ref=e350]: 24-09
+                              - img [ref=e353] [cursor=pointer]
+                            - generic [ref=e355]:
+                              - generic [ref=e356]:
+                                - generic [ref=e357]: Fri
+                                - generic [ref=e358]: 25-09
+                              - img [ref=e361] [cursor=pointer]
+                        - generic [ref=e363]:
+                          - generic [ref=e364]: week 38
+                          - generic [ref=e365]:
+                            - generic [ref=e366]:
+                              - generic [ref=e367]:
+                                - generic [ref=e368]: Tue
+                                - generic [ref=e369]: 15-09
+                              - img [ref=e372] [cursor=pointer]
+                            - generic [ref=e374]:
+                              - generic [ref=e375]:
+                                - generic [ref=e376]: Wed
+                                - generic [ref=e377]: 16-09
+                              - img [ref=e380] [cursor=pointer]
+                            - generic [ref=e382]:
+                              - generic [ref=e383]:
+                                - generic [ref=e384]: Thu
+                                - generic [ref=e385]: 17-09
+                              - img [ref=e388] [cursor=pointer]
+                            - generic [ref=e390]:
+                              - generic [ref=e391]:
+                                - generic [ref=e392]: Fri
+                                - generic [ref=e393]: 18-09
+                              - img [ref=e396] [cursor=pointer]
+                        - generic [ref=e398]:
+                          - generic [ref=e399]: week 37
+                          - generic [ref=e400]:
+                            - generic [ref=e401]:
+                              - generic [ref=e402]:
+                                - generic [ref=e403]: Mon
+                                - generic [ref=e404]: 07-09
+                              - img [ref=e407] [cursor=pointer]
+                            - generic [ref=e409]:
+                              - generic [ref=e410]:
+                                - generic [ref=e411]: Tue
+                                - generic [ref=e412]: 08-09
+                              - img [ref=e415] [cursor=pointer]
+                            - generic [ref=e417]:
+                              - generic [ref=e418]:
+                                - generic [ref=e419]: Wed
+                                - generic [ref=e420]: 09-09
+                              - img [ref=e423] [cursor=pointer]
+                            - generic [ref=e425]:
+                              - generic [ref=e426]:
+                                - generic [ref=e427]: Thu
+                                - generic [ref=e428]: 10-09
+                              - img [ref=e431] [cursor=pointer]
+                            - generic [ref=e433]:
+                              - generic [ref=e434]:
+                                - generic [ref=e435]: Fri
+                                - generic [ref=e436]: 11-09
+                              - img [ref=e439] [cursor=pointer]
+                        - generic [ref=e441]:
+                          - generic [ref=e442]: week 36
+                          - generic [ref=e443]:
+                            - generic [ref=e444]:
+                              - generic [ref=e445]:
+                                - generic [ref=e446]: Tue
+                                - generic [ref=e447]: 01-09
+                              - img [ref=e449] [cursor=pointer]
+                            - generic [ref=e451]:
+                              - generic [ref=e452]:
+                                - generic [ref=e453]: Wed
+                                - generic [ref=e454]: 02-09
+                              - img [ref=e457] [cursor=pointer]
+                            - generic [ref=e459]:
+                              - generic [ref=e460]:
+                                - generic [ref=e461]: Thu
+                                - generic [ref=e462]: 03-09
+                              - img [ref=e465] [cursor=pointer]
+                            - generic [ref=e467]:
+                              - generic [ref=e468]:
+                                - generic [ref=e469]: Fri
+                                - generic [ref=e470]: 04-09
+                              - img [ref=e473] [cursor=pointer]
+                        - generic [ref=e476]: week 35
+                        - generic [ref=e479]: week 34
+                      - img [ref=e483] [cursor=pointer]
+                    - generic [ref=e485]:
+                      - generic [ref=e486]:
+                        - generic [ref=e492] [cursor=pointer]: Bandeja 45 Alveolos Romero
+                        - generic [ref=e499] [cursor=pointer]: Feromona Bactrocera zonata
+                        - generic [ref=e506] [cursor=pointer]: Propylea quatuordecimpunctata-AP (250 individuals)
+                        - generic [ref=e513] [cursor=pointer]: Swirski-Mite Plus/500 sachets
+                        - generic [ref=e515] [cursor=pointer]: + Add product
+                      - generic [ref=e518]:
+                        - generic [ref=e523]:
+                          - generic [ref=e525]:
+                            - spinbutton [ref=e526]
+                            - spinbutton [ref=e527]
+                            - textbox [ref=e528]
+                            - textbox [ref=e529]
+                            - textbox [ref=e530]
+                          - generic [ref=e532]:
+                            - spinbutton [ref=e533]
+                            - spinbutton [ref=e534]
+                            - textbox [ref=e535]
+                            - textbox [ref=e536]
+                            - textbox [ref=e537]
+                          - generic [ref=e539]:
+                            - spinbutton [ref=e540]: "10"
+                            - spinbutton [ref=e541]: "10"
+                            - textbox [ref=e542]
+                            - textbox [ref=e543]
+                            - textbox [ref=e544]
+                          - generic [ref=e546]:
+                            - spinbutton [ref=e547]: "9"
+                            - spinbutton [ref=e548]: "9"
+                            - textbox [ref=e549]
+                            - textbox [ref=e550]
+                            - textbox [ref=e551]
+                        - generic [ref=e559]:
+                          - generic [ref=e561]:
+                            - spinbutton [ref=e562]
+                            - spinbutton [ref=e563]
+                            - spinbutton [ref=e564]
+                            - spinbutton [ref=e565]
+                            - spinbutton [ref=e566]
+                          - generic [ref=e568]:
+                            - spinbutton [ref=e569]
+                            - spinbutton [ref=e570]
+                            - spinbutton [ref=e571]
+                            - spinbutton [ref=e572]
+                            - spinbutton [ref=e573]
+                          - generic [ref=e575]:
+                            - spinbutton [ref=e576]: "10"
+                            - spinbutton [ref=e577]: "10"
+                            - spinbutton [ref=e578]: "10"
+                            - spinbutton [ref=e579]: "10"
+                            - spinbutton [ref=e580]: "10"
+                          - generic [ref=e582]:
+                            - spinbutton [ref=e583]: "9"
+                            - spinbutton [ref=e584]: "9"
+                            - spinbutton [ref=e585]: "9"
+                            - spinbutton [ref=e586]: "9"
+                            - spinbutton [ref=e587]: "9"
+                        - generic [ref=e595]:
+                          - generic [ref=e597]:
+                            - generic [ref=e598]: "10"
+                            - generic [ref=e599]: "10"
+                            - spinbutton [ref=e600]: "10"
+                            - spinbutton [ref=e601]: "10"
+                            - spinbutton [ref=e602]: "10"
+                          - generic [ref=e604]:
+                            - spinbutton [ref=e607]
+                            - spinbutton [ref=e608]
+                            - spinbutton [ref=e609]
+                          - generic [ref=e611]:
+                            - spinbutton [ref=e614]
+                            - spinbutton [ref=e615]
+                            - spinbutton [ref=e616]
+                          - generic [ref=e618]:
+                            - generic [ref=e619]: "11"
+                            - generic [ref=e620]: "11"
+                            - spinbutton [ref=e621]: "9"
+                            - spinbutton [ref=e622]: "9"
+                            - spinbutton [ref=e623]: "9"
+                        - generic [ref=e631]:
+                          - generic [ref=e633]:
+                            - generic [ref=e634]: "10"
+                            - generic [ref=e635]: "10"
+                            - generic [ref=e636]: "10"
+                            - generic [ref=e637]: "10"
+                            - generic [ref=e638]: "10"
+                          - generic [ref=e645]: "2"
+                          - generic [ref=e654]:
+                            - generic [ref=e655]: "11"
+                            - generic [ref=e656]: "11"
+                            - generic [ref=e657]: "11"
+                            - generic [ref=e658]: "11"
+                            - generic [ref=e659]: "9"
+                        - generic [ref=e667]:
+                          - generic [ref=e669]:
+                            - generic [ref=e671]: "10"
+                            - generic [ref=e672]: "10"
+                            - generic [ref=e673]: "20"
+                          - generic [ref=e687]:
+                            - generic [ref=e688]: "2"
+                            - generic [ref=e689]: "13"
+                            - generic [ref=e690]: "13"
+                            - generic [ref=e691]: "24"
+                    - generic [ref=e710]:
+                      - button "order.orders.costDelta.calculateTotal" [ref=e711] [cursor=pointer]:
+                        - generic [ref=e712]: order.orders.costDelta.calculateTotal
+                      - button "Discard changes" [ref=e714] [cursor=pointer]:
+                        - generic [ref=e715]: Discard changes
+                      - button "Order" [ref=e717] [cursor=pointer]:
+                        - generic [ref=e718]: Order
+                  - generic [ref=e720]:
+                    - generic "AGROCENTRO ABONOS VELEZ EL MORCHE - MENSAJERIA" [ref=e721] [cursor=pointer]:
+                      - generic [ref=e723]: AGROCENTRO ABONOS VELEZ EL MORCHE - MENSAJERIA
+                    - generic [ref=e725]: No order data
+                    - generic [ref=e726] [cursor=pointer]: + Add product
+                - generic [ref=e737]: All rights reserved. © Koppert 2026
+        - button "Digital Assistant" [ref=e739] [cursor=pointer]:
+          - img [ref=e740]
+          - generic [ref=e745]: Digital Assistant
+  - generic [ref=e747]:
+    - dialog:
+      - generic [ref=e749]:
+        - generic [ref=e751]:
+          - generic [ref=e752]:
+            - img "warning" [ref=e753]:
+              - img [ref=e754]
+            - text: Order references are mandatory
+          - button [ref=e756] [cursor=pointer]:
+            - img [ref=e757]
+        - text: All orders must have an order reference to be submitted. Please add an order reference to all orders. Red boxes indicate which orders don’t have an order reference.
+        - separator [ref=e759]
+        - button "Close" [ref=e761] [cursor=pointer]:
+          - generic [ref=e762]: Close
+```

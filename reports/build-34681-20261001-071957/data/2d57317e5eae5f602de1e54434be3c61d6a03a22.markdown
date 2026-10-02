@@ -1,0 +1,92 @@
+# Page snapshot
+
+```yaml
+- generic [ref=e1]:
+  - generic [ref=e3]:
+    - generic [ref=e4]: You're on DEVELOPMENT OR STAGE
+    - generic [ref=e6]:
+      - generic [ref=e10]:
+        - img [ref=e11]
+        - heading [level=4]
+      - generic [ref=e20]:
+        - generic [ref=e21]:
+          - strong [ref=e23]: Login
+          - generic [ref=e25]:
+            - generic "Email" [ref=e27]
+            - textbox "Email" [ref=e31]
+          - generic [ref=e32]:
+            - img "info-circle" [ref=e33]:
+              - img [ref=e34]
+            - generic [ref=e37]:
+              - text: SSO login is temporarily unavailable.
+              - link "Set your password here" [ref=e38] [cursor=pointer]:
+                - /url: /forgot-password
+              - text: to log in using your email address and password.
+          - generic [ref=e40]:
+            - generic "Password" [ref=e42]
+            - generic [ref=e46]:
+              - textbox "Password" [ref=e47]
+              - img "eye-invisible" [ref=e49] [cursor=pointer]:
+                - img [ref=e50]
+          - generic [ref=e58]:
+            - button "Login" [ref=e59] [cursor=pointer]:
+              - generic [ref=e60]: Login
+            - link "Forgot password" [ref=e61] [cursor=pointer]:
+              - /url: /forgot-password
+        - separator [ref=e62]
+        - generic [ref=e63]: Don't have an account yet?Create an account
+        - separator [ref=e64]
+        - generic [ref=e65]:
+          - text: New to Koppert One?
+          - link "More info" [ref=e66] [cursor=pointer]:
+            - /url: https://www.koppert.com/koppert-one/
+            - text: More info
+            - img [ref=e67]
+        - separator [ref=e70]
+        - generic [ref=e71]:
+          - generic [ref=e72]: All rights reserved. © Koppert 2026
+          - generic [ref=e73]:
+            - link "Privacy statement" [ref=e74] [cursor=pointer]:
+              - /url: https://stage.koppert.one/assets/statements/privacy-statement.pdf
+            - text: "|"
+            - link "Terms of Use" [ref=e75] [cursor=pointer]:
+              - /url: https://stage.koppert.one/assets/statements/terms-of-use.pdf
+  - generic [active]:
+    - generic:
+      - generic:
+        - button "Open Privacy Settings" [ref=e76] [cursor=pointer]:
+          - img [ref=e78]
+        - dialog "Privacy Settings" [ref=e83]:
+          - generic [ref=e87]:
+            - generic [ref=e89]:
+              - img [ref=e92]
+              - heading "Privacy Settings" [level=1] [ref=e95]
+              - generic [ref=e98]: This site uses third-party website tracking technologies to provide and continually improve our services, and to display advertisements according to users' interests. I agree and may revoke or change my consent at any time with effect for the future.
+              - generic [ref=e99]:
+                - generic [ref=e100]:
+                  - link "Privacy Policy" [ref=e101] [cursor=pointer]:
+                    - /url: https://www.koppert.com/privacy-statement/
+                  - link "Cookie Statement" [ref=e102] [cursor=pointer]:
+                    - /url: https://www.koppert.com/cookie-statement/
+                - button "More Information" [ref=e104] [cursor=pointer]:
+                  - generic [ref=e105]: More Information
+            - generic [ref=e107]:
+              - generic [ref=e110]:
+                - generic [ref=e111] [cursor=pointer]: Marketing
+                - switch "Marketing" [ref=e112] [cursor=pointer]:
+                  - img [ref=e113]
+              - generic [ref=e122]:
+                - generic [ref=e123] [cursor=pointer]: Functional
+                - switch "Functional" [ref=e124] [cursor=pointer]:
+                  - img [ref=e125]
+              - generic [ref=e134]:
+                - generic [ref=e135] [cursor=pointer]: Essential
+                - switch "Essential" [checked] [disabled] [ref=e136] [cursor=pointer]:
+                  - img [ref=e137]
+          - generic [ref=e145]:
+            - generic [ref=e147]:
+              - button "Save Settings" [ref=e148] [cursor=pointer]
+              - button "Accept All" [ref=e149] [cursor=pointer]
+            - link "Powered by Usercentrics Consent Management" [ref=e151] [cursor=pointer]:
+              - /url: https://usercentrics.com/consent-management-platform-powered-by-usercentrics/?utm_source=banner_uc&utm_medium=referral&utm_content=v2
+```
