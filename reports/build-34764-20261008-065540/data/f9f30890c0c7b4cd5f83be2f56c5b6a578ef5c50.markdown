@@ -1,0 +1,53 @@
+# Page snapshot
+
+```yaml
+- generic [ref=e3]:
+  - generic [ref=e4]: You're on DEVELOPMENT OR STAGE
+  - generic [ref=e6]:
+    - generic [ref=e10]:
+      - img [ref=e11]
+      - heading [level=4]
+    - generic [ref=e20]:
+      - generic [ref=e21]:
+        - strong [ref=e23]: Login
+        - generic [ref=e25]:
+          - generic "Email" [ref=e27]
+          - textbox "Email" [active] [ref=e31]
+        - generic [ref=e32]:
+          - img "info-circle" [ref=e33]:
+            - img [ref=e34]
+          - generic [ref=e37]:
+            - text: SSO login is temporarily unavailable.
+            - link "Set your password here" [ref=e38] [cursor=pointer]:
+              - /url: /forgot-password
+            - text: to log in using your email address and password.
+        - generic [ref=e40]:
+          - generic "Password" [ref=e42]
+          - generic [ref=e46]:
+            - textbox "Password" [ref=e47]
+            - img "eye-invisible" [ref=e49] [cursor=pointer]:
+              - img [ref=e50]
+        - generic [ref=e58]:
+          - button "Login" [ref=e59] [cursor=pointer]:
+            - generic [ref=e60]: Login
+          - link "Forgot password" [ref=e61] [cursor=pointer]:
+            - /url: /forgot-password
+      - separator [ref=e62]
+      - generic [ref=e63]: Don't have an account yet?Create an account
+      - separator [ref=e64]
+      - generic [ref=e65]:
+        - text: New to Koppert One?
+        - link "More info" [ref=e66] [cursor=pointer]:
+          - /url: https://www.koppert.com/koppert-one/
+          - text: More info
+          - img [ref=e67]
+      - separator [ref=e70]
+      - generic [ref=e71]:
+        - generic [ref=e72]: All rights reserved. © Koppert 2026
+        - generic [ref=e73]:
+          - link "Privacy statement" [ref=e74] [cursor=pointer]:
+            - /url: https://stage.koppert.one/assets/statements/privacy-statement.pdf
+          - text: "|"
+          - link "Terms of Use" [ref=e75] [cursor=pointer]:
+            - /url: https://stage.koppert.one/assets/statements/terms-of-use.pdf
+```

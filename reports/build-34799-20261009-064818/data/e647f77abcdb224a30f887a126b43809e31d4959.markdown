@@ -1,0 +1,472 @@
+# Page snapshot
+
+```yaml
+- generic [ref=e3]:
+  - generic [ref=e4]: You're on DEVELOPMENT OR STAGE
+  - generic [ref=e6]:
+    - img [ref=e7] [cursor=pointer]
+    - menu [ref=e14]:
+      - menuitem "Order" [ref=e15] [cursor=pointer]:
+        - link "Order" [ref=e17]:
+          - /url: /apps/order
+      - menuitem "Knowledge" [ref=e18] [cursor=pointer]:
+        - link "Knowledge" [ref=e20]:
+          - /url: /apps/protect
+      - menuitem "Scout" [ref=e21] [cursor=pointer]:
+        - link "Scout" [ref=e23]:
+          - /url: https://www.natutecscout.com/apps/scout
+      - menuitem "Organization" [ref=e24] [cursor=pointer]:
+        - link "Organization" [ref=e26]:
+          - /url: /apps/organization
+    - generic [ref=e27]:
+      - generic [ref=e28]: Plkw P. van Geest Maasland B.V.
+      - generic [ref=e29] [cursor=pointer]:
+        - img "user" [ref=e30]:
+          - img [ref=e31]
+        - text: Playwright DudeqkcVfOw
+  - generic [ref=e33]:
+    - complementary [ref=e35]:
+      - menu [ref=e37]:
+        - menuitem "Planner" [ref=e38] [cursor=pointer]:
+          - img [ref=e39]
+          - link "Planner" [ref=e43]:
+            - /url: /apps/order/planner
+        - menuitem "Order list" [ref=e44] [cursor=pointer]:
+          - img [ref=e45]
+          - link "Order list" [ref=e48]:
+            - /url: /apps/order/order-list
+      - img "left" [ref=e50] [cursor=pointer]:
+        - img [ref=e51]
+    - main [ref=e53]:
+      - generic [ref=e55]:
+        - heading "Planner" [level=2] [ref=e62]
+        - generic [ref=e63]:
+          - separator [ref=e65]
+          - generic [ref=e66]:
+            - generic [ref=e69]:
+              - generic [ref=e71]:
+                - generic [ref=e72]: Locations
+                - generic [ref=e75]:
+                  - generic [ref=e78]:
+                    - generic [ref=e80]: 7/7 selected
+                    - combobox [ref=e83] [cursor=pointer]
+                  - generic:
+                    - generic:
+                      - img
+              - generic [ref=e84]:
+                - switch [checked] [ref=e85] [cursor=pointer]
+                - generic [ref=e87]: Order mode
+              - generic [ref=e88]:
+                - generic [ref=e90]:
+                  - textbox "Search..." [ref=e91]
+                  - img [ref=e93]
+                - generic [ref=e95]:
+                  - generic [ref=e96]: "Week selection:"
+                  - generic [ref=e98]:
+                    - generic [ref=e100]:
+                      - textbox "week 35 - 2026" [ref=e101]:
+                        - /placeholder: Start week
+                      - generic:
+                        - img "calendar":
+                          - img
+                    - text: "-"
+                    - generic [ref=e103]:
+                      - textbox "week 46 - 2026" [ref=e104]:
+                        - /placeholder: End week
+                      - generic:
+                        - img "calendar":
+                          - img
+            - generic [ref=e105]:
+              - generic [ref=e106]:
+                - generic [ref=e108]:
+                  - generic [ref=e109]:
+                    - generic [ref=e110]:
+                      - img [ref=e112] [cursor=pointer]
+                      - generic [ref=e116] [cursor=pointer]: Plkw P. van Geest B.V. - Loc. Gerbera
+                    - generic [ref=e122]:
+                      - generic [ref=e123]:
+                        - generic [ref=e124]: week 46
+                        - generic [ref=e125]:
+                          - generic [ref=e127]:
+                            - generic [ref=e128]: Mon
+                            - generic [ref=e129]: 09-11
+                          - generic [ref=e131]:
+                            - generic [ref=e132]: Tue
+                            - generic [ref=e133]: 10-11
+                          - generic [ref=e135]:
+                            - generic [ref=e136]: Wed
+                            - generic [ref=e137]: 11-11
+                          - generic [ref=e139]:
+                            - generic [ref=e140]: Thu
+                            - generic [ref=e141]: 12-11
+                          - generic [ref=e143]:
+                            - generic [ref=e144]: Fri
+                            - generic [ref=e145]: 13-11
+                      - generic [ref=e146]:
+                        - generic [ref=e147]: week 45
+                        - generic [ref=e148]:
+                          - generic [ref=e150]:
+                            - generic [ref=e151]: Mon
+                            - generic [ref=e152]: 02-11
+                          - generic [ref=e154]:
+                            - generic [ref=e155]: Tue
+                            - generic [ref=e156]: 03-11
+                          - generic [ref=e158]:
+                            - generic [ref=e159]: Wed
+                            - generic [ref=e160]: 04-11
+                          - generic [ref=e162]:
+                            - generic [ref=e163]: Thu
+                            - generic [ref=e164]: 05-11
+                          - generic [ref=e166]:
+                            - generic [ref=e167]: Fri
+                            - generic [ref=e168]: 06-11
+                      - generic [ref=e169]:
+                        - generic [ref=e170]: week 44
+                        - generic [ref=e171]:
+                          - generic [ref=e173]:
+                            - generic [ref=e174]: Mon
+                            - generic [ref=e175]: 26-10
+                          - generic [ref=e177]:
+                            - generic [ref=e178]: Tue
+                            - generic [ref=e179]: 27-10
+                          - generic [ref=e181]:
+                            - generic [ref=e182]: Wed
+                            - generic [ref=e183]: 28-10
+                          - generic [ref=e185]:
+                            - generic [ref=e186]: Thu
+                            - generic [ref=e187]: 29-10
+                          - generic [ref=e189]:
+                            - generic [ref=e190]: Fri
+                            - generic [ref=e191]: 30-10
+                      - generic [ref=e192]:
+                        - generic [ref=e193]: week 43
+                        - generic [ref=e194]:
+                          - generic [ref=e195]:
+                            - generic [ref=e196]:
+                              - generic [ref=e197]: Mon
+                              - generic [ref=e198]: 19-10
+                            - img [ref=e200] [cursor=pointer]
+                          - generic [ref=e202]:
+                            - generic [ref=e203]:
+                              - generic [ref=e204]: Tue
+                              - generic [ref=e205]: 20-10
+                            - img [ref=e207] [cursor=pointer]
+                          - generic [ref=e209]:
+                            - generic [ref=e210]:
+                              - generic [ref=e211]: Wed
+                              - generic [ref=e212]: 21-10
+                            - img [ref=e214] [cursor=pointer]
+                          - generic [ref=e216]:
+                            - generic [ref=e217]:
+                              - generic [ref=e218]: Thu
+                              - generic [ref=e219]: 22-10
+                            - img [ref=e221] [cursor=pointer]
+                          - generic [ref=e223]:
+                            - generic [ref=e224]:
+                              - generic [ref=e225]: Fri
+                              - generic [ref=e226]: 23-10
+                            - img [ref=e228] [cursor=pointer]
+                      - generic [ref=e230]:
+                        - generic [ref=e231]: week 42
+                        - generic [ref=e232]:
+                          - generic [ref=e234]:
+                            - generic [ref=e235]: Mon
+                            - generic [ref=e236]: 12-10
+                          - generic [ref=e237]:
+                            - generic [ref=e238]:
+                              - generic [ref=e239]: Tue
+                              - generic [ref=e240]: 13-10
+                            - img [ref=e242] [cursor=pointer]
+                          - generic [ref=e245]:
+                            - generic [ref=e246]: Wed
+                            - generic [ref=e247]: 14-10
+                          - generic [ref=e249]:
+                            - generic [ref=e250]: Thu
+                            - generic [ref=e251]: 15-10
+                          - generic [ref=e253]:
+                            - generic [ref=e254]: Fri
+                            - generic [ref=e255]: 16-10
+                      - generic [ref=e257]: week 41
+                      - generic [ref=e260]: week 40
+                      - generic [ref=e263]: week 39
+                      - generic [ref=e266]: week 38
+                      - generic [ref=e269]: week 37
+                      - generic [ref=e272]: week 36
+                      - generic [ref=e275]: week 35
+                    - img [ref=e279] [cursor=pointer]
+                  - generic [ref=e281]:
+                    - generic [ref=e282]:
+                      - generic [ref=e288] [cursor=pointer]: Anso-Mite/125,000/6l
+                      - generic [ref=e290] [cursor=pointer]: + Add product
+                    - generic [ref=e293]:
+                      - generic [ref=e300]:
+                        - textbox [ref=e301]: "3"
+                        - textbox [ref=e302]: "15"
+                        - textbox [ref=e303]: "97"
+                        - textbox [ref=e304]: "333"
+                        - textbox [ref=e305]: "8"
+                      - generic [ref=e315]:
+                        - textbox [ref=e316]
+                        - textbox [ref=e317]: "12"
+                        - textbox [ref=e318]
+                        - textbox [ref=e319]
+                        - textbox [ref=e320]
+                      - generic [ref=e331]: —
+                      - generic [ref=e337]: —
+                      - generic [ref=e343]: —
+                      - generic [ref=e349]: —
+                      - generic [ref=e355]: —
+                      - generic [ref=e361]: —
+                      - generic [ref=e367]: —
+                - generic [ref=e373]:
+                  - generic [ref=e374]:
+                    - generic [ref=e375]:
+                      - img [ref=e377] [cursor=pointer]
+                      - generic [ref=e381] [cursor=pointer]: Plkw P. van Geest Maasland bio Sierteelt
+                    - generic [ref=e387]:
+                      - generic [ref=e388]:
+                        - generic [ref=e389]: week 46
+                        - generic [ref=e390]:
+                          - generic [ref=e392]:
+                            - generic [ref=e393]: Mon
+                            - generic [ref=e394]: 09-11
+                          - generic [ref=e396]:
+                            - generic [ref=e397]: Tue
+                            - generic [ref=e398]: 10-11
+                          - generic [ref=e400]:
+                            - generic [ref=e401]: Wed
+                            - generic [ref=e402]: 11-11
+                          - generic [ref=e404]:
+                            - generic [ref=e405]: Thu
+                            - generic [ref=e406]: 12-11
+                          - generic [ref=e408]:
+                            - generic [ref=e409]: Fri
+                            - generic [ref=e410]: 13-11
+                      - generic [ref=e411]:
+                        - generic [ref=e412]: week 45
+                        - generic [ref=e413]:
+                          - generic [ref=e415]:
+                            - generic [ref=e416]: Mon
+                            - generic [ref=e417]: 02-11
+                          - generic [ref=e419]:
+                            - generic [ref=e420]: Tue
+                            - generic [ref=e421]: 03-11
+                          - generic [ref=e423]:
+                            - generic [ref=e424]: Wed
+                            - generic [ref=e425]: 04-11
+                          - generic [ref=e427]:
+                            - generic [ref=e428]: Thu
+                            - generic [ref=e429]: 05-11
+                          - generic [ref=e431]:
+                            - generic [ref=e432]: Fri
+                            - generic [ref=e433]: 06-11
+                      - generic [ref=e434]:
+                        - generic [ref=e435]: week 44
+                        - generic [ref=e436]:
+                          - generic [ref=e438]:
+                            - generic [ref=e439]: Mon
+                            - generic [ref=e440]: 26-10
+                          - generic [ref=e442]:
+                            - generic [ref=e443]: Tue
+                            - generic [ref=e444]: 27-10
+                          - generic [ref=e446]:
+                            - generic [ref=e447]: Wed
+                            - generic [ref=e448]: 28-10
+                          - generic [ref=e450]:
+                            - generic [ref=e451]: Thu
+                            - generic [ref=e452]: 29-10
+                          - generic [ref=e454]:
+                            - generic [ref=e455]: Fri
+                            - generic [ref=e456]: 30-10
+                      - generic [ref=e457]:
+                        - generic [ref=e458]: week 43
+                        - generic [ref=e459]:
+                          - generic [ref=e460]:
+                            - generic [ref=e461]:
+                              - generic [ref=e462]: Mon
+                              - generic [ref=e463]: 19-10
+                            - img [ref=e465] [cursor=pointer]
+                          - generic [ref=e468]:
+                            - generic [ref=e469]: Tue
+                            - generic [ref=e470]: 20-10
+                          - generic [ref=e472]:
+                            - generic [ref=e473]: Wed
+                            - generic [ref=e474]: 21-10
+                          - generic [ref=e476]:
+                            - generic [ref=e477]: Thu
+                            - generic [ref=e478]: 22-10
+                          - generic [ref=e480]:
+                            - generic [ref=e481]: Fri
+                            - generic [ref=e482]: 23-10
+                      - generic [ref=e483]:
+                        - generic [ref=e484]: week 42
+                        - generic [ref=e485]:
+                          - generic [ref=e487]:
+                            - generic [ref=e488]: Mon
+                            - generic [ref=e489]: 12-10
+                          - generic [ref=e491]:
+                            - generic [ref=e492]: Tue
+                            - generic [ref=e493]: 13-10
+                          - generic [ref=e495]:
+                            - generic [ref=e496]: Wed
+                            - generic [ref=e497]: 14-10
+                          - generic [ref=e499]:
+                            - generic [ref=e500]: Thu
+                            - generic [ref=e501]: 15-10
+                          - generic [ref=e503]:
+                            - generic [ref=e504]: Fri
+                            - generic [ref=e505]: 16-10
+                      - generic [ref=e507]: week 41
+                      - generic [ref=e510]: week 40
+                      - generic [ref=e513]: week 39
+                      - generic [ref=e516]: week 38
+                      - generic [ref=e519]: week 37
+                      - generic [ref=e522]: week 36
+                      - generic [ref=e525]: week 35
+                    - img [ref=e529] [cursor=pointer]
+                  - generic [ref=e531]:
+                    - generic [ref=e532]:
+                      - generic [ref=e538] [cursor=pointer]: Anso-Mite/125,000/6l
+                      - generic [ref=e540] [cursor=pointer]: + Add product
+                    - generic [ref=e543]:
+                      - generic [ref=e550]:
+                        - textbox [ref=e551]: "4"
+                        - textbox [ref=e552]
+                        - textbox [ref=e553]
+                        - textbox [ref=e554]
+                        - textbox [ref=e555]
+                      - generic [ref=e565]:
+                        - textbox [ref=e566]
+                        - textbox [ref=e567]
+                        - textbox [ref=e568]
+                        - textbox [ref=e569]
+                        - textbox [ref=e570]
+                      - generic [ref=e581]: —
+                      - generic [ref=e587]: —
+                      - generic [ref=e593]: —
+                      - generic [ref=e599]: —
+                      - generic [ref=e605]: —
+                      - generic [ref=e611]: —
+                      - generic [ref=e617]: —
+                - generic [ref=e626]:
+                  - generic [ref=e627]:
+                    - generic [ref=e628]:
+                      - img [ref=e630] [cursor=pointer]
+                      - generic [ref=e634] [cursor=pointer]: Plkw P. van Geest Maasland (Monstersepad 8)
+                    - generic [ref=e640]:
+                      - generic [ref=e641]:
+                        - generic [ref=e642]: week 46
+                        - generic [ref=e643]:
+                          - generic [ref=e645]:
+                            - generic [ref=e646]: Mon
+                            - generic [ref=e647]: 09-11
+                          - generic [ref=e649]:
+                            - generic [ref=e650]: Tue
+                            - generic [ref=e651]: 10-11
+                          - generic [ref=e653]:
+                            - generic [ref=e654]: Wed
+                            - generic [ref=e655]: 11-11
+                          - generic [ref=e657]:
+                            - generic [ref=e658]: Thu
+                            - generic [ref=e659]: 12-11
+                          - generic [ref=e661]:
+                            - generic [ref=e662]: Fri
+                            - generic [ref=e663]: 13-11
+                      - generic [ref=e664]:
+                        - generic [ref=e665]: week 45
+                        - generic [ref=e666]:
+                          - generic [ref=e668]:
+                            - generic [ref=e669]: Mon
+                            - generic [ref=e670]: 02-11
+                          - generic [ref=e672]:
+                            - generic [ref=e673]: Tue
+                            - generic [ref=e674]: 03-11
+                          - generic [ref=e676]:
+                            - generic [ref=e677]: Wed
+                            - generic [ref=e678]: 04-11
+                          - generic [ref=e680]:
+                            - generic [ref=e681]: Thu
+                            - generic [ref=e682]: 05-11
+                          - generic [ref=e684]:
+                            - generic [ref=e685]: Fri
+                            - generic [ref=e686]: 06-11
+                      - generic [ref=e687]:
+                        - generic [ref=e688]: week 44
+                        - generic [ref=e689]:
+                          - generic [ref=e691]:
+                            - generic [ref=e692]: Mon
+                            - generic [ref=e693]: 26-10
+                          - generic [ref=e695]:
+                            - generic [ref=e696]: Tue
+                            - generic [ref=e697]: 27-10
+                          - generic [ref=e699]:
+                            - generic [ref=e700]: Wed
+                            - generic [ref=e701]: 28-10
+                          - generic [ref=e703]:
+                            - generic [ref=e704]: Thu
+                            - generic [ref=e705]: 29-10
+                          - generic [ref=e707]:
+                            - generic [ref=e708]: Fri
+                            - generic [ref=e709]: 30-10
+                      - generic [ref=e710]:
+                        - generic [ref=e711]: week 43
+                        - generic [ref=e712]:
+                          - generic [ref=e714]:
+                            - generic [ref=e715]: Mon
+                            - generic [ref=e716]: 19-10
+                          - generic [ref=e718]:
+                            - generic [ref=e719]: Tue
+                            - generic [ref=e720]: 20-10
+                          - generic [ref=e722]:
+                            - generic [ref=e723]: Wed
+                            - generic [ref=e724]: 21-10
+                          - generic [ref=e726]:
+                            - generic [ref=e727]: Thu
+                            - generic [ref=e728]: 22-10
+                          - generic [ref=e730]:
+                            - generic [ref=e731]: Fri
+                            - generic [ref=e732]: 23-10
+                      - generic [ref=e733]:
+                        - generic [ref=e734]: week 42
+                        - generic [ref=e735]:
+                          - generic [ref=e737]:
+                            - generic [ref=e738]: Mon
+                            - generic [ref=e739]: 12-10
+                          - generic [ref=e741]:
+                            - generic [ref=e742]: Tue
+                            - generic [ref=e743]: 13-10
+                          - generic [ref=e745]:
+                            - generic [ref=e746]: Wed
+                            - generic [ref=e747]: 14-10
+                          - generic [ref=e749]:
+                            - generic [ref=e750]: Thu
+                            - generic [ref=e751]: 15-10
+                          - generic [ref=e753]:
+                            - generic [ref=e754]: Fri
+                            - generic [ref=e755]: 16-10
+                      - generic [ref=e757]: week 41
+                      - generic [ref=e760]: week 40
+                      - generic [ref=e763]: week 39
+                      - generic [ref=e766]: week 38
+                      - generic [ref=e769]: week 37
+                      - generic [ref=e772]: week 36
+                      - generic [ref=e774]:
+                        - generic [ref=e775]: week 35
+                        - generic [ref=e777]:
+                          - generic [ref=e778]:
+                            - generic [ref=e779]: Tue
+                            - generic [ref=e780]: 25-08
+                          - img [ref=e783] [cursor=pointer]
+                    - img [ref=e787] [cursor=pointer]
+                  - generic [ref=e790]:
+                    - generic [ref=e796] [cursor=pointer]: Ervibank/500
+                    - generic [ref=e803] [cursor=pointer]: Montdo-Mite/50,000/1l/bottle
+                    - generic [ref=e810] [cursor=pointer]: Nutari/2 Million/30g/900ml
+                    - generic [ref=e817] [cursor=pointer]: Spical/25,000/500ml/bottle
+                    - generic [ref=e824] [cursor=pointer]: Spidex/2,000/100ml/bottle
+                    - generic [ref=e826] [cursor=pointer]: + Add product
+              - generic [ref=e856]: All rights reserved. © Koppert 2026
+      - button "Digital Assistant" [ref=e858] [cursor=pointer]:
+        - img [ref=e859]
+        - generic [ref=e864]: Digital Assistant
+```

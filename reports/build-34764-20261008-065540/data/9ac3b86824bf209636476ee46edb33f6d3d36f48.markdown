@@ -1,0 +1,110 @@
+# Page snapshot
+
+```yaml
+- generic [ref=e1]:
+  - generic [ref=e3]:
+    - generic [ref=e4]: You're on DEVELOPMENT OR STAGE
+    - generic [ref=e6]:
+      - img [ref=e7] [cursor=pointer]
+      - menu [ref=e14]:
+        - menuitem "Overview" [ref=e15] [cursor=pointer]:
+          - link "Overview" [ref=e17]:
+            - /url: /apps/overview
+        - menuitem "Order" [ref=e18] [cursor=pointer]:
+          - link "Order" [ref=e20]:
+            - /url: /apps/order
+        - menuitem "Scout" [ref=e21] [cursor=pointer]:
+          - link "Scout" [ref=e23]:
+            - /url: https://www.natutecscout.com/apps/scout
+        - menuitem "Organization" [ref=e24] [cursor=pointer]:
+          - link "Organization" [ref=e26]:
+            - /url: /apps/organization
+        - menuitem "Admin" [ref=e27] [cursor=pointer]:
+          - link "Admin" [ref=e29]:
+            - /url: /apps/admin
+      - generic [ref=e30]:
+        - generic [ref=e31]: AGRICOLA SUAGO, S.L.
+        - generic [ref=e32] [cursor=pointer]:
+          - img "user" [ref=e33]:
+            - img [ref=e34]
+          - text: Superuser for autotests
+    - generic [ref=e36]:
+      - complementary [ref=e38]:
+        - menu [ref=e40]:
+          - menuitem "swap Side Effects" [ref=e41] [cursor=pointer]:
+            - img "swap" [ref=e42]:
+              - img [ref=e43]
+            - link "Side Effects" [ref=e46]:
+              - /url: /apps/protect/side-effects
+          - menuitem "Visit reports" [ref=e47] [cursor=pointer]:
+            - img [ref=e48]
+            - link "Visit reports" [ref=e54]:
+              - /url: /apps/protect/visit-reports
+          - menuitem "search Solution finder" [ref=e55] [cursor=pointer]:
+            - img "search" [ref=e56]:
+              - img [ref=e57]
+            - link "Solution finder" [ref=e60]:
+              - /url: /apps/protect/solution-finder
+        - img "left" [ref=e62] [cursor=pointer]:
+          - img [ref=e63]
+      - main [ref=e65]:
+        - generic [ref=e66]:
+          - generic [ref=e67]:
+            - generic [ref=e68]:
+              - generic [ref=e70]: Beneficial
+              - button "Select product" [ref=e71] [cursor=pointer]:
+                - generic [ref=e72]: Select product
+            - generic [ref=e73]:
+              - generic [ref=e75]: Active ingredient
+              - button "Select product" [ref=e76] [cursor=pointer]:
+                - generic [ref=e77]: Select product
+          - generic [ref=e78]:
+            - generic "Side Effects" [ref=e82]
+            - generic [ref=e83]:
+              - generic [ref=e85]:
+                - img [ref=e88]
+                - generic [ref=e90]: Nothing has been selected yet
+                - generic [ref=e91]: Select one or more beneficials and active ingredients to show side effects.
+              - button "Digital Assistant" [ref=e93] [cursor=pointer]:
+                - img [ref=e94]
+                - generic [ref=e99]: Digital Assistant
+            - generic [ref=e102]: All rights reserved. © Koppert 2026
+  - generic [active]:
+    - generic:
+      - generic:
+        - button "Open Privacy Settings" [ref=e103] [cursor=pointer]:
+          - img [ref=e105]
+        - dialog "Privacy Settings" [ref=e110]:
+          - generic [ref=e114]:
+            - generic [ref=e116]:
+              - img [ref=e119]
+              - heading "Privacy Settings" [level=1] [ref=e122]
+              - generic [ref=e125]: This site uses third-party website tracking technologies to provide and continually improve our services, and to display advertisements according to users' interests. I agree and may revoke or change my consent at any time with effect for the future.
+              - generic [ref=e126]:
+                - generic [ref=e127]:
+                  - link "Privacy Policy" [ref=e128] [cursor=pointer]:
+                    - /url: https://www.koppert.com/privacy-statement/
+                  - link "Cookie Statement" [ref=e129] [cursor=pointer]:
+                    - /url: https://www.koppert.com/cookie-statement/
+                - button "More Information" [ref=e131] [cursor=pointer]:
+                  - generic [ref=e132]: More Information
+            - generic [ref=e134]:
+              - generic [ref=e137]:
+                - generic [ref=e138] [cursor=pointer]: Marketing
+                - switch "Marketing" [ref=e139] [cursor=pointer]:
+                  - img [ref=e140]
+              - generic [ref=e149]:
+                - generic [ref=e150] [cursor=pointer]: Functional
+                - switch "Functional" [ref=e151] [cursor=pointer]:
+                  - img [ref=e152]
+              - generic [ref=e161]:
+                - generic [ref=e162] [cursor=pointer]: Essential
+                - switch "Essential" [checked] [disabled] [ref=e163] [cursor=pointer]:
+                  - img [ref=e164]
+          - generic [ref=e172]:
+            - generic [ref=e174]:
+              - button "Save Settings" [ref=e175] [cursor=pointer]
+              - button "Accept All" [ref=e176] [cursor=pointer]
+            - link "Powered by Usercentrics Consent Management" [ref=e178] [cursor=pointer]:
+              - /url: https://usercentrics.com/consent-management-platform-powered-by-usercentrics/?utm_source=banner_uc&utm_medium=referral&utm_content=v2
+```
