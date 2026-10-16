@@ -1,0 +1,123 @@
+# Page snapshot
+
+```yaml
+- generic [ref=e3]:
+  - generic [ref=e4]: You're on DEVELOPMENT OR STAGE
+  - generic [ref=e6]:
+    - img [ref=e7] [cursor=pointer]
+    - menu [ref=e14]:
+      - menuitem "Order" [ref=e15] [cursor=pointer]:
+        - link "Order" [ref=e17]:
+          - /url: /apps/order
+      - menuitem "Knowledge" [ref=e18] [cursor=pointer]:
+        - link "Knowledge" [ref=e20]:
+          - /url: /apps/protect
+      - menuitem "Scout" [ref=e21] [cursor=pointer]:
+        - link "Scout" [ref=e23]:
+          - /url: https://www.natutecscout.com/apps/scout
+      - menuitem "Organization" [ref=e24] [cursor=pointer]:
+        - link "Organization" [ref=e26]:
+          - /url: /apps/organization
+    - generic [ref=e27]:
+      - generic [ref=e28]: Plkw P. van Geest Maasland B.V.
+      - generic [ref=e29] [cursor=pointer]:
+        - img "user" [ref=e30]:
+          - img [ref=e31]
+        - text: Playwright DudeppnMofJ
+  - generic [ref=e33]:
+    - complementary [ref=e35]:
+      - menu [ref=e37]:
+        - menuitem "Planner" [ref=e38] [cursor=pointer]:
+          - img [ref=e39]
+          - link "Planner" [ref=e43]:
+            - /url: /apps/order/planner
+        - menuitem "Order list" [ref=e44] [cursor=pointer]:
+          - img [ref=e45]
+          - link "Order list" [ref=e48]:
+            - /url: /apps/order/order-list
+      - img "left" [ref=e50] [cursor=pointer]:
+        - img [ref=e51]
+    - main [ref=e53]:
+      - generic [ref=e55]:
+        - generic [ref=e60]:
+          - link [ref=e61] [cursor=pointer]:
+            - /url: /apps/order/order-list
+            - img [ref=e62]
+          - heading "Order details" [level=2] [ref=e65]
+        - generic [ref=e66]:
+          - separator [ref=e67]
+          - generic [ref=e68]:
+            - generic [ref=e69]:
+              - generic [ref=e70]: "Order number:"
+              - generic [ref=e72]:
+                - text: "#"
+                - generic [ref=e73]:
+                  - text: NL6-SO00316132
+                  - button "Copy" [ref=e74] [cursor=pointer]:
+                    - img "copy" [ref=e75]:
+                      - img [ref=e76]
+              - generic [ref=e78]: "Location:"
+              - generic [ref=e79]: Plkw P. van Geest B.V. - Loc. Gerbera
+              - generic [ref=e80]: "Address:"
+              - generic [ref=e81]: Herenlaan 21 21, MAASLAND, 3155 DC, Netherlands
+              - generic [ref=e82]: Shipping date
+              - generic [ref=e83]: 26 October 2026
+            - generic [ref=e84]:
+              - generic [ref=e85]: "Status:"
+              - generic [ref=e87]:
+                - img [ref=e88]
+                - text: Open
+              - generic [ref=e90]: "Orderer:"
+              - generic [ref=e91]: Playwright DudexWLMpVC
+            - button "Order log" [ref=e94] [cursor=pointer]:
+              - generic [ref=e95]: Order log
+          - separator [ref=e96]
+          - generic [ref=e98]:
+            - generic [ref=e99]:
+              - generic [ref=e100]:
+                - generic [ref=e101]:
+                  - generic [ref=e102]: Product name
+                  - generic [ref=e103]: pieces
+                - generic [ref=e104]:
+                  - generic [ref=e109] [cursor=pointer]: Anso-Mite/125,000/6l
+                  - generic [ref=e111]: "5"
+              - separator [ref=e112]
+              - generic [ref=e113]:
+                - generic [ref=e115]:
+                  - generic "Shipping method" [ref=e117]
+                  - generic [ref=e124]:
+                    - generic [ref=e126]:
+                      - combobox [disabled] [ref=e128] [cursor=pointer]
+                      - generic "NL0003"
+                    - generic:
+                      - generic:
+                        - img
+                - generic [ref=e130]:
+                  - generic "Order reference" [ref=e132]
+                  - textbox [disabled] [ref=e136]
+                - generic [ref=e138]:
+                  - generic "Order notes" [ref=e140]
+                  - textbox [disabled] [ref=e146]
+            - button "Edit" [ref=e147] [cursor=pointer]:
+              - generic [ref=e148]: Edit
+          - generic [ref=e149]:
+            - separator [ref=e150]
+            - generic [ref=e151]:
+              - generic [ref=e152]:
+                - generic [ref=e153]: Invoice address
+                - generic [ref=e154]:
+                  - generic [ref=e155]: Plkw P. van Geest Maasland B.V.
+                  - generic [ref=e156]: Plkw P. van Geest Maasland B.V.
+                  - generic [ref=e157]: 3155 DC MAASLAND
+                  - generic [ref=e158]: Netherlands
+              - separator [ref=e159]
+              - generic [ref=e160]:
+                - generic [ref=e161]: Company address
+                - generic [ref=e162]:
+                  - generic [ref=e163]: Plkw P. van Geest Maasland B.V.
+                  - generic [ref=e164]: Plkw P. van Geest Maasland B.V.
+                  - generic [ref=e165]: 3155 DC MAASLAND
+                  - generic [ref=e166]: Netherlands
+              - separator [ref=e167]
+        - generic [ref=e170]: All rights reserved. © Koppert 2026
+```

@@ -1,0 +1,211 @@
+# Page snapshot
+
+```yaml
+- generic [ref=e3]:
+  - generic [ref=e4]: You're on DEVELOPMENT OR STAGE
+  - generic [ref=e6]:
+    - img [ref=e7] [cursor=pointer]
+    - menu [ref=e14]:
+      - menuitem "Order" [ref=e15] [cursor=pointer]:
+        - link "Order" [ref=e17]:
+          - /url: /apps/order
+      - menuitem "Knowledge" [ref=e18] [cursor=pointer]:
+        - link "Knowledge" [ref=e20]:
+          - /url: /apps/protect
+      - menuitem "Scout" [ref=e21] [cursor=pointer]:
+        - link "Scout" [ref=e23]:
+          - /url: https://www.natutecscout.com/apps/scout
+      - menuitem "Organization" [ref=e24] [cursor=pointer]:
+        - link "Organization" [ref=e26]:
+          - /url: /apps/organization
+    - generic [ref=e27]:
+      - generic [ref=e28]: Plkw P. van Geest Maasland B.V.
+      - generic [ref=e29] [cursor=pointer]:
+        - img "user" [ref=e30]:
+          - img [ref=e31]
+        - text: Playwright DudesgXXlMa
+  - generic [ref=e33]:
+    - complementary [ref=e35]:
+      - menu [ref=e37]:
+        - menuitem "Planner" [ref=e38] [cursor=pointer]:
+          - img [ref=e39]
+          - link "Planner" [ref=e43]:
+            - /url: /apps/order/planner
+        - menuitem "Order list" [ref=e44] [cursor=pointer]:
+          - img [ref=e45]
+          - link "Order list" [ref=e48]:
+            - /url: /apps/order/order-list
+        - menuitem "file-text Invoices" [ref=e49] [cursor=pointer]:
+          - img "file-text" [ref=e50]:
+            - img [ref=e51]
+          - link "Invoices" [ref=e54]:
+            - /url: /apps/order/invoices
+      - img "left" [ref=e56] [cursor=pointer]:
+        - img [ref=e57]
+    - main [ref=e59]:
+      - generic [ref=e61]:
+        - heading "Order list" [level=2] [ref=e67]
+        - generic [ref=e68]:
+          - separator [ref=e69]
+          - generic [ref=e70]:
+            - generic [ref=e71]:
+              - textbox "Search..." [ref=e72]
+              - img [ref=e74]
+            - button "Create order" [ref=e76] [cursor=pointer]:
+              - generic [ref=e77]: Create order
+          - separator [ref=e78]
+          - generic [ref=e79]:
+            - generic [ref=e80]:
+              - generic [ref=e81]: Shipping date
+              - generic [ref=e82]: Order Nr.
+              - generic [ref=e83]: Location
+              - generic [ref=e84]: Order reference
+              - generic [ref=e85]: Amount
+              - generic [ref=e86]: Status
+            - button "Load future weeks" [ref=e89] [cursor=pointer]:
+              - img [ref=e91]
+              - generic [ref=e93]: Load future weeks
+            - generic [ref=e94]:
+              - generic [ref=e95]: Week 43
+              - generic [ref=e96]: "- Next week"
+            - generic [ref=e97]:
+              - generic [ref=e98]: 19 October 2026
+              - generic [ref=e99]: "#NL6-SO00316208"
+              - generic [ref=e100]: Plkw P. van Geest B.V. - Loc. Gerbera
+              - generic [ref=e101]: "-"
+              - generic [ref=e102]: € 1.242,60
+              - generic [ref=e104]:
+                - img [ref=e105]
+                - text: Open
+              - button "View details" [ref=e108] [cursor=pointer]:
+                - generic [ref=e109]: View details
+            - generic [ref=e111]: Week 35
+            - generic [ref=e112]:
+              - generic [ref=e113]: 25 August 2026
+              - generic [ref=e114]: "#NL6-SO00310903"
+              - generic [ref=e115]: Plkw P. van Geest Maasland (Monstersepad 8)
+              - generic [ref=e116]: peter
+              - generic [ref=e117]: € 870,50
+              - generic [ref=e119]:
+                - img [ref=e120]
+                - text: Locked
+              - button "View details" [ref=e123] [cursor=pointer]:
+                - generic [ref=e124]: View details
+            - generic [ref=e126]: Week 34
+            - generic [ref=e127]:
+              - generic [ref=e128]: 19 August 2026
+              - generic [ref=e129]: "#NL6-SO00310481"
+              - generic [ref=e130]: Plkw P. van Geest Maasland (Monstersepad 8)
+              - generic [ref=e131]: peter
+              - generic [ref=e132]: N/A
+              - generic [ref=e134]:
+                - img [ref=e135]
+                - text: Locked
+              - button "View details" [ref=e138] [cursor=pointer]:
+                - generic [ref=e139]: View details
+            - generic [ref=e140]:
+              - generic [ref=e141]: 17 August 2026
+              - generic [ref=e142]: "#NL6-SO00310228"
+              - generic [ref=e143]: Plkw P. van Geest Maasland Groenten tomaat
+              - generic [ref=e144]: "-"
+              - generic [ref=e145]: N/A
+              - generic [ref=e147]:
+                - img [ref=e148]
+                - text: Locked
+              - button "View details" [ref=e151] [cursor=pointer]:
+                - generic [ref=e152]: View details
+            - generic [ref=e154]: Week 33
+            - generic [ref=e155]:
+              - generic [ref=e156]: 12 August 2026
+              - generic [ref=e157]: "#NL6-SO00309867"
+              - generic [ref=e158]: Plkw P. van Geest Maasland (Monstersepad 8)
+              - generic [ref=e159]: peter
+              - generic [ref=e160]: N/A
+              - generic [ref=e162]:
+                - img [ref=e163]
+                - text: Locked
+              - button "View details" [ref=e166] [cursor=pointer]:
+                - generic [ref=e167]: View details
+            - generic [ref=e168]:
+              - generic [ref=e169]: 11 August 2026
+              - generic [ref=e170]: "#NL6-SO00309677"
+              - generic [ref=e171]: Plkw P. van Geest B.V. - Loc. Gerbera
+              - generic [ref=e172]: "-"
+              - generic [ref=e173]: N/A
+              - generic [ref=e175]:
+                - img [ref=e176]
+                - text: Locked
+              - button "View details" [ref=e179] [cursor=pointer]:
+                - generic [ref=e180]: View details
+            - generic [ref=e181]:
+              - generic [ref=e182]: 10 August 2026
+              - generic [ref=e183]: "#NL6-SO00309517"
+              - generic [ref=e184]: Plkw P. van Geest Maasland B.V.
+              - generic [ref=e185]: "-"
+              - generic [ref=e186]: N/A
+              - generic [ref=e188]:
+                - img [ref=e189]
+                - text: Locked
+              - button "View details" [ref=e192] [cursor=pointer]:
+                - generic [ref=e193]: View details
+            - generic [ref=e194]:
+              - generic [ref=e195]: 10 August 2026
+              - generic [ref=e196]: "#NL6-SO00309506"
+              - generic [ref=e197]: Plkw P. van Geest Maasland (Monstersepad 8)
+              - generic [ref=e198]: "-"
+              - generic [ref=e199]: N/A
+              - generic [ref=e201]:
+                - img [ref=e202]
+                - text: Locked
+              - button "View details" [ref=e205] [cursor=pointer]:
+                - generic [ref=e206]: View details
+            - generic [ref=e208]: Week 32
+            - generic [ref=e209]:
+              - generic [ref=e210]: 7 August 2026
+              - generic [ref=e211]: "#NL6-SO00309391"
+              - generic [ref=e212]: Plkw P. van Geest B.V. - Loc. Gerbera
+              - generic [ref=e213]: "-"
+              - generic [ref=e214]: N/A
+              - generic [ref=e216]:
+                - img [ref=e217]
+                - text: Locked
+              - button "View details" [ref=e220] [cursor=pointer]:
+                - generic [ref=e221]: View details
+            - generic [ref=e222]:
+              - generic [ref=e223]: 6 August 2026
+              - generic [ref=e224]: "#NL6-SO00309309"
+              - generic [ref=e225]: Plkw P. van Geest Maasland (Monstersepad 8)
+              - generic [ref=e226]: peter
+              - generic [ref=e227]: N/A
+              - generic [ref=e229]:
+                - img [ref=e230]
+                - text: Locked
+              - button "View details" [ref=e233] [cursor=pointer]:
+                - generic [ref=e234]: View details
+            - generic [ref=e235]:
+              - generic [ref=e236]: 5 August 2026
+              - generic [ref=e237]: "#NL6-SO00309107"
+              - generic [ref=e238]: Plkw P. van Geest Maasland (Monstersepad 8)
+              - generic [ref=e239]: "-"
+              - generic [ref=e240]: N/A
+              - generic [ref=e242]:
+                - img [ref=e243]
+                - text: Locked
+              - button "View details" [ref=e246] [cursor=pointer]:
+                - generic [ref=e247]: View details
+            - generic [ref=e248]:
+              - generic [ref=e249]: 4 August 2026
+              - generic [ref=e250]: "#NL6-SO00308964"
+              - generic [ref=e251]: Plkw P. van Geest Maasland B.V.
+              - generic [ref=e252]: "-"
+              - generic [ref=e253]: N/A
+              - generic [ref=e255]:
+                - img [ref=e256]
+                - text: Locked
+              - button "View details" [ref=e259] [cursor=pointer]:
+                - generic [ref=e260]: View details
+          - button "Load previous weeks" [ref=e262] [cursor=pointer]:
+            - img [ref=e264]
+            - generic [ref=e266]: Load previous weeks
+        - generic [ref=e269]: All rights reserved. © Koppert 2026
+```
