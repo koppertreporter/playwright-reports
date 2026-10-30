@@ -1,0 +1,108 @@
+# Page snapshot
+
+```yaml
+- generic [ref=e3]:
+  - generic [ref=e4]: You're on DEVELOPMENT OR STAGE
+  - generic [ref=e6]:
+    - img [ref=e7] [cursor=pointer]
+    - menu [ref=e14]:
+      - menuitem "Overview" [ref=e15] [cursor=pointer]:
+        - link "Overview" [ref=e17]:
+          - /url: /apps/overview
+      - menuitem "Order" [ref=e18] [cursor=pointer]:
+        - link "Order" [ref=e20]:
+          - /url: /apps/order
+      - menuitem "Knowledge" [ref=e21] [cursor=pointer]:
+        - link "Knowledge" [ref=e23]:
+          - /url: /apps/protect
+      - menuitem "Scout" [ref=e24] [cursor=pointer]:
+        - link "Scout" [ref=e26]:
+          - /url: https://www.natutecscout.com/apps/scout
+      - menuitem "Organization" [ref=e27] [cursor=pointer]:
+        - link "Organization" [ref=e29]:
+          - /url: /apps/organization
+      - menuitem "Admin" [ref=e30] [cursor=pointer]:
+        - link "Admin" [ref=e32]:
+          - /url: /apps/admin
+    - generic [ref=e33]:
+      - generic [ref=e37]:
+        - generic [ref=e39]:
+          - combobox [ref=e41] [cursor=pointer]
+          - generic:
+            - generic:
+              - generic: 2100 E Artesia Blvd LLC
+        - generic:
+          - generic:
+            - img
+      - generic [ref=e42] [cursor=pointer]:
+        - img "user" [ref=e43]:
+          - img [ref=e44]
+        - text: Playwright persistent da_planner_two_enterprises
+  - generic [ref=e46]:
+    - complementary [ref=e48]:
+      - menu [ref=e50]:
+        - menuitem "Planner" [ref=e51] [cursor=pointer]:
+          - img [ref=e52]
+          - link "Planner" [ref=e56]:
+            - /url: /apps/order/planner
+        - menuitem "Order list" [ref=e57] [cursor=pointer]:
+          - img [ref=e58]
+          - link "Order list" [ref=e61]:
+            - /url: /apps/order/order-list
+        - menuitem "file-text Invoices" [ref=e62] [cursor=pointer]:
+          - img "file-text" [ref=e63]:
+            - img [ref=e64]
+          - link "Invoices" [ref=e67]:
+            - /url: /apps/order/invoices
+      - img "left" [ref=e69] [cursor=pointer]:
+        - img [ref=e70]
+    - main [ref=e72]:
+      - generic [ref=e74]:
+        - heading "Planner" [level=2] [ref=e81]
+        - generic [ref=e82]:
+          - separator [ref=e84]
+          - generic [ref=e85]:
+            - generic [ref=e88]:
+              - generic [ref=e89]:
+                - generic [ref=e90]:
+                  - generic [ref=e91]: Locations
+                  - generic [ref=e92]: 2100 E. Artesia Blvd, LLC
+                - generic [ref=e93]:
+                  - generic [ref=e94]: Grouping
+                  - generic [ref=e96]:
+                    - generic [ref=e98]:
+                      - combobox [ref=e100] [cursor=pointer]
+                      - generic "Products"
+                    - generic:
+                      - generic:
+                        - img
+              - generic [ref=e101]:
+                - switch [ref=e102] [cursor=pointer]
+                - generic [ref=e104]: Order mode
+              - generic [ref=e105]:
+                - generic [ref=e107]:
+                  - textbox "Search..." [ref=e108]
+                  - img [ref=e110]
+                - generic [ref=e112]:
+                  - generic [ref=e113]: "Week selection:"
+                  - generic [ref=e115]:
+                    - generic [ref=e117]:
+                      - textbox "week 38 - 2026" [ref=e118]:
+                        - /placeholder: Start week
+                      - generic:
+                        - img "calendar":
+                          - img
+                    - text: "-"
+                    - generic [ref=e120]:
+                      - textbox "week 49 - 2026" [ref=e121]:
+                        - /placeholder: End week
+                      - generic:
+                        - img "calendar":
+                          - img
+            - generic [ref=e125]:
+              - img "empty" [ref=e127]
+              - heading "You don’t have any orders in this week selection." [level=4] [ref=e128]
+      - button "Digital Assistant" [active] [ref=e130] [cursor=pointer]:
+        - img [ref=e131]
+        - generic [ref=e136]: Digital Assistant
+```

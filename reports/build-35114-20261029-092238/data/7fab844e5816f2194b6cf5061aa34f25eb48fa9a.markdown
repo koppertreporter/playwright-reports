@@ -1,0 +1,68 @@
+# Page snapshot
+
+```yaml
+- generic [ref=e3]:
+  - generic [ref=e4]: You're on DEVELOPMENT OR STAGE
+  - generic [ref=e6]:
+    - img [ref=e7] [cursor=pointer]
+    - menu [ref=e14]:
+      - menuitem "Order" [ref=e15] [cursor=pointer]:
+        - link "Order" [ref=e17]:
+          - /url: /apps/order
+      - menuitem "Scout" [ref=e18] [cursor=pointer]:
+        - link "Scout" [ref=e20]:
+          - /url: https://www.natutecscout.com/apps/scout
+      - menuitem "Organization" [ref=e21] [cursor=pointer]:
+        - link "Organization" [ref=e23]:
+          - /url: /apps/organization
+    - generic [ref=e24]:
+      - generic [ref=e28]:
+        - generic [ref=e30]:
+          - combobox [ref=e32] [cursor=pointer]
+          - generic:
+            - generic:
+              - generic: 16 Quartz Hop Farm
+        - generic:
+          - generic:
+            - img
+      - generic [ref=e33] [cursor=pointer]:
+        - img "user" [ref=e34]:
+          - img [ref=e35]
+        - text: Playwright DudeopZmiNK
+  - generic [ref=e37]:
+    - complementary [ref=e39]:
+      - menu [ref=e41]:
+        - menuitem "swap Side Effects" [ref=e42] [cursor=pointer]:
+          - img "swap" [ref=e43]:
+            - img [ref=e44]
+          - link "Side Effects" [ref=e47]:
+            - /url: /apps/protect/side-effects
+        - menuitem "Visit reports" [ref=e48] [cursor=pointer]:
+          - img [ref=e49]
+          - link "Visit reports" [ref=e55]:
+            - /url: /apps/protect/visit-reports
+      - img "left" [ref=e57] [cursor=pointer]:
+        - img [ref=e58]
+    - main [ref=e60]:
+      - generic [ref=e61]:
+        - generic [ref=e62]:
+          - generic [ref=e63]:
+            - generic [ref=e65]: Beneficial
+            - button "Select product" [ref=e66] [cursor=pointer]:
+              - generic [ref=e67]: Select product
+          - generic [ref=e68]:
+            - generic [ref=e70]: Active ingredient
+            - button "Select product" [ref=e71] [cursor=pointer]:
+              - generic [ref=e72]: Select product
+        - generic [ref=e73]:
+          - generic "Side Effects" [ref=e77]
+          - generic [ref=e78]:
+            - generic [ref=e80]:
+              - img [ref=e83]
+              - generic [ref=e85]: Nothing has been selected yet
+              - generic [ref=e86]: Select one or more beneficials and active ingredients to show side effects.
+            - button "Digital Assistant" [ref=e88] [cursor=pointer]:
+              - img [ref=e89]
+              - generic [ref=e94]: Digital Assistant
+          - generic [ref=e97]: All rights reserved. © Koppert 2026
+```
