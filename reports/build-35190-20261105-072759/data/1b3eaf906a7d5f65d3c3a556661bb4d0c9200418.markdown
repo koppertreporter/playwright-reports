@@ -1,0 +1,82 @@
+# Page snapshot
+
+```yaml
+- generic [ref=e3]:
+  - generic [ref=e4]: You're on DEVELOPMENT OR STAGE
+  - generic [ref=e6]:
+    - img [ref=e7] [cursor=pointer]
+    - menu [ref=e14]:
+      - menuitem "Overview" [ref=e15] [cursor=pointer]:
+        - link "Overview" [ref=e17]:
+          - /url: /apps/overview
+      - menuitem "Order" [ref=e18] [cursor=pointer]:
+        - link "Order" [ref=e20]:
+          - /url: /apps/order
+      - menuitem "Knowledge" [ref=e21] [cursor=pointer]:
+        - link "Knowledge" [ref=e23]:
+          - /url: /apps/protect
+      - menuitem "Scout" [ref=e24] [cursor=pointer]:
+        - link "Scout" [ref=e26]:
+          - /url: https://www.natutecscout.com/apps/scout
+      - menuitem "Organization" [ref=e27] [cursor=pointer]:
+        - link "Organization" [ref=e29]:
+          - /url: /apps/organization
+      - menuitem "Admin" [ref=e30] [cursor=pointer]:
+        - link "Admin" [ref=e32]:
+          - /url: /apps/admin
+    - generic [ref=e33]:
+      - generic [ref=e37]:
+        - generic [ref=e39]:
+          - combobox [ref=e41] [cursor=pointer]
+          - generic:
+            - generic:
+              - generic: 2100 E Artesia Blvd LLC
+        - generic:
+          - generic:
+            - img
+      - generic [ref=e42] [cursor=pointer]:
+        - img "user" [ref=e43]:
+          - img [ref=e44]
+        - text: Playwright da_side_effects_two_enterprises
+  - generic [ref=e46]:
+    - complementary [ref=e48]:
+      - menu [ref=e50]:
+        - menuitem "swap Neveneffecten" [ref=e51] [cursor=pointer]:
+          - img "swap" [ref=e52]:
+            - img [ref=e53]
+          - link "Neveneffecten" [ref=e56]:
+            - /url: /apps/protect/side-effects
+        - menuitem "Bezoekverslagen" [ref=e57] [cursor=pointer]:
+          - img [ref=e58]
+          - link "Bezoekverslagen" [ref=e64]:
+            - /url: /apps/protect/visit-reports
+        - menuitem "search Solution finder" [ref=e65] [cursor=pointer]:
+          - img "search" [ref=e66]:
+            - img [ref=e67]
+          - link "Solution finder" [ref=e70]:
+            - /url: /apps/protect/solution-finder
+      - img "left" [ref=e72] [cursor=pointer]:
+        - img [ref=e73]
+    - main [ref=e75]:
+      - generic [ref=e76]:
+        - generic [ref=e77]:
+          - generic [ref=e78]:
+            - generic [ref=e80]: Natuurlijke bestrijders
+            - button "Selecteer product" [ref=e81] [cursor=pointer]:
+              - generic [ref=e82]: Selecteer product
+          - generic [ref=e83]:
+            - generic [ref=e85]: Werkzame stof
+            - button "Selecteer product" [ref=e86] [cursor=pointer]:
+              - generic [ref=e87]: Selecteer product
+        - generic [ref=e88]:
+          - generic "Neveneffecten" [ref=e92]
+          - generic [ref=e93]:
+            - generic [ref=e95]:
+              - img [ref=e98]
+              - generic [ref=e100]: Er is nog niets geselecteerd
+              - generic [ref=e101]: Selecteer één of meer natuurlijke bestrijders en werkzame stoffen om neveneffecten te tonen.
+            - button "Digital Assistant" [active] [ref=e103] [cursor=pointer]:
+              - img [ref=e104]
+              - generic [ref=e109]: Digital Assistant
+          - generic [ref=e112]: Alle rechten voorbehouden. © Koppert 2026
+```

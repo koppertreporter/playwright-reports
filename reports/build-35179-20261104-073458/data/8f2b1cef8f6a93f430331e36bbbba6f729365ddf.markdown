@@ -1,0 +1,71 @@
+# Page snapshot
+
+```yaml
+- generic [ref=e3]:
+  - generic [ref=e4]: You're on DEVELOPMENT OR STAGE
+  - generic [ref=e6]:
+    - img [ref=e7] [cursor=pointer]
+    - menu [ref=e14]:
+      - menuitem "Overview" [ref=e15] [cursor=pointer]:
+        - link "Overview" [ref=e17]:
+          - /url: /apps/overview
+      - menuitem "Order" [ref=e18] [cursor=pointer]:
+        - link "Order" [ref=e20]:
+          - /url: /apps/order
+      - menuitem "Scout" [ref=e21] [cursor=pointer]:
+        - link "Scout" [ref=e23]:
+          - /url: https://www.natutecscout.com/apps/scout
+      - menuitem "Organization" [ref=e24] [cursor=pointer]:
+        - link "Organization" [ref=e26]:
+          - /url: /apps/organization
+      - menuitem "Admin" [ref=e27] [cursor=pointer]:
+        - link "Admin" [ref=e29]:
+          - /url: /apps/admin
+    - generic [ref=e30]:
+      - generic [ref=e31]: AGRICOLA SUAGO, S.L.
+      - generic [ref=e32] [cursor=pointer]:
+        - img "user" [ref=e33]:
+          - img [ref=e34]
+        - text: Superuser for autotests
+  - generic [ref=e36]:
+    - complementary [ref=e38]:
+      - menu [ref=e40]:
+        - menuitem "swap Side Effects" [ref=e41] [cursor=pointer]:
+          - img "swap" [ref=e42]:
+            - img [ref=e43]
+          - link "Side Effects" [ref=e46]:
+            - /url: /apps/protect/side-effects
+        - menuitem "Visit reports" [ref=e47] [cursor=pointer]:
+          - img [ref=e48]
+          - link "Visit reports" [ref=e54]:
+            - /url: /apps/protect/visit-reports
+        - menuitem "search Solution finder" [ref=e55] [cursor=pointer]:
+          - img "search" [ref=e56]:
+            - img [ref=e57]
+          - link "Solution finder" [ref=e60]:
+            - /url: /apps/protect/solution-finder
+      - img "left" [ref=e62] [cursor=pointer]:
+        - img [ref=e63]
+    - main [ref=e65]:
+      - generic [ref=e66]:
+        - generic [ref=e67]:
+          - generic [ref=e68]:
+            - generic [ref=e70]: Beneficial
+            - button "Select product" [ref=e71] [cursor=pointer]:
+              - generic [ref=e72]: Select product
+          - generic [ref=e73]:
+            - generic [ref=e75]: Active ingredient
+            - button "Select product" [ref=e76] [cursor=pointer]:
+              - generic [ref=e77]: Select product
+        - generic [ref=e78]:
+          - generic "Side Effects" [ref=e82]
+          - generic [ref=e83]:
+            - generic [ref=e85]:
+              - img [ref=e88]
+              - generic [ref=e90]: Nothing has been selected yet
+              - generic [ref=e91]: Select one or more beneficials and active ingredients to show side effects.
+            - button "Digital Assistant" [ref=e93] [cursor=pointer]:
+              - img [ref=e94]
+              - generic [ref=e99]: Digital Assistant
+          - generic [ref=e102]: All rights reserved. © Koppert 2026
+```
