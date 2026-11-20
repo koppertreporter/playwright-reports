@@ -1,0 +1,302 @@
+# Instructions
+
+- Following Playwright test failed.
+- Explain why, be concise, respect Playwright best practices.
+- Provide a snippet of code with the fix, if possible.
+
+# Test info
+
+- Name: orders.spec.ts >> Orders >> TC:14210 - [Cancellation] Check if multiple orders are deleted from Order Details when entering Zero/Removing quantities
+- Location: playwright/specs/orders.spec.ts:216:7
+
+# Error details
+
+```
+TimeoutError: locator.click: Timeout 30000ms exceeded.
+Call log:
+  - waiting for locator('[role="dialog"]').filter({ hasText: /Select products|Add product/i }).locator('label').filter({ has: locator('input[type="checkbox"]') }).filter({ hasNot: locator('input:checked') }).first()
+    - locator resolved to <label class="ant-checkbox-wrapper">…</label>
+  - attempting click action
+    2 × waiting for element to be visible, enabled and stable
+      - element is not stable
+    - retrying click action
+    - waiting 20ms
+    2 × waiting for element to be visible, enabled and stable
+      - element is not enabled
+    - retrying click action
+      - waiting 100ms
+    57 × waiting for element to be visible, enabled and stable
+       - element is not enabled
+     - retrying click action
+       - waiting 500ms
+
+```
+
+# Page snapshot
+
+```yaml
+- generic [active] [ref=e1]:
+  - generic [ref=e3]:
+    - generic [ref=e4]: You're on DEVELOPMENT OR STAGE
+    - generic [ref=e6]:
+      - img [ref=e7] [cursor=pointer]
+      - generic [ref=e14]:
+        - generic [ref=e15]: 4Innovations Horti B.V.
+        - generic [ref=e16] [cursor=pointer]:
+          - img "user" [ref=e17]:
+            - img [ref=e18]
+          - text: Playwright DudeeIGvvxE
+    - generic [ref=e21]:
+      - generic [ref=e22]:
+        - heading "Hi, Playwright DudeeIGvvxE!" [level=1] [ref=e23]
+        - strong [ref=e25]: Welcome to Koppert One
+        - generic [ref=e26]:
+          - heading "Need help ?" [level=5] [ref=e27]
+          - separator [ref=e28]
+          - generic [ref=e29]:
+            - img [ref=e31]
+            - generic [ref=e32]:
+              - heading "Koppert One support" [level=5] [ref=e33]
+              - link "mail support@koppert.one" [ref=e35] [cursor=pointer]:
+                - /url: mailto:support@koppert.one
+                - img "mail" [ref=e36]:
+                  - img [ref=e37]
+                - text: support@koppert.one
+                - img [ref=e39]
+              - link "phone +31 1 051 405 17" [ref=e43] [cursor=pointer]:
+                - /url: tel:+31105140517
+                - img "phone" [ref=e44]:
+                  - img [ref=e45]
+                - text: +31 1 051 405 17
+                - img [ref=e47]
+      - generic [ref=e51]:
+        - generic [ref=e52] [cursor=pointer]:
+          - img [ref=e54]
+          - generic [ref=e57]: Order
+          - generic [ref=e59]: View, place and manage orders
+          - img [ref=e61]
+        - generic [ref=e63] [cursor=pointer]:
+          - img [ref=e65]
+          - generic [ref=e69]: Knowledge
+          - generic [ref=e71]: Explore chemical compatibility with Koppert's natural enemies and bumblebees
+          - img [ref=e73]
+        - generic [ref=e75] [cursor=pointer]:
+          - img [ref=e77]
+          - generic [ref=e79]: Scout
+          - generic [ref=e81]: Discover trends in pest development and beneficial insect counts to know when to act
+          - img [ref=e83]
+        - generic [ref=e85] [cursor=pointer]:
+          - img [ref=e87]
+          - generic [ref=e89]: Organization
+          - generic [ref=e91]: Manage team members and their access to locations
+          - img [ref=e93]
+  - button "Feedback" [ref=e95] [cursor=pointer]:
+    - generic [ref=e97]: Feedback
+```
+
+# Test source
+
+```ts
+  186 |     await ordersSel.productModalSearchInput.fill(q);
+  187 |     await page.waitForTimeout(400);
+  188 |   },
+  189 | 
+  190 |   async clearSearchInAddProductModal(ordersSel: ReturnType<typeof ordersSelectors>, page: Page) {
+  191 |     await expect(ordersSel.productModalSearchInput).toBeVisible({ timeout: 10000 });
+  192 |     await ordersSel.productModalSearchInput.fill('');
+  193 |     await page.waitForTimeout(300);
+  194 |   },
+  195 | 
+  196 |   async expectProductVisibleInAddModal(ordersSel: ReturnType<typeof ordersSelectors>, page: Page, productName: string) {
+  197 |     const shortName = getShortProductName(productName);
+  198 |     const label = ordersSel.productModalProductLabels.filter({ hasText: shortName }).first();
+  199 |     await expect(label, `Expected product "${shortName}" to be visible in Add product modal`).toBeVisible({
+  200 |       timeout: 10000,
+  201 |     });
+  202 |   },
+  203 | 
+  204 |   async expectProductNotVisibleInAddModal(
+  205 |     ordersSel: ReturnType<typeof ordersSelectors>,
+  206 |     page: Page,
+  207 |     productName: string,
+  208 |   ) {
+  209 |     const shortName = getShortProductName(productName);
+  210 |     const label = ordersSel.productModalProductLabels.filter({ hasText: shortName }).first();
+  211 |     await expect(label, `Expected product "${shortName}" to be hidden in Add product modal`).toBeHidden({
+  212 |       timeout: 10000,
+  213 |     });
+  214 |   },
+  215 | 
+  216 |   async expectProductCheckboxStateInAddModal(
+  217 |     ordersSel: ReturnType<typeof ordersSelectors>,
+  218 |     page: Page,
+  219 |     productName: string,
+  220 |     expected: { checked?: boolean; disabled?: boolean },
+  221 |   ) {
+  222 |     const shortName = getShortProductName(productName);
+  223 |     const label = ordersSel.productModalProductLabels.filter({ hasText: shortName }).first();
+  224 |     await expect(label).toBeVisible({ timeout: 10000 });
+  225 | 
+  226 |     const checkbox = label.locator('input[type="checkbox"]').first();
+  227 |     await expect(checkbox).toBeVisible({ timeout: 10000 });
+  228 | 
+  229 |     if (typeof expected.disabled === 'boolean') {
+  230 |       if (expected.disabled) await expect(checkbox).toBeDisabled();
+  231 |       else await expect(checkbox).toBeEnabled();
+  232 |     }
+  233 | 
+  234 |     if (typeof expected.checked === 'boolean') {
+  235 |       const isChecked = await checkbox.isChecked().catch(() => false);
+  236 |       expect(isChecked).toBe(expected.checked);
+  237 |     }
+  238 |   },
+  239 | 
+  240 |   async getAnyExistingProductNameFromOrder(ordersSel: ReturnType<typeof ordersSelectors>, page: Page): Promise<string> {
+  241 |     await expect(ordersSel.productQtyInputsEditable.first()).toBeVisible({ timeout: 20000 });
+  242 | 
+  243 |     const row = ordersSel.productEditableRows.first();
+  244 |     await expect(row).toBeVisible({ timeout: 20000 });
+  245 | 
+  246 |     const raw = ((await row.textContent()) || '').trim();
+  247 |     const name = extractProductNameFromRowText(raw);
+  248 | 
+  249 |     expect(name, `Could not extract product name from row text: "${raw}"`).toBeTruthy();
+  250 |     return name;
+  251 |   },
+  252 | 
+  253 |   async openAddProductModal(orders: ReturnType<typeof ordersSelectors>) {
+  254 |     await orders.addProductButton.click();
+  255 |     await expect(orders.productModal).toBeVisible({ timeout: 20000 });
+  256 |   },
+  257 | 
+  258 |   async addProductFromModalByName(orders: ReturnType<typeof ordersSelectors>, page: Page, productName: string) {
+  259 |     const short = getShortProductName(productName);
+  260 | 
+  261 |     await orders.productModalSearchInput.fill(short);
+  262 |     await page.waitForTimeout(300);
+  263 | 
+  264 |     const label = orders.productModalProductLabels.filter({ hasText: new RegExp(escapeRegExp(short), 'i') }).first();
+  265 |     await expect(label).toBeVisible({ timeout: 10000 });
+  266 | 
+  267 |     const cb = label.locator('input[type="checkbox"]').first();
+  268 |     const cbVisible = await cb.isVisible().catch(() => false);
+  269 |     if (cbVisible) {
+  270 |       await expect(cb).toBeEnabled();
+  271 |       const checked = await cb.isChecked().catch(() => false);
+  272 |       if (!checked) await label.click();
+  273 |     } else {
+  274 |       await label.click();
+  275 |     }
+  276 | 
+  277 |     await orders.productAddButton.click();
+  278 |     await orders.productModal.waitFor({ state: 'hidden', timeout: 10000 });
+  279 |   },
+  280 | 
+  281 |   async addAnyProductFromModal(orders: ReturnType<typeof ordersSelectors>, page: Page): Promise<string> {
+  282 |     const label = orders.productModalUncheckedProducts.first();
+  283 |     await expect(label).toBeVisible({ timeout: 20000 });
+  284 | 
+  285 |     const productName = ((await label.textContent()) || '').replace(/\s+/g, ' ').trim();
+> 286 |     await label.click();
+      |                 ^ TimeoutError: locator.click: Timeout 30000ms exceeded.
+  287 | 
+  288 |     await orders.productAddButton.click();
+  289 |     await orders.productModal.waitFor({ state: 'hidden', timeout: 10000 });
+  290 | 
+  291 |     return productName;
+  292 |   },
+  293 | 
+  294 |   // The modal lists every product whatever the order's delivery date, and one that cannot be delivered
+  295 |   // by then is still added - with a readonly quantity and Save disabled. Pick, among the products not
+  296 |   // yet on the order, the first the order form will accept (see isProductOrderableOn). Each checkbox
+  297 |   // carries the product id in its testid, so the choice is made against ids, not names.
+  298 |   async addOrderableProductFromModal(
+  299 |     orders: ReturnType<typeof ordersSelectors>,
+  300 |     page: Page,
+  301 |     orderableProductIds: string[],
+  302 |   ): Promise<string> {
+  303 |     await expect(orders.productModalUncheckedProducts.first()).toBeVisible({ timeout: 20000 });
+  304 | 
+  305 |     const orderable = new Set(orderableProductIds);
+  306 |     const uncheckedIds = await orders.productModalUncheckedProducts
+  307 |       .locator('input[type="checkbox"]')
+  308 |       .evaluateAll((inputs) =>
+  309 |         inputs.map((input) => (input.getAttribute('data-testid') || '').replace('add-product-checkbox:', '')),
+  310 |       );
+  311 |     const productId = uncheckedIds.find((id) => orderable.has(id));
+  312 |     if (!productId) {
+  313 |       throw new Error(
+  314 |         `None of the ${uncheckedIds.length} products offered by the Add product modal can be ordered for this ` +
+  315 |           `order's delivery date (${orderable.size} orderable in the catalog)`,
+  316 |       );
+  317 |     }
+  318 | 
+  319 |     const label = orders.productModalUncheckedProducts
+  320 |       .filter({ has: page.locator(`input[data-testid="add-product-checkbox:${productId}"]`) })
+  321 |       .first();
+  322 |     const productName = ((await label.textContent()) || '').replace(/\s+/g, ' ').trim();
+  323 |     await label.click();
+  324 | 
+  325 |     await orders.productAddButton.click();
+  326 |     await orders.productModal.waitFor({ state: 'hidden', timeout: 10000 });
+  327 | 
+  328 |     return productName;
+  329 |   },
+  330 | 
+  331 |   async expectZeroRejectedOrTriggersDeletion(
+  332 |     orders: ReturnType<typeof ordersSelectors>,
+  333 |     page: Page,
+  334 |     productName: string,
+  335 |   ) {
+  336 |     const row = getProductRowByName(orders, page, productName);
+  337 |     const qty = getQtyInputInRow(row);
+  338 | 
+  339 |     await qty.focus();
+  340 |     await page.keyboard.press('Tab');
+  341 | 
+  342 |     await page.waitForTimeout(250);
+  343 | 
+  344 |     await expect
+  345 |       .poll(
+  346 |         async () => {
+  347 |           const val = await qty.inputValue().catch(() => '');
+  348 |           const saveEnabled = await orders.saveButton.isEnabled().catch(() => false);
+  349 | 
+  350 |           if (val !== '0' || !saveEnabled) return 'rejected-or-disabled';
+  351 | 
+  352 |           await orders.saveButton.click();
+  353 | 
+  354 |           const modalVisible = await orders.deletingQuantitiesModal.isVisible().catch(() => false);
+  355 |           if (modalVisible) {
+  356 |             const canCancel = await orders.deletingQuantitiesCancelButton.isVisible().catch(() => false);
+  357 |             if (canCancel) await orders.deletingQuantitiesCancelButton.click();
+  358 |             await expect(orders.deletingQuantitiesModal).toBeHidden({ timeout: 10000 });
+  359 |             return 'treated-as-deletion';
+  360 |           }
+  361 | 
+  362 |           return 'still-accepted';
+  363 |         },
+  364 |         { timeout: 8000 },
+  365 |       )
+  366 |       .not.toBe('still-accepted');
+  367 |   },
+  368 | 
+  369 |   async scanProductModalForImagePresence(
+  370 |     orders: ReturnType<typeof ordersSelectors>,
+  371 |     scanN = 20,
+  372 |   ): Promise<{ foundWithImage: boolean; foundWithoutImage: boolean; oneImageSrc: string }> {
+  373 |     const labels = orders.productModalProductLabels;
+  374 |     await expect(labels.first()).toBeVisible({ timeout: 20000 });
+  375 | 
+  376 |     const total = await labels.count();
+  377 |     const n = Math.min(scanN, total);
+  378 | 
+  379 |     let foundWithImage = false;
+  380 |     let foundWithoutImage = false;
+  381 |     let oneImageSrc = '';
+  382 | 
+  383 |     for (let i = 0; i < n; i++) {
+  384 |       const label = labels.nth(i);
+  385 |       const img = label.locator('img').first();
+  386 | 
+```

@@ -1,0 +1,291 @@
+# Instructions
+
+- Following Playwright test failed.
+- Explain why, be concise, respect Playwright best practices.
+- Provide a snippet of code with the fix, if possible.
+
+# Test info
+
+- Name: planner_2.spec.ts >> Planner - Week Navigation >> TC:13407 - [Order Note] Check user can add order note
+- Location: playwright/specs/planner_2.spec.ts:1928:7
+
+# Error details
+
+```
+Error: locator.scrollIntoViewIfNeeded: Error: strict mode violation: locator('input[data-testid="orderable-cell:Anso-Mite/125,000/6l:2026-11-30"]') resolved to 2 elements:
+    1) <input type="text" value="142" inputmode="numeric" class="sc-ePDLzJ hXDelN" data-testid="orderable-cell:Anso-Mite/125,000/6l:2026-11-30"/> aka getByTestId('orderable-cell:Anso-Mite/125,000/6l:2026-11-30').first()
+    2) <input value="4" type="text" inputmode="numeric" class="sc-ePDLzJ hXDelN" data-testid="orderable-cell:Anso-Mite/125,000/6l:2026-11-30"/> aka getByTestId('orderable-cell:Anso-Mite/125,000/6l:2026-11-30').nth(1)
+
+Call log:
+  - waiting for locator('input[data-testid="orderable-cell:Anso-Mite/125,000/6l:2026-11-30"]')
+
+```
+
+# Page snapshot
+
+```yaml
+- generic [active] [ref=e1]:
+  - generic [ref=e3]:
+    - generic [ref=e4]: You're on DEVELOPMENT OR STAGE
+    - generic [ref=e6]:
+      - img [ref=e7] [cursor=pointer]
+      - generic [ref=e14]:
+        - generic [ref=e15]: Plkw P. van Geest Maasland B.V.
+        - generic [ref=e16] [cursor=pointer]:
+          - img "user" [ref=e17]:
+            - img [ref=e18]
+          - text: Playwright DudeFdrdXsn
+    - generic [ref=e21]:
+      - generic [ref=e22]:
+        - heading "Hi, Playwright DudeFdrdXsn!" [level=1] [ref=e23]
+        - strong [ref=e25]: Welcome to Koppert One
+        - generic [ref=e26]:
+          - heading "Need help ?" [level=5] [ref=e27]
+          - separator [ref=e28]
+          - generic [ref=e29]:
+            - img [ref=e31]
+            - generic [ref=e32]:
+              - heading "Koppert One support" [level=5] [ref=e33]
+              - link "mail support@koppert.one" [ref=e35] [cursor=pointer]:
+                - /url: mailto:support@koppert.one
+                - img "mail" [ref=e36]:
+                  - img [ref=e37]
+                - text: support@koppert.one
+                - img [ref=e39]
+              - link "phone +31 1 051 405 17" [ref=e43] [cursor=pointer]:
+                - /url: tel:+31105140517
+                - img "phone" [ref=e44]:
+                  - img [ref=e45]
+                - text: +31 1 051 405 17
+                - img [ref=e47]
+      - generic [ref=e51]:
+        - generic [ref=e52] [cursor=pointer]:
+          - img [ref=e54]
+          - generic [ref=e57]: Order
+          - generic [ref=e59]: View, place and manage orders
+          - img [ref=e61]
+        - generic [ref=e63] [cursor=pointer]:
+          - img [ref=e65]
+          - generic [ref=e69]: Knowledge
+          - generic [ref=e71]: Explore chemical compatibility with Koppert's natural enemies and bumblebees
+          - img [ref=e73]
+        - generic [ref=e75] [cursor=pointer]:
+          - img [ref=e77]
+          - generic [ref=e79]: Scout
+          - generic [ref=e81]: Discover trends in pest development and beneficial insect counts to know when to act
+          - img [ref=e83]
+        - generic [ref=e85] [cursor=pointer]:
+          - img [ref=e87]
+          - generic [ref=e89]: Organization
+          - generic [ref=e91]: Manage team members and their access to locations
+          - img [ref=e93]
+  - button "Feedback" [ref=e95] [cursor=pointer]:
+    - generic [ref=e97]: Feedback
+```
+
+# Test source
+
+```ts
+  2317 |           .then(() => 'modal' as const)
+  2318 |           .catch(() => null),
+  2319 |       ]);
+  2320 | 
+  2321 |       if (got !== 'url') {
+  2322 |         await expect(orderDetailsModal, 'Order details modal did not appear').toBeVisible({ timeout: 30000 });
+  2323 | 
+  2324 |         const viewDetails = orderDetailsModal
+  2325 |           .locator('a')
+  2326 |           .filter({ hasText: /View details/i })
+  2327 |           .first();
+  2328 | 
+  2329 |         await expect(viewDetails, '"View details" link not found in Order details modal').toBeVisible({
+  2330 |           timeout: 15000,
+  2331 |         });
+  2332 |         await viewDetails.click({ force: true });
+  2333 | 
+  2334 |         const unsaved = page
+  2335 |           .locator('.ant-modal:visible .ant-modal-content')
+  2336 |           .filter({ hasText: /Are you sure\?/i })
+  2337 |           .first();
+  2338 | 
+  2339 |         if (await unsaved.isVisible().catch(() => false)) {
+  2340 |           await unsaved
+  2341 |             .locator('button')
+  2342 |             .filter({ hasText: /^Discard$/i })
+  2343 |             .first()
+  2344 |             .click({ force: true });
+  2345 |         }
+  2346 | 
+  2347 |         await page.waitForURL(detailsUrlRe, { timeout: 60000 });
+  2348 |       }
+  2349 |     }
+  2350 |   },
+  2351 | 
+  2352 |   async setPlannerQtyAndCommit(page: Page, input: any, value: string) {
+  2353 |     await expect(input, 'Planner qty input should be visible').toBeVisible({ timeout: 30000 });
+  2354 |     await expect(input, 'Planner qty input should be editable').toBeEditable({ timeout: 30000 });
+  2355 | 
+  2356 |     await input.scrollIntoViewIfNeeded().catch(() => {});
+  2357 |     await input.click({ force: true });
+  2358 | 
+  2359 |     await input.press('Control+A').catch(() => {});
+  2360 |     await input.press('Meta+A').catch(() => {});
+  2361 |     await input.press('Backspace').catch(() => {});
+  2362 |     await input.fill('').catch(() => {});
+  2363 | 
+  2364 |     if (value !== '') {
+  2365 |       await input.type(String(value), { delay: 20 }).catch(async () => {
+  2366 |         await input.fill(String(value));
+  2367 |       });
+  2368 |     }
+  2369 | 
+  2370 |     await input.press('Enter').catch(() => {});
+  2371 |     await input.press('Tab').catch(() => {});
+  2372 | 
+  2373 |     await page.waitForTimeout(150);
+  2374 |   },
+  2375 | 
+  2376 |   // Drops every location's pending edit. Order and Discard are per-location, and both the click and the
+  2377 |   // "buttons are gone again" check below work page-wide, so a draft left behind on another location -
+  2378 |   // by an earlier test on the same shared enterprise, or by live-sync - makes this helper order the
+  2379 |   // wrong location and then wait out the timeout on an Order button that was never ours.
+  2380 |   async discardAllPendingPlannerChanges(page: Page) {
+  2381 |     const discardButtons = page.getByRole('button', { name: /^Discard changes?$/i });
+  2382 | 
+  2383 |     for (let i = 0; i < 10; i++) {
+  2384 |       const button = discardButtons.first();
+  2385 |       if (!(await button.isVisible({ timeout: 1000 }).catch(() => false))) return;
+  2386 |       await button.click({ force: true }).catch(() => {});
+  2387 |       await page.waitForTimeout(500);
+  2388 |       await this.dismissPostOrderModals(page);
+  2389 |     }
+  2390 |   },
+  2391 | 
+  2392 |   async createOrderFromPlannerBySettingAnyQty(
+  2393 |     page: Page,
+  2394 |     preferredQty: string = '5',
+  2395 |   ): Promise<{ input: any; testId: string; orderedValue: string }> {
+  2396 |     await this.discardAllPendingPlannerChanges(page);
+  2397 | 
+  2398 |     const allInputs = page.locator('input[data-testid^="orderable-cell:"]');
+  2399 |     const inputCount = await allInputs.count();
+  2400 | 
+  2401 |     let testId = '';
+  2402 |     for (let i = 0; i < inputCount; i++) {
+  2403 |       const input = allInputs.nth(i);
+  2404 |       const isReadonly = await input.getAttribute('readonly');
+  2405 |       if (isReadonly !== null) continue;
+  2406 | 
+  2407 |       const isEditable = await input.isEditable().catch(() => false);
+  2408 |       if (!isEditable) continue;
+  2409 | 
+  2410 |       testId = (await input.getAttribute('data-testid')) || '';
+  2411 |       if (testId) break;
+  2412 |     }
+  2413 | 
+  2414 |     expect(testId, 'Could not find an editable planner qty input to create an order').toBeTruthy();
+  2415 | 
+  2416 |     const input = page.locator(`input[data-testid="${testId}"]`);
+> 2417 |     await input.scrollIntoViewIfNeeded();
+       |                 ^ Error: locator.scrollIntoViewIfNeeded: Error: strict mode violation: locator('input[data-testid="orderable-cell:Anso-Mite/125,000/6l:2026-11-30"]') resolved to 2 elements:
+  2418 |     await expect(input).toBeVisible({ timeout: 30000 });
+  2419 |     await expect(input).toBeEditable({ timeout: 10000 });
+  2420 | 
+  2421 |     const current = ((await input.inputValue().catch(() => '')) || '').trim();
+  2422 |     let qtyToSet = String(preferredQty);
+  2423 | 
+  2424 |     if (current === qtyToSet) {
+  2425 |       const n = parseInt(qtyToSet, 10);
+  2426 |       qtyToSet = Number.isFinite(n) ? String(n + 1) : `${qtyToSet}1`;
+  2427 |     }
+  2428 | 
+  2429 |     await this.setPlannerQtyAndCommit(page, input, qtyToSet);
+  2430 |     await expect(input).toHaveValue(qtyToSet, { timeout: 20000 });
+  2431 | 
+  2432 |     await this.expectOrderAndDiscardButtonsVisible(page);
+  2433 | 
+  2434 |     await this.clickOrderButton(page);
+  2435 | 
+  2436 |     await this.confirmOrderIfModalAppears(page);
+  2437 |     await this.closeFirstOrderCongratulationsModalIfVisible(page);
+  2438 | 
+  2439 |     await this.expectOrderAndDiscardButtonsHidden(page);
+  2440 | 
+  2441 |     await page.waitForLoadState('networkidle', { timeout: 10000 }).catch(() => {});
+  2442 |     await page.waitForLoadState('domcontentloaded').catch(() => {});
+  2443 | 
+  2444 |     const inputAfter = await this.getPlannerQtyInputByTestId(page, testId);
+  2445 |     await expect(inputAfter).toBeVisible({ timeout: 30000 });
+  2446 |     await expect(inputAfter).toBeEditable({ timeout: 10000 });
+  2447 | 
+  2448 |     const finalValue = await inputAfter.inputValue();
+  2449 | 
+  2450 |     return { input: inputAfter, testId, orderedValue: finalValue || qtyToSet };
+  2451 |   },
+  2452 | 
+  2453 |   // Sets a quantity in any editable planner cell and clicks the Order button WITHOUT confirming or handling the
+  2454 |   // mandatory-reference modal. Use when the test needs to assert what happens on ordering (e.g. Required blocks empty).
+  2455 |   async beginOrderWithAnyQty(page: Page, preferredQty: string = '5'): Promise<boolean> {
+  2456 |     const allInputs = page.locator('input[data-testid^="orderable-cell:"]');
+  2457 |     const inputCount = await allInputs.count();
+  2458 | 
+  2459 |     let testId = '';
+  2460 |     for (let i = 0; i < inputCount; i++) {
+  2461 |       const input = allInputs.nth(i);
+  2462 |       if ((await input.getAttribute('readonly')) !== null) continue;
+  2463 |       if (!(await input.isEditable().catch(() => false))) continue;
+  2464 |       testId = (await input.getAttribute('data-testid')) || '';
+  2465 |       if (testId) break;
+  2466 |     }
+  2467 |     if (!testId) return false;
+  2468 | 
+  2469 |     const input = page.locator(`input[data-testid="${testId}"]`);
+  2470 |     await input.scrollIntoViewIfNeeded();
+  2471 |     await expect(input).toBeEditable({ timeout: 10000 });
+  2472 | 
+  2473 |     const current = ((await input.inputValue().catch(() => '')) || '').trim();
+  2474 |     let qtyToSet = String(preferredQty);
+  2475 |     if (current === qtyToSet) {
+  2476 |       const n = parseInt(qtyToSet, 10);
+  2477 |       qtyToSet = Number.isFinite(n) ? String(n + 1) : `${qtyToSet}1`;
+  2478 |     }
+  2479 | 
+  2480 |     await this.setPlannerQtyAndCommit(page, input, qtyToSet);
+  2481 |     await this.expectOrderAndDiscardButtonsVisible(page);
+  2482 |     await this.clickOrderButton(page);
+  2483 |     return true;
+  2484 |   },
+  2485 | 
+  2486 |   async getPlannerQtyInputByTestId(page: Page, testId: string) {
+  2487 |     const direct = page.locator(`input[data-testid="${testId}"]`).first();
+  2488 |     await direct.waitFor({ state: 'attached', timeout: 5000 }).catch(async () => {
+  2489 |       const nested = page.locator(`[data-testid="${testId}"] input`).first();
+  2490 |       await nested.waitFor({ state: 'attached', timeout: 5000 });
+  2491 |       return nested;
+  2492 |     });
+  2493 | 
+  2494 |     if ((await direct.count()) > 0) {
+  2495 |       await direct.waitFor({ state: 'visible', timeout: 10000 });
+  2496 |       return direct;
+  2497 |     }
+  2498 |     const nested = page.locator(`[data-testid="${testId}"] input`).first();
+  2499 |     await nested.waitFor({ state: 'visible', timeout: 10000 });
+  2500 |     return nested;
+  2501 |   },
+  2502 | 
+  2503 |   async checkCellState(
+  2504 |     page: Page,
+  2505 |     productId: string,
+  2506 |     dateStr: string,
+  2507 |     expectedState: 'enabled' | 'disabled' | 'not-exists',
+  2508 |   ) {
+  2509 |     const testId = `orderable-cell:${productId}:${dateStr}`;
+  2510 |     const cell = page.locator(`[data-testid="${testId}"]`).first();
+  2511 | 
+  2512 |     const cellExists = await cell.count();
+  2513 | 
+  2514 |     if (cellExists === 0) {
+  2515 |       expect(expectedState, `Cell ${testId} does not exist`).toBe('not-exists');
+  2516 |       return { exists: false, disabled: true };
+  2517 |     }
+```

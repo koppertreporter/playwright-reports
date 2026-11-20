@@ -1,0 +1,301 @@
+# Instructions
+
+- Following Playwright test failed.
+- Explain why, be concise, respect Playwright best practices.
+- Provide a snippet of code with the fix, if possible.
+
+# Test info
+
+- Name: orders.spec.ts >> Orders >> TC:12971 - [Order confirmation] Check 'Order confirmation' modal when editing Order details
+- Location: playwright/specs/orders.spec.ts:81:7
+
+# Error details
+
+```
+Error: expect(received).toBeGreaterThan(expected)
+
+Expected: > 2
+Received:   2
+
+Call Log:
+- Timeout 10000ms exceeded while waiting on the predicate
+```
+
+# Page snapshot
+
+```yaml
+- generic [ref=e3]:
+  - generic [ref=e4]: You're on DEVELOPMENT OR STAGE
+  - generic [ref=e6]:
+    - img [ref=e7] [cursor=pointer]
+    - menu [ref=e14]:
+      - menuitem "Overview" [ref=e15] [cursor=pointer]:
+        - link "Overview" [ref=e17]:
+          - /url: /apps/overview
+      - menuitem "Order" [ref=e18] [cursor=pointer]:
+        - link "Order" [ref=e20]:
+          - /url: /apps/order
+      - menuitem "Scout" [ref=e21] [cursor=pointer]:
+        - link "Scout" [ref=e23]:
+          - /url: https://www.natutecscout.com/apps/scout
+      - menuitem "Organization" [ref=e24] [cursor=pointer]:
+        - link "Organization" [ref=e26]:
+          - /url: /apps/organization
+      - menuitem "Admin" [ref=e27] [cursor=pointer]:
+        - link "Admin" [ref=e29]:
+          - /url: /apps/admin
+    - generic [ref=e30]:
+      - generic [ref=e31]: AGRICOLA SUAGO, S.L.
+      - generic [ref=e32] [cursor=pointer]:
+        - img "user" [ref=e33]:
+          - img [ref=e34]
+        - text: Superuser for autotests
+  - generic [ref=e36]:
+    - complementary [ref=e38]:
+      - menu [ref=e40]:
+        - menuitem "swap Side Effects" [ref=e41] [cursor=pointer]:
+          - img "swap" [ref=e42]:
+            - img [ref=e43]
+          - link "Side Effects" [ref=e46]:
+            - /url: /apps/protect/side-effects
+        - menuitem "Visit reports" [ref=e47] [cursor=pointer]:
+          - img [ref=e48]
+          - link "Visit reports" [ref=e54]:
+            - /url: /apps/protect/visit-reports
+        - menuitem "search Solution finder" [ref=e55] [cursor=pointer]:
+          - img "search" [ref=e56]:
+            - img [ref=e57]
+          - link "Solution finder" [ref=e60]:
+            - /url: /apps/protect/solution-finder
+      - img "left" [ref=e62] [cursor=pointer]:
+        - img [ref=e63]
+    - main [ref=e65]:
+      - generic [ref=e66]:
+        - generic [ref=e67]:
+          - generic [ref=e68]:
+            - generic [ref=e70]: Beneficial
+            - button "Select product" [ref=e71] [cursor=pointer]:
+              - generic [ref=e72]: Select product
+          - generic [ref=e73]:
+            - generic [ref=e75]: Active ingredient
+            - button "Select product" [ref=e76] [cursor=pointer]:
+              - generic [ref=e77]: Select product
+        - generic [ref=e78]:
+          - generic "Side Effects" [ref=e82]
+          - generic [ref=e83]:
+            - generic [ref=e85]:
+              - img [ref=e88]
+              - generic [ref=e90]: Nothing has been selected yet
+              - generic [ref=e91]: Select one or more beneficials and active ingredients to show side effects.
+            - button "Digital Assistant" [ref=e93] [cursor=pointer]:
+              - img [ref=e94]
+              - generic [ref=e99]: Digital Assistant
+          - generic [ref=e102]: All rights reserved. © Koppert 2026
+```
+
+# Test source
+
+```ts
+  16  |     ordersSel: ReturnType<typeof ordersSelectors>,
+  17  |     page: Page,
+  18  |     minProductsToKeep = 1,
+  19  |   ) {
+  20  |     minProductsToKeep = Math.max(0, minProductsToKeep);
+  21  |     const deleteIcons = page.locator('span[aria-label="delete"]');
+  22  | 
+  23  |     while (true) {
+  24  |       const before = await deleteIcons.count();
+  25  | 
+  26  |       if (before <= minProductsToKeep) break;
+  27  | 
+  28  |       await deleteIcons.nth(before - 1).click();
+  29  | 
+  30  |       await expect(ordersSel.deleteOrderLineModal).toBeVisible({ timeout: 10000 });
+  31  |       await ordersSel.deleteOrderLineConfirmButton.click();
+  32  |       await expect(ordersSel.deleteOrderLineModal).toBeHidden({ timeout: 10000 });
+  33  | 
+  34  |       await expect.poll(async () => await deleteIcons.count(), { timeout: 10000 }).toBeLessThan(before);
+  35  |     }
+  36  |   },
+  37  | 
+  38  |   async deleteProductLineByName(ordersSel: ReturnType<typeof ordersSelectors>, page: Page, productName: string) {
+  39  |     const row = getProductRowByName(ordersSel, page, productName);
+  40  |     await expect(row).toBeVisible({ timeout: 10000 });
+  41  | 
+  42  |     await row.locator('[aria-label="delete"]').click();
+  43  |     await expect(ordersSel.deleteOrderLineModal).toBeVisible({ timeout: 10000 });
+  44  |     await ordersSel.deleteOrderLineConfirmButton.click();
+  45  |     await expect(ordersSel.deleteOrderLineModal).toBeHidden({ timeout: 10000 });
+  46  | 
+  47  |     await expect(row).toBeHidden({ timeout: 10000 });
+  48  |   },
+  49  | 
+  50  |   async setQtyInExistingProductRowByName(
+  51  |     ordersSel: ReturnType<typeof ordersSelectors>,
+  52  |     page: Page,
+  53  |     productName: string,
+  54  |     qty: string,
+  55  |   ) {
+  56  |     const row = getProductRowByName(ordersSel, page, productName);
+  57  |     await expect(row).toBeVisible({ timeout: 10000 });
+  58  | 
+  59  |     const qtyInput = getQtyInputInRow(row);
+  60  |     await expect(qtyInput).toBeVisible();
+  61  | 
+  62  |     await qtyInput.fill(qty);
+  63  |     await qtyInput.blur();
+  64  |   },
+  65  | 
+  66  |   async clearQtyInExistingProductRowByName(
+  67  |     ordersSel: ReturnType<typeof ordersSelectors>,
+  68  |     page: Page,
+  69  |     productName: string,
+  70  |   ) {
+  71  |     await ordersProducts.setQtyInExistingProductRowByName(ordersSel, page, productName, '');
+  72  |   },
+  73  | 
+  74  |   async captureQuantityByProductName(
+  75  |     ordersSel: ReturnType<typeof ordersSelectors>,
+  76  |     page: Page,
+  77  |     productName: string,
+  78  |   ): Promise<string> {
+  79  |     const row = getProductRowByName(ordersSel, page, productName);
+  80  |     await expect(row).toBeVisible({ timeout: 10000 });
+  81  | 
+  82  |     const qtyInput = getQtyInputInRow(row);
+  83  |     await expect(qtyInput).toBeVisible();
+  84  | 
+  85  |     return await qtyInput.inputValue();
+  86  |   },
+  87  | 
+  88  |   async changeQuantityByProductName(
+  89  |     ordersSel: ReturnType<typeof ordersSelectors>,
+  90  |     page: Page,
+  91  |     productName: string,
+  92  |     originalQty: string,
+  93  |   ) {
+  94  |     const row = getProductRowByName(ordersSel, page, productName);
+  95  |     await expect(row).toBeVisible({ timeout: 10000 });
+  96  | 
+  97  |     const qtyInput = getQtyInputInRow(row);
+  98  |     await expect(qtyInput).toBeVisible();
+  99  | 
+  100 |     const newQty = String(Math.floor(Math.random() * 20) + 1);
+  101 | 
+  102 |     await qtyInput.fill(newQty);
+  103 |     await qtyInput.blur();
+  104 |   },
+  105 | 
+  106 |   async fillQtyInProductRowByName(
+  107 |     ordersSel: ReturnType<typeof ordersSelectors>,
+  108 |     page: Page,
+  109 |     productName: string,
+  110 |     qty: string,
+  111 |     previousQtyInputsCount: number,
+  112 |   ) {
+  113 |     await page.waitForTimeout(500);
+  114 |     await expect
+  115 |       .poll(async () => await ordersSel.productQtyInputs.count(), { timeout: 10000 })
+> 116 |       .toBeGreaterThan(previousQtyInputsCount);
+      |        ^ Error: expect(received).toBeGreaterThan(expected)
+  117 | 
+  118 |     const row = getProductRowByName(ordersSel, page, productName);
+  119 |     await expect(row).toBeVisible({ timeout: 10000 });
+  120 | 
+  121 |     const qtyInput = getQtyInputInRow(row);
+  122 |     await expect(qtyInput).toBeVisible();
+  123 | 
+  124 |     await qtyInput.fill(qty);
+  125 |     await qtyInput.blur();
+  126 |   },
+  127 | 
+  128 |   async addFirstProductFromModalAndReturnMeta(
+  129 |     ordersSel: ReturnType<typeof ordersSelectors>,
+  130 |     page: Page,
+  131 |   ): Promise<{ value: string; labelText: string }> {
+  132 |     await ordersSel.addProductButton.click();
+  133 |     await expect(ordersSel.productModal).toBeVisible();
+  134 | 
+  135 |     const firstLabel = ordersSel.productModalFirstProductLabel;
+  136 |     await expect(firstLabel).toBeVisible();
+  137 | 
+  138 |     const checkbox = ordersSel.productModalCheckboxInputInLabel(firstLabel);
+  139 |     const value = (await checkbox.getAttribute('value')) || '';
+  140 |     const labelText = (await firstLabel.textContent())?.trim() || '';
+  141 | 
+  142 |     expect(value, 'Expected checkbox value to exist').toBeTruthy();
+  143 |     expect(labelText, 'Expected product label text to exist').toBeTruthy();
+  144 | 
+  145 |     await firstLabel.click();
+  146 |     await ordersSel.productAddButton.click();
+  147 |     await ordersSel.productModal.waitFor({ state: 'hidden', timeout: 5000 });
+  148 | 
+  149 |     return { value, labelText };
+  150 |   },
+  151 | 
+  152 |   async verifyProductDisabledWhenReAddingAndTooltipShown(
+  153 |     ordersSel: ReturnType<typeof ordersSelectors>,
+  154 |     page: Page,
+  155 |     productValue: string,
+  156 |   ) {
+  157 |     await ordersSel.addProductButton.click();
+  158 |     await expect(ordersSel.productModal).toBeVisible();
+  159 | 
+  160 |     const label = ordersSel.productModalLabelByCheckboxValue(productValue);
+  161 |     await expect(label).toBeVisible();
+  162 | 
+  163 |     const checkbox = ordersSel.productModalCheckboxInputInLabel(label);
+  164 |     await expect(checkbox).toBeDisabled();
+  165 |     expect(await checkbox.isChecked()).toBeTruthy();
+  166 | 
+  167 |     await label.hover({ force: true });
+  168 | 
+  169 |     const tooltipAppeared = await expect(ordersSel.tooltip)
+  170 |       .toBeVisible()
+  171 |       .then(() => true)
+  172 |       .catch(() => false);
+  173 | 
+  174 |     if (tooltipAppeared) {
+  175 |       const tooltipText = await ordersSel.tooltip.textContent();
+  176 |       expect(tooltipText).toBeTruthy();
+  177 |     }
+  178 | 
+  179 |     await label.click({ force: true }).catch(() => {});
+  180 |     expect(await checkbox.isChecked()).toBeTruthy();
+  181 |   },
+  182 | 
+  183 |   async searchInAddProductModal(ordersSel: ReturnType<typeof ordersSelectors>, page: Page, text: string) {
+  184 |     const q = (text || '').trim();
+  185 |     await expect(ordersSel.productModalSearchInput).toBeVisible({ timeout: 10000 });
+  186 |     await ordersSel.productModalSearchInput.fill(q);
+  187 |     await page.waitForTimeout(400);
+  188 |   },
+  189 | 
+  190 |   async clearSearchInAddProductModal(ordersSel: ReturnType<typeof ordersSelectors>, page: Page) {
+  191 |     await expect(ordersSel.productModalSearchInput).toBeVisible({ timeout: 10000 });
+  192 |     await ordersSel.productModalSearchInput.fill('');
+  193 |     await page.waitForTimeout(300);
+  194 |   },
+  195 | 
+  196 |   async expectProductVisibleInAddModal(ordersSel: ReturnType<typeof ordersSelectors>, page: Page, productName: string) {
+  197 |     const shortName = getShortProductName(productName);
+  198 |     const label = ordersSel.productModalProductLabels.filter({ hasText: shortName }).first();
+  199 |     await expect(label, `Expected product "${shortName}" to be visible in Add product modal`).toBeVisible({
+  200 |       timeout: 10000,
+  201 |     });
+  202 |   },
+  203 | 
+  204 |   async expectProductNotVisibleInAddModal(
+  205 |     ordersSel: ReturnType<typeof ordersSelectors>,
+  206 |     page: Page,
+  207 |     productName: string,
+  208 |   ) {
+  209 |     const shortName = getShortProductName(productName);
+  210 |     const label = ordersSel.productModalProductLabels.filter({ hasText: shortName }).first();
+  211 |     await expect(label, `Expected product "${shortName}" to be hidden in Add product modal`).toBeHidden({
+  212 |       timeout: 10000,
+  213 |     });
+  214 |   },
+  215 | 
+  216 |   async expectProductCheckboxStateInAddModal(
+```

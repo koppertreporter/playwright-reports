@@ -1,0 +1,290 @@
+# Instructions
+
+- Following Playwright test failed.
+- Explain why, be concise, respect Playwright best practices.
+- Provide a snippet of code with the fix, if possible.
+
+# Test info
+
+- Name: planner_4.spec.ts >> Planner - Add Product Modal >> TC:17299 - [Cancel order popup] Verify confirmation popup before canceling order line on planner
+- Location: playwright/specs/planner_4.spec.ts:975:7
+
+# Error details
+
+```
+Error: Value should be empty after confirming deletion
+
+expect(received).toBe(expected) // Object.is equality
+
+Expected: ""
+Received: "10"
+```
+
+# Page snapshot
+
+```yaml
+- generic [active] [ref=e1]:
+  - generic [ref=e3]:
+    - generic [ref=e4]: You're on DEVELOPMENT OR STAGE
+    - generic [ref=e6]:
+      - img [ref=e7] [cursor=pointer]
+      - generic [ref=e14]:
+        - generic [ref=e15]: Plkw P. van Geest Maasland B.V.
+        - generic [ref=e16] [cursor=pointer]:
+          - img "user" [ref=e17]:
+            - img [ref=e18]
+          - text: Playwright DudeaYdeFeL
+    - generic [ref=e21]:
+      - generic [ref=e22]:
+        - heading "Hi, Playwright DudeaYdeFeL!" [level=1] [ref=e23]
+        - strong [ref=e25]: Welcome to Koppert One
+        - generic [ref=e26]:
+          - heading "Need help ?" [level=5] [ref=e27]
+          - separator [ref=e28]
+          - generic [ref=e29]:
+            - img [ref=e31]
+            - generic [ref=e32]:
+              - heading "Koppert One support" [level=5] [ref=e33]
+              - link "mail support@koppert.one" [ref=e35] [cursor=pointer]:
+                - /url: mailto:support@koppert.one
+                - img "mail" [ref=e36]:
+                  - img [ref=e37]
+                - text: support@koppert.one
+                - img [ref=e39]
+              - link "phone +31 1 051 405 17" [ref=e43] [cursor=pointer]:
+                - /url: tel:+31105140517
+                - img "phone" [ref=e44]:
+                  - img [ref=e45]
+                - text: +31 1 051 405 17
+                - img [ref=e47]
+      - generic [ref=e51]:
+        - generic [ref=e52] [cursor=pointer]:
+          - img [ref=e54]
+          - generic [ref=e57]: Order
+          - generic [ref=e59]: View, place and manage orders
+          - img [ref=e61]
+        - generic [ref=e63] [cursor=pointer]:
+          - img [ref=e65]
+          - generic [ref=e69]: Knowledge
+          - generic [ref=e71]: Explore chemical compatibility with Koppert's natural enemies and bumblebees
+          - img [ref=e73]
+        - generic [ref=e75] [cursor=pointer]:
+          - img [ref=e77]
+          - generic [ref=e79]: Scout
+          - generic [ref=e81]: Discover trends in pest development and beneficial insect counts to know when to act
+          - img [ref=e83]
+        - generic [ref=e85] [cursor=pointer]:
+          - img [ref=e87]
+          - generic [ref=e89]: Organization
+          - generic [ref=e91]: Manage team members and their access to locations
+          - img [ref=e93]
+  - button "Feedback" [ref=e95] [cursor=pointer]:
+    - generic [ref=e97]: Feedback
+```
+
+# Test source
+
+```ts
+  971  | 
+  972  |     expect(inactiveProductCheckboxB, 'Inactive product should not appear in Location B modal').toBeNull();
+  973  |   });
+  974  | 
+  975  |   test(`TC:17299 - [Cancel order popup] Verify confirmation popup before canceling order line on planner`, async ({
+  976  |     page,
+  977  |   }) => {
+  978  |     const user = await ordersPage.setupOrdererUserWithEnterpriseAccess(page, corpnav, ENTERPRISE_WITH_DATA_ID);
+  979  |     userIdsToDelete.push(user.userId);
+  980  |     await cleanupOrdersIfNeeded();
+  981  | 
+  982  |     // Prime onboarding flags + pin the enterprise selector so the freshly-created user is not routed off the
+  983  |     // planner (the app bounces a fresh user to Home after their first order unless firstOrderDone is set),
+  984  |     // then load it resiliently.
+  985  |     await plannerPage.primeFreshUserForPlanner(page);
+  986  |     await setEnterpriseSelectorInLocalStorage(page, ENTERPRISE_WITH_DATA_ID);
+  987  |     await plannerPage.gotoPlannerStable(page);
+  988  |     await showOnlyLastLocation(page);
+  989  |     await plannerPage.switchOrderMode(page, true);
+  990  |     // Settle live-sync BEFORE adding a product. An added product row is unsaved client state until an order
+  991  |     // is placed; settling after it would let a live-sync "changes were discarded" push wipe the row.
+  992  |     await plannerPage.settleLiveSync(page);
+  993  |     await plannerPage.ensureMatrixHasOrderableProducts(page);
+  994  |     await expect(planner.weekHeaders.first()).toBeVisible({ timeout: 30000 });
+  995  | 
+  996  |     // Self-seed a still-editable saved order through the UI. An API read-view order lands on the nearest
+  997  |     // delivery date, which is usually past its order deadline and renders as a readonly cell that cannot
+  998  |     // be zeroed out to exercise the cancel-deletion popup.
+  999  |     const seeded = await plannerPage.seedSyncedOrderViaUI(page, '10');
+  1000 |     const originalValue = seeded.value;
+  1001 |     const inputWithSavedOrder = page.locator(`[data-testid="${seeded.testId}"]`);
+  1002 | 
+  1003 |     // Set the saved order line to 0. Per the ADO case the deletion confirmation appears only after
+  1004 |     // pressing the Order button ("change it to 0 and press Order button" -> "Removing a quantity ...
+  1005 |     // Are you sure?"), not on blur.
+  1006 |     await inputWithSavedOrder.scrollIntoViewIfNeeded();
+  1007 |     await inputWithSavedOrder.click();
+  1008 |     await page.waitForTimeout(500);
+  1009 |     await inputWithSavedOrder.fill('0');
+  1010 |     await page.keyboard.press('Tab');
+  1011 |     await page.waitForTimeout(1000);
+  1012 | 
+  1013 |     await expect(planner.orderButton).toBeEnabled({ timeout: 30000 });
+  1014 |     await plannerPage.clickOrderButton(page);
+  1015 | 
+  1016 |     await expect(planner.deletingQuantitiesModal).toBeVisible({ timeout: 10000 });
+  1017 |     await expect(planner.deletingQuantitiesModalContent).toContainText(/Removing a quantity/i);
+  1018 |     await expect(planner.deletingQuantitiesModalContent).toContainText(/Are you sure/i);
+  1019 | 
+  1020 |     await planner.deletingQuantitiesModalCancelButton.click();
+  1021 |     await expect(planner.deletingQuantitiesModal).toBeHidden({ timeout: 10000 });
+  1022 | 
+  1023 |     await page.reload();
+  1024 |     await expect(planner.weekHeaders.first()).toBeVisible({ timeout: 30000 });
+  1025 | 
+  1026 |     // Read back the cell this test seeded, not the first cell holding a value: the shared enterprise can
+  1027 |     // carry other orders (e.g. when cleanup could not remove them), and their cells may render first.
+  1028 |     const firstInputTestId = seeded.testId;
+  1029 |     const firstInputAfterCancel = page.locator(`[data-testid="${firstInputTestId}"]`);
+  1030 |     await firstInputAfterCancel.scrollIntoViewIfNeeded();
+  1031 |     await expect(firstInputAfterCancel, 'Expected the seeded cell after cancel').toBeVisible({ timeout: 30000 });
+  1032 |     const valueAfterCancel = await firstInputAfterCancel.inputValue();
+  1033 |     expect(valueAfterCancel, 'Value should not be deleted after clicking Cancel').toBe(originalValue);
+  1034 | 
+  1035 |     await firstInputAfterCancel.click();
+  1036 |     await firstInputAfterCancel.fill('0');
+  1037 |     await page.keyboard.press('Tab');
+  1038 |     await page.waitForTimeout(1000);
+  1039 | 
+  1040 |     await expect(planner.orderButton).toBeEnabled({ timeout: 30000 });
+  1041 |     await plannerPage.clickOrderButton(page);
+  1042 | 
+  1043 |     await expect(planner.deletingQuantitiesModal).toBeVisible({ timeout: 10000 });
+  1044 |     await planner.deletingQuantitiesModalConfirmButton.click();
+  1045 |     await expect(planner.deletingQuantitiesModal).toBeHidden({ timeout: 10000 });
+  1046 | 
+  1047 |     await page.waitForTimeout(2000);
+  1048 | 
+  1049 |     const congratsModal = page.locator('.ant-modal:visible').filter({ hasText: /Congratulations/i });
+  1050 |     const isCongratsVisible = await congratsModal.isVisible().catch(() => false);
+  1051 |     if (isCongratsVisible) {
+  1052 |       const closeButton = congratsModal.getByRole('button', { name: /Close/i });
+  1053 |       await closeButton.click();
+  1054 |       await expect(congratsModal).toBeHidden({ timeout: 10000 });
+  1055 |     }
+  1056 | 
+  1057 |     // Verify the TRUE persisted state by reloading (ADO step 5: "Order quantity removed from Planner").
+  1058 |     // NOTE (app behaviour, see bugs_found.md): a cell whose value was TYPED as "0" keeps displaying "0"
+  1059 |     // in place until reload, and an order mutation can bounce a fresh user to Home - reloading reads the
+  1060 |     // persisted result and re-establishes the enterprise context. Deleting the only seeded order also
+  1061 |     // empties the matrix entirely (an added product row is unsaved once its order is gone), so the
+  1062 |     // seeded cell is now either absent (matrix collapsed) or blank - both confirm the quantity is removed.
+  1063 |     await plannerPage.dismissPostOrderModals(page);
+  1064 |     await plannerPage.gotoPlannerStable(page);
+  1065 |     await plannerPage.switchOrderMode(page, true);
+  1066 |     await page.waitForLoadState('networkidle', { timeout: 10000 }).catch(() => {});
+  1067 | 
+  1068 |     const refreshedSavedInput = page.locator(`[data-testid="${firstInputTestId}"]`);
+  1069 |     if ((await refreshedSavedInput.count()) > 0) {
+  1070 |       const valueAfterConfirm = await refreshedSavedInput.inputValue();
+> 1071 |       expect(valueAfterConfirm, 'Value should be empty after confirming deletion').toBe('');
+       |                                                                                    ^ Error: Value should be empty after confirming deletion
+  1072 |     } else {
+  1073 |       expect(
+  1074 |         await planner.orderableInputs.count(),
+  1075 |         'Deleting the only order should leave no orderable quantity on the planner',
+  1076 |       ).toBe(0);
+  1077 |     }
+  1078 |   });
+  1079 | 
+  1080 |   test(`TC:14206 - [Cancellation] Check if zero can not be entered for order creation on Planner`, async ({ page }) => {
+  1081 |     const user = await ordersPage.setupOrdererUserWithEnterpriseAccess(page, corpnav, ENTERPRISE_WITH_DATA_ID);
+  1082 |     userIdsToDelete.push(user.userId);
+  1083 | 
+  1084 |     await page.goto(urls.orderPlanner);
+  1085 |     await plannerPage.switchOrderMode(page, true);
+  1086 |     await plannerPage.ensureMatrixHasOrderableProducts(page);
+  1087 |     await expect(planner.weekHeaders.first()).toBeVisible({ timeout: 30000 });
+  1088 | 
+  1089 |     const allInputs = planner.orderableInputs;
+  1090 |     await expect(allInputs.first()).toBeVisible({ timeout: 30000 });
+  1091 | 
+  1092 |     let emptyInputTestId = '';
+  1093 |     const inputCount = await allInputs.count();
+  1094 |     for (let i = 0; i < inputCount; i++) {
+  1095 |       const input = allInputs.nth(i);
+  1096 |       const isReadonly = await input.getAttribute('readonly');
+  1097 |       if (isReadonly !== null) continue;
+  1098 | 
+  1099 |       const isEditable = await input.isEditable().catch(() => false);
+  1100 |       if (!isEditable) continue;
+  1101 | 
+  1102 |       const value = await input.inputValue();
+  1103 |       if (!value || value === '' || value === '0') {
+  1104 |         emptyInputTestId = (await input.getAttribute('data-testid')) || '';
+  1105 |         break;
+  1106 |       }
+  1107 |     }
+  1108 | 
+  1109 |     expect(emptyInputTestId, 'Expected to find an empty input field').toBeTruthy();
+  1110 | 
+  1111 |     const emptyInput = page.locator(`[data-testid="${emptyInputTestId}"]`);
+  1112 |     await emptyInput.scrollIntoViewIfNeeded();
+  1113 |     await expect(emptyInput).toBeEditable({ timeout: 10000 });
+  1114 |     await emptyInput.click();
+  1115 |     await emptyInput.fill('0');
+  1116 |     await page.keyboard.press('Tab');
+  1117 |     await page.waitForTimeout(1000);
+  1118 | 
+  1119 |     const valueAfterEntering0 = await emptyInput!.inputValue();
+  1120 |     expect(valueAfterEntering0, 'Zero should not be accepted in empty input field').toBe('');
+  1121 | 
+  1122 |     const isOrderButtonEnabled = await planner.orderButton.isEnabled().catch(() => false);
+  1123 |     expect(isOrderButtonEnabled, 'Order button should not be enabled when only 0 is entered').toBe(false);
+  1124 |   });
+  1125 | 
+  1126 |   // FIXME: blocked by two app-side issues (see bugs_found.md):
+  1127 |   //  1. The final assertion (order-cancellation email x2) depends on order-update email notifications
+  1128 |   //     that are not being sent - bug ADO 20346 (the earlier email checks in this test are already
+  1129 |   //     commented out for the same reason).
+  1130 |   //  2. Placing a multi-product first order as a freshly-created user is destabilised by the app's
+  1131 |   //     post-order Home-bounce, which corrupts the order document so Order Details intermittently
+  1132 |   //     shows 0 lines after removing only two of three products.
+  1133 |   // The core planner deletion behaviour it covers (Zero/Removing -> lines removed) is already verified
+  1134 |   // on the reloaded planner up to that point; re-enable once 20346 and the fresh-user bounce are fixed.
+  1135 |   test.fixme(
+  1136 |     `TC:17366 - [Cancellation] Check if multiple orders are deleted from Order Details when enter Zero/Removing`,
+  1137 |     async ({ page }) => {
+  1138 |       const user = await ordersPage.setupOrdererUserWithEnterpriseAccess(page, corpnav, ENTERPRISE_WITH_DATA_ID);
+  1139 |       userIdsToDelete.push(user.userId);
+  1140 |       await cleanupOrdersIfNeeded();
+  1141 | 
+  1142 |       // Prime onboarding flags + pin the enterprise selector so the freshly-created user is not routed off the
+  1143 |       // planner (the app bounces a fresh user to Home after their first order unless firstOrderDone is set),
+  1144 |       // then load it resiliently.
+  1145 |       await plannerPage.primeFreshUserForPlanner(page);
+  1146 |       await setEnterpriseSelectorInLocalStorage(page, ENTERPRISE_WITH_DATA_ID);
+  1147 |       await plannerPage.gotoPlannerStable(page);
+  1148 |       await plannerPage.switchOrderMode(page, true);
+  1149 |       // Settle live-sync BEFORE adding products so a "changes were discarded" push cannot wipe the unsaved
+  1150 |       // product rows before they are ordered (they only persist once an order is placed).
+  1151 |       await plannerPage.settleLiveSync(page);
+  1152 |       await plannerPage.ensureMatrixHasOrderableProducts(page, 3);
+  1153 |       await expect(planner.weekHeaders.first()).toBeVisible({ timeout: 30000 });
+  1154 | 
+  1155 |       const allInputs = planner.orderableInputs;
+  1156 |       await expect(allInputs.first()).toBeVisible({ timeout: 30000 });
+  1157 | 
+  1158 |       const emptyInputTestIds = [];
+  1159 |       const inputCount = await allInputs.count();
+  1160 | 
+  1161 |       for (let i = 0; i < inputCount && emptyInputTestIds.length < 3; i++) {
+  1162 |         const input = allInputs.nth(i);
+  1163 |         const isReadonly = await input.getAttribute('readonly');
+  1164 |         if (isReadonly !== null) continue;
+  1165 | 
+  1166 |         const isEditable = await input.isEditable().catch(() => false);
+  1167 |         if (!isEditable) continue;
+  1168 | 
+  1169 |         const value = await input.inputValue();
+  1170 |         if (!value || value === '' || value === '0') {
+  1171 |           const testId = (await input.getAttribute('data-testid')) || '';
+```

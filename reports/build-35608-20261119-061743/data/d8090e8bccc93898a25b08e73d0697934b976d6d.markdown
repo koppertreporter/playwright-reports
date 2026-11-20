@@ -1,0 +1,362 @@
+# Instructions
+
+- Following Playwright test failed.
+- Explain why, be concise, respect Playwright best practices.
+- Provide a snippet of code with the fix, if possible.
+
+# Test info
+
+- Name: loginSignup.spec.ts >> Authentication Flows >> TC:10335 - Create regular account and verify email invitation flow
+- Location: playwright/specs/loginSignup.spec.ts:92:7
+
+# Error details
+
+```
+TimeoutError: locator.click: Timeout 30000ms exceeded.
+Call log:
+  - waiting for locator('.ant-select-item[title="Grower"]')
+    - locator resolved to <div title="Grower" aria-selected="false" class="ant-select-item ant-select-item-option">…</div>
+  - attempting click action
+    2 × waiting for element to be visible, enabled and stable
+      - element is visible, enabled and stable
+      - scrolling into view if needed
+      - done scrolling
+      - element is outside of the viewport
+    - retrying click action
+    - waiting 20ms
+    - waiting for element to be visible, enabled and stable
+    - element is visible, enabled and stable
+    - scrolling into view if needed
+    - done scrolling
+    - element is outside of the viewport
+  - retrying click action
+    - waiting 100ms
+    - waiting for element to be visible, enabled and stable
+    - element is visible, enabled and stable
+    - scrolling into view if needed
+    - done scrolling
+    - element is not visible
+  - retrying click action
+    - waiting 100ms
+    - waiting for element to be visible, enabled and stable
+    - element is not stable
+  14 × retrying click action
+       - waiting 500ms
+       - waiting for element to be visible, enabled and stable
+       - element is visible, enabled and stable
+       - scrolling into view if needed
+       - done scrolling
+       - <div class="ant-modal-body">…</div> from <div>…</div> subtree intercepts pointer events
+     - retrying click action
+       - waiting 500ms
+       - waiting for element to be visible, enabled and stable
+       - element is visible, enabled and stable
+       - scrolling into view if needed
+       - done scrolling
+       - <div class="ant-select-dropdown ant-select-dropdown-placement-bottomLeft ">…</div> intercepts pointer events
+     - retrying click action
+       - waiting 500ms
+       - waiting for element to be visible, enabled and stable
+       - element is visible, enabled and stable
+       - scrolling into view if needed
+       - done scrolling
+       - <div>…</div> from <div>…</div> subtree intercepts pointer events
+     - retrying click action
+       - waiting 500ms
+       - waiting for element to be visible, enabled and stable
+       - element is visible, enabled and stable
+       - scrolling into view if needed
+       - done scrolling
+       - <div>…</div> from <div>…</div> subtree intercepts pointer events
+  - retrying click action
+    - waiting 500ms
+    - waiting for element to be visible, enabled and stable
+    - element is visible, enabled and stable
+    - scrolling into view if needed
+    - done scrolling
+    - <div class="ant-modal-body">…</div> from <div>…</div> subtree intercepts pointer events
+  - retrying click action
+    - waiting 500ms
+
+```
+
+# Page snapshot
+
+```yaml
+- generic [ref=e1]:
+  - generic [ref=e3]:
+    - generic [ref=e4]: You're on DEVELOPMENT OR STAGE
+    - generic [ref=e6]:
+      - img [ref=e7] [cursor=pointer]
+      - menu
+      - generic [ref=e15] [cursor=pointer]:
+        - img "user" [ref=e16]:
+          - img [ref=e17]
+        - text: ngFriuD
+    - generic [ref=e19]:
+      - complementary [ref=e21]:
+        - menu [ref=e23]:
+          - menuitem "swap Side Effects" [ref=e24] [cursor=pointer]:
+            - img "swap" [ref=e25]:
+              - img [ref=e26]
+            - link "Side Effects" [ref=e29]:
+              - /url: /apps/protect/side-effects
+        - img "right" [ref=e31] [cursor=pointer]:
+          - img [ref=e32]
+      - main [ref=e34]:
+        - generic [ref=e35]:
+          - generic [ref=e36]:
+            - generic [ref=e37]:
+              - generic [ref=e39]: Beneficial
+              - button "Select product" [ref=e40] [cursor=pointer]:
+                - generic [ref=e41]: Select product
+            - generic [ref=e42]:
+              - generic [ref=e44]: Active ingredient
+              - button "Select product" [ref=e45] [cursor=pointer]:
+                - generic [ref=e46]: Select product
+          - generic [ref=e47]:
+            - generic "Side Effects" [ref=e51]
+            - generic [ref=e52]:
+              - generic [ref=e54]:
+                - img [ref=e57]
+                - generic [ref=e59]: Nothing has been selected yet
+                - generic [ref=e60]: Select one or more beneficials and active ingredients to show side effects.
+              - button "Digital Assistant" [ref=e62] [cursor=pointer]:
+                - img [ref=e63]
+                - generic [ref=e68]: Digital Assistant
+            - generic [ref=e71]: All rights reserved. © Koppert 2026
+  - generic [ref=e73]:
+    - dialog "Expertise at your fingertips":
+      - generic [ref=e74]:
+        - heading "Expertise at your fingertips" [level=5] [ref=e77]
+        - generic [ref=e78]:
+          - heading "Complete your profile" [level=1] [ref=e79]
+          - generic [ref=e80]: You're almost there! Complete your profile to unlock Koppert One features.
+          - generic [ref=e81]:
+            - generic [ref=e83]:
+              - generic "Company" [ref=e85]: "* Company"
+              - textbox "* Company" [ref=e89]
+            - generic [ref=e91]:
+              - generic "Crop(s)" [ref=e93]: "* Crop(s)"
+              - textbox "* Crop(s)" [ref=e97]
+            - generic [ref=e99]:
+              - generic "Job title" [ref=e101]: "* Job title"
+              - generic [ref=e105] [cursor=pointer]:
+                - combobox "* Job title" [ref=e108]
+                - generic:
+                  - img:
+                    - img
+            - generic [ref=e114] [cursor=pointer]:
+              - checkbox "I agree to receive marketing e-mails from Koppert" [ref=e116]
+              - generic [ref=e118]: I agree to receive marketing e-mails from Koppert
+            - separator [ref=e119]
+            - button "Go to Koppert One" [ref=e121] [cursor=pointer]:
+              - generic [ref=e122]: Go to Koppert One
+```
+
+# Test source
+
+```ts
+  274 |     await expect(loginPageSelectors.forgotPassword).toBeVisible();
+  275 | 
+  276 |     await initiatePasswordReset(page, user.email);
+  277 | 
+  278 |     console.log(`Waiting for password reset email for: ${user.email}`);
+  279 |     await page.waitForTimeout(5000);
+  280 | 
+  281 |     let resetEmail = null;
+  282 |     const allSubjects = await emailHelper.getAllEmailSubjects(user.email);
+  283 |     console.log(`All email subjects received: ${allSubjects.join(', ')}`);
+  284 | 
+  285 |     const resetSubject = allSubjects.find(
+  286 |       (subject) =>
+  287 |         subject.toLowerCase().includes('reset') ||
+  288 |         subject.toLowerCase().includes('password') ||
+  289 |         subject.toLowerCase().includes('forgot'),
+  290 |     );
+  291 | 
+  292 |     if (resetSubject) {
+  293 |       resetEmail = await emailHelper.getLetter(user.email, resetSubject);
+  294 |     }
+  295 | 
+  296 |     if (!resetEmail) {
+  297 |       console.log(`Password reset email not received. Attempting manual check...`);
+  298 |       await page.waitForTimeout(10000);
+  299 | 
+  300 |       const updatedSubjects = await emailHelper.getAllEmailSubjects(user.email);
+  301 |       console.log(`Updated email subjects: ${updatedSubjects.join(', ')}`);
+  302 | 
+  303 |       const latestResetSubject = updatedSubjects.find(
+  304 |         (subject) =>
+  305 |           subject.toLowerCase().includes('reset') ||
+  306 |           subject.toLowerCase().includes('password') ||
+  307 |           subject.toLowerCase().includes('forgot'),
+  308 |       );
+  309 | 
+  310 |       if (latestResetSubject) {
+  311 |         resetEmail = await emailHelper.getLetter(user.email, latestResetSubject);
+  312 |       }
+  313 |     }
+  314 | 
+  315 |     if (!resetEmail) {
+  316 |       throw new Error(`Password reset email not received after waiting. Available subjects: ${allSubjects.join(', ')}`);
+  317 |     }
+  318 | 
+  319 |     const verificationLink = emailHelper.getResetPasswordLink(resetEmail);
+  320 |     if (!verificationLink) {
+  321 |       throw new Error('Reset password link not found in email');
+  322 |     }
+  323 | 
+  324 |     console.log('Navigating to reset password page...');
+  325 |     await page.goto(verificationLink);
+  326 |     await loginPageSelectors.resetPasswordModal.newPasswordField.fill(newPassword);
+  327 |     await loginPageSelectors.resetPasswordModal.confirmPasswordField.fill(newPassword);
+  328 |     await loginPageSelectors.resetPasswordModal.resetPasswordBtn.click();
+  329 |     await expect(loginPageSelectors.resetPasswordModal.resetPasswordSuccessMessage).toContainText('Password changed!');
+  330 |     await loginPage.verifyUserIsLoggedIn();
+  331 |   });
+  332 | 
+  333 |   async function fillBasicRegistrationForm(details) {
+  334 |     await registerPageSelectors.nameField.fill(generateRandomString());
+  335 |     await registerPageSelectors.emailField.fill(details.email);
+  336 |     await selectCountryFromDropdown(details.country);
+  337 |     await selectLanguageFromDropdown(details.language);
+  338 |   }
+  339 | 
+  340 |   async function selectCountryFromDropdown(country) {
+  341 |     await registerPageSelectors.countryDropdown.click();
+  342 |     await registerPageSelectors.searchCountryIcon.click();
+  343 |     await registerPageSelectors.dropdownContainer.waitFor({ state: 'visible' });
+  344 |     await registerPageSelectors.countryDropdown.fill(country);
+  345 |     await registerPageSelectors.dropdownOption(country).first().waitFor({ state: 'visible' });
+  346 |     await registerPageSelectors.dropdownOption(country).first().click();
+  347 |     await registerPageSelectors.dropdownContainer.waitFor({ state: 'hidden' });
+  348 |   }
+  349 | 
+  350 |   async function selectLanguageFromDropdown(language) {
+  351 |     const languageDropdown =
+  352 |       registerPageSelectors.languageDropdown || registerPageSelectors.creaAccountLanguageDropdown;
+  353 |     await languageDropdown.click();
+  354 |     await registerPageSelectors.dropdownContainer.waitFor({ state: 'visible' });
+  355 |     await registerPageSelectors.dropdownOption(language).first().click({ force: true });
+  356 |   }
+  357 | 
+  358 |   async function activateAccount(page, password, verificationLink) {
+  359 |     await page.goto(verificationLink);
+  360 |     await registerPageSelectors.activateYourAccountModal.newPasswordField.fill(password);
+  361 |     await registerPageSelectors.activateYourAccountModal.confirmPasswordField.fill(password);
+  362 |     await registerPageSelectors.activateYourAccountModal.termsCheckbox.check();
+  363 |     await registerPageSelectors.activateYourAccountModal.activateAccountBtn.click();
+  364 |     await expect(registerPageSelectors.activateYourAccountModal.activationSuccessMessage).toBeVisible();
+  365 |     await expect(registerPageSelectors.activateYourAccountModal.activationSuccessMessage).toContainText(
+  366 |       'Successfully activated!',
+  367 |     );
+  368 |   }
+  369 | 
+  370 |   async function completeUserProfile(details) {
+  371 |     await registerPageSelectors.completeYourProfileModal.companyNameField.fill(details.companyName);
+  372 |     await registerPageSelectors.completeYourProfileModal.cropsField.fill(details.crops);
+  373 |     await registerPageSelectors.completeYourProfileModal.jobTitleDropdown.click();
+> 374 |     await registerPageSelectors.completeYourProfileModal.jobTitleOption(details.jobTitle).click();
+      |                                                                                           ^ TimeoutError: locator.click: Timeout 30000ms exceeded.
+  375 |     await registerPageSelectors.completeYourProfileModal.iAgreeToReceiveMarketingEmailsCheckbox.check();
+  376 |     await registerPageSelectors.completeYourProfileModal.goToKoppertOneBtn.click();
+  377 |   }
+  378 | 
+  379 |   async function verifyCustomerFieldsVisible() {
+  380 |     await expect(registerPageSelectors.ifAlreadyCustomer.companyNameField).toBeVisible();
+  381 |     await expect(registerPageSelectors.ifAlreadyCustomer.companyCodeField).toBeVisible();
+  382 |     await expect(registerPageSelectors.ifAlreadyCustomer.consultantName).toBeVisible();
+  383 |     await expect(registerPageSelectors.ifAlreadyCustomer.consultantEmail).toBeVisible();
+  384 |   }
+  385 | 
+  386 |   async function verifyRequiredFieldValidation() {
+  387 |     await registerPageSelectors.createAccountBtn.click();
+  388 |     await expect(registerPageSelectors.ifAlreadyCustomer.companyNameIsRequiredAlert).toBeVisible();
+  389 |     await expect(registerPageSelectors.ifAlreadyCustomer.companyNameIsRequiredAlert).toContainText(
+  390 |       'Company name is required',
+  391 |     );
+  392 |     await expect(registerPageSelectors.ifAlreadyCustomer.companyCodeIsRequiredAlert).toBeVisible();
+  393 |     await expect(registerPageSelectors.ifAlreadyCustomer.companyCodeIsRequiredAlert).toContainText(
+  394 |       'Company code is required',
+  395 |     );
+  396 |   }
+  397 | 
+  398 |   async function testEmailValidation(details) {
+  399 |     await registerPageSelectors.ifAlreadyCustomer.companyNameField.fill(details.companyName);
+  400 |     await registerPageSelectors.ifAlreadyCustomer.companyCodeField.fill('12345');
+  401 |     await registerPageSelectors.ifAlreadyCustomer.consultantName.fill('Consultant ' + generateRandomString(5));
+  402 |     await registerPageSelectors.ifAlreadyCustomer.consultantEmail.fill(details.invalidEmail);
+  403 |     await registerPageSelectors.createAccountBtn.click();
+  404 |     await expect(registerPageSelectors.ifAlreadyCustomer.consultantEmailIsRequiredAlert).toBeVisible();
+  405 |     await expect(registerPageSelectors.ifAlreadyCustomer.consultantEmailIsRequiredAlert).toContainText(
+  406 |       `${details.invalidEmail} is not a valid e-mail address`,
+  407 |     );
+  408 |     await registerPageSelectors.ifAlreadyCustomer.consultantEmail.clear();
+  409 |     await registerPageSelectors.ifAlreadyCustomer.consultantEmail.fill(details.consultantEmail);
+  410 |   }
+  411 | 
+  412 |   async function verifyTooltipFunctionality() {
+  413 |     await registerPageSelectors.ifAlreadyCustomer.companyCodeTooltip.click();
+  414 |     await expect(registerPageSelectors.ifAlreadyCustomer.companyCodeTooltipContent).toBeVisible();
+  415 |     await expect(registerPageSelectors.ifAlreadyCustomer.companyCodeTooltipContent).toContainText(
+  416 |       'Where to find company codes',
+  417 |     );
+  418 |     await expect(registerPageSelectors.ifAlreadyCustomer.companyCodeTooltipContent).toContainText('invoices');
+  419 |     await expect(registerPageSelectors.ifAlreadyCustomer.companyCodeTooltipContent).toContainText('Customer');
+  420 |     await expect(registerPageSelectors.ifAlreadyCustomer.companyCodeTooltipContent).toContainText(
+  421 |       'Order confirmation emails',
+  422 |     );
+  423 |     await registerPageSelectors.ifAlreadyCustomer.consultantEmail.click();
+  424 |     await expect(registerPageSelectors.ifAlreadyCustomer.companyCodeTooltipContent).not.toBeVisible();
+  425 |   }
+  426 | 
+  427 |   async function verifyRequiredFieldsValidation() {
+  428 |     await registerPageSelectors.createAccountBtn.click();
+  429 |     await expect(registerPageSelectors.nameFieldIsRequiredAlert).toBeVisible();
+  430 |     await expect(registerPageSelectors.nameFieldIsRequiredAlert).toHaveText('Name is a required field');
+  431 |     await expect(registerPageSelectors.emailFieldIsRequiredAlert).toBeVisible();
+  432 |     await expect(registerPageSelectors.emailFieldIsRequiredAlert).toHaveText('E-mail address is a required field');
+  433 |     await expect(registerPageSelectors.countryDropdownIsRequiredAlert).toBeVisible();
+  434 |     await expect(registerPageSelectors.countryDropdownIsRequiredAlert).toHaveText('Select a country from the list');
+  435 |   }
+  436 | 
+  437 |   async function testInvalidEmailValidation(invalidEmail) {
+  438 |     await registerPageSelectors.emailField.fill(invalidEmail);
+  439 |     await expect(registerPageSelectors.emailField).toHaveValue(invalidEmail);
+  440 |     await expect(
+  441 |       registerPageSelectors.emailFieldIsRequiredAlert.filter({
+  442 |         hasText: `${invalidEmail} is not a valid e-mail address`,
+  443 |       }),
+  444 |     ).toBeVisible();
+  445 |   }
+  446 | 
+  447 |   async function testDuplicateEmailHandling(user, testData) {
+  448 |     await registerPageSelectors.emailField.clear();
+  449 |     await registerPageSelectors.emailField.fill(user.email);
+  450 |     await registerPageSelectors.nameField.fill(testData.name);
+  451 |     await selectCountryFromDropdown(testData.country);
+  452 |     await registerPageSelectors.createAccountBtn.click();
+  453 |     await expect(loginPageSelectors.toastNotification(`User with email ${user.email} already exists`)).toBeVisible();
+  454 |   }
+  455 | 
+  456 |   async function verifyBasicUserPermissions(page, corpnav) {
+  457 |     await expect(page).toHaveURL(/.*apps\/protect\/side-effects.*/);
+  458 |     // Basic+Scout users only see Scout menu
+  459 |     await expect(corpnav.scout).toBeVisible();
+  460 |     // Order requires Orderer+Grower roles
+  461 |     await expect(corpnav.order).not.toBeVisible();
+  462 |     // Organization requires enterprise membership
+  463 |     await expect(corpnav.organization).not.toBeVisible();
+  464 |     await expect(corpnav.scout2).not.toBeVisible();
+  465 |     await expect(corpnav.knowledge).not.toBeVisible();
+  466 |     await expect(corpnav.admin).not.toBeVisible();
+  467 |   }
+  468 | 
+  469 |   async function testLanguageChangeFunctionality(page) {
+  470 |     await corpnav.userIcon.click();
+  471 |     await corpnav.myProfile.click();
+  472 |     await expect(page).toHaveURL(/.*apps\/my-profile.*/);
+  473 |     await expect(userPreferences.info.tab).toBeVisible();
+  474 | 
+```

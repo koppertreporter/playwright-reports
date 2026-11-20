@@ -1,0 +1,288 @@
+# Instructions
+
+- Following Playwright test failed.
+- Explain why, be concise, respect Playwright best practices.
+- Provide a snippet of code with the fix, if possible.
+
+# Test info
+
+- Name: lagBuster.spec.ts >> Planner - Lag Buster >> TC:14329 - Check if 'Your changes were discarded' modal appears after order Deleting for the SAME location
+- Location: playwright/specs/lagBuster.spec.ts:1032:7
+
+# Error details
+
+```
+Error: Step 5: the row should stay with an empty cell (bug 25878)
+
+expect(locator).toBeVisible() failed
+
+Locator: locator('input[data-testid="orderable-cell:Anso-Mite/125,000/6l:2026-12-01"]')
+Expected: visible
+Timeout: 40000ms
+Error: element(s) not found
+
+Call log:
+  - Step 5: the row should stay with an empty cell (bug 25878) with timeout 40000ms
+  - waiting for locator('input[data-testid="orderable-cell:Anso-Mite/125,000/6l:2026-12-01"]')
+
+```
+
+```yaml
+- text: You're on DEVELOPMENT OR STAGE
+- img
+- menu:
+  - menuitem "Order":
+    - link "Order":
+      - /url: /apps/order
+  - menuitem "Knowledge":
+    - link "Knowledge":
+      - /url: /apps/protect
+  - menuitem "Scout":
+    - link "Scout":
+      - /url: https://www.natutecscout.com/apps/scout
+  - menuitem "Organization":
+    - link "Organization":
+      - /url: /apps/organization
+- text: Plkw P. van Geest Maasland B.V.
+- img "user"
+- text: Playwright DudeSDTfJaf
+- complementary:
+  - menu:
+    - menuitem "Planner":
+      - img
+      - link "Planner":
+        - /url: /apps/order/planner
+    - menuitem "Order list":
+      - img
+      - link "Order list":
+        - /url: /apps/order/order-list
+  - img "left"
+- main:
+  - heading "Planner" [level=2]
+  - separator
+  - text: Locations Plkw P. van Geest B.V. - Loc. Gerbera
+  - combobox
+  - switch [checked]
+  - text: Order mode
+  - textbox "Search..."
+  - img
+  - text: "Week selection:"
+  - textbox "week 41 - 2026":
+    - /placeholder: Start week
+  - img "calendar"
+  - text: "-"
+  - textbox "week 52 - 2026":
+    - /placeholder: End week
+  - img "calendar"
+  - text: Plkw P. van Geest B.V. - Loc. Gerbera No order data + Add product All rights reserved. © Koppert 2026
+  - button "Digital Assistant":
+    - img
+    - text: Digital Assistant
+```
+
+# Test source
+
+```ts
+  1132 |     await page.waitForTimeout(2000);
+  1133 | 
+  1134 |     const deletingModal = planner.deletingQuantitiesModal;
+  1135 |     let deletionModalAppeared = false;
+  1136 |     try {
+  1137 |       await expect(deletingModal).toBeVisible({ timeout: 5000 });
+  1138 |       deletionModalAppeared = true;
+  1139 |     } catch {
+  1140 |       // Modal may appear after clicking Order instead
+  1141 |     }
+  1142 | 
+  1143 |     if (deletionModalAppeared) {
+  1144 |       await planner.deletingQuantitiesModalConfirmButton.click();
+  1145 |       await expect(deletingModal).not.toBeVisible({ timeout: 10000 });
+  1146 |       await page.waitForTimeout(2000);
+  1147 |     } else {
+  1148 |       await plannerPage.clickOrderButton(page);
+  1149 |       await page.waitForTimeout(1000);
+  1150 |       try {
+  1151 |         await expect(deletingModal).toBeVisible({ timeout: 5000 });
+  1152 |         await planner.deletingQuantitiesModalConfirmButton.click();
+  1153 |         await expect(deletingModal).not.toBeVisible({ timeout: 10000 });
+  1154 |         await page.waitForTimeout(1000);
+  1155 |       } catch {
+  1156 |         // No deletion modal after Order click either
+  1157 |       }
+  1158 |       const confirmModal = planner.orderConfirmationModal;
+  1159 |       try {
+  1160 |         await expect(confirmModal).toBeVisible({ timeout: 5000 });
+  1161 |         await planner.orderConfirmationModalConfirmButton.click();
+  1162 |         await expect(confirmModal).not.toBeVisible({ timeout: 10000 });
+  1163 |       } catch {
+  1164 |         // No confirmation modal
+  1165 |       }
+  1166 |       await plannerPage.closeFirstOrderCongratulationsModalIfVisible(page);
+  1167 |       await page.waitForTimeout(2000);
+  1168 |     }
+  1169 | 
+  1170 |     // Wait for client 2 to sync the deletion
+  1171 |     const syncCell = page2.locator(`input[data-testid="${targetTestId}"]`);
+  1172 |     await expect(syncCell).not.toHaveValue('7', { timeout: 30000 });
+  1173 |     const modalVisibleAfterStep3 = await planner2.changesDiscardedModal.isVisible({ timeout: 5000 }).catch(() => false);
+  1174 |     expect(modalVisibleAfterStep3, 'Step 3: Modal should NOT appear when Client 2 has no changes').toBe(false);
+  1175 | 
+  1176 |     // Step 5: Client 2 edits the second cell (unsaved), Client 1 deletes same cell
+  1177 |     const targetInputClient2 = page2.locator(`input[data-testid="${targetTestId2}"]`);
+  1178 |     await targetInputClient2.scrollIntoViewIfNeeded();
+  1179 |     await targetInputClient2.click();
+  1180 |     await targetInputClient2.fill('5');
+  1181 |     await page2.waitForTimeout(1000);
+  1182 | 
+  1183 |     const targetInput2Client1 = page.locator(`input[data-testid="${targetTestId2}"]`);
+  1184 |     await page.waitForTimeout(2000);
+  1185 |     await scrollPlannerToCells(page, [targetTestId2]);
+  1186 |     await targetInput2Client1.scrollIntoViewIfNeeded();
+  1187 |     await targetInput2Client1.click({ force: true });
+  1188 |     await targetInput2Client1.fill('0', { force: true });
+  1189 |     await targetInput2Client1.press('Tab');
+  1190 |     await page.waitForTimeout(2000);
+  1191 | 
+  1192 |     const deletingModal2 = planner.deletingQuantitiesModal;
+  1193 |     let deletion2ModalAppeared = false;
+  1194 |     try {
+  1195 |       await expect(deletingModal2).toBeVisible({ timeout: 5000 });
+  1196 |       deletion2ModalAppeared = true;
+  1197 |     } catch {
+  1198 |       // Modal may appear after clicking Order
+  1199 |     }
+  1200 | 
+  1201 |     if (deletion2ModalAppeared) {
+  1202 |       await planner.deletingQuantitiesModalConfirmButton.click();
+  1203 |       await expect(deletingModal2).not.toBeVisible({ timeout: 10000 });
+  1204 |       await page.waitForTimeout(2000);
+  1205 |     } else {
+  1206 |       await plannerPage.clickOrderButton(page);
+  1207 |       await page.waitForTimeout(1000);
+  1208 |       try {
+  1209 |         await expect(deletingModal2).toBeVisible({ timeout: 5000 });
+  1210 |         await planner.deletingQuantitiesModalConfirmButton.click();
+  1211 |         await expect(deletingModal2).not.toBeVisible({ timeout: 10000 });
+  1212 |         await page.waitForTimeout(1000);
+  1213 |       } catch {
+  1214 |         // No deletion modal
+  1215 |       }
+  1216 |       const confirmModal2 = planner.orderConfirmationModal;
+  1217 |       try {
+  1218 |         await expect(confirmModal2).toBeVisible({ timeout: 5000 });
+  1219 |         await planner.orderConfirmationModalConfirmButton.click();
+  1220 |         await expect(confirmModal2).not.toBeVisible({ timeout: 10000 });
+  1221 |       } catch {
+  1222 |         // No confirmation modal
+  1223 |       }
+  1224 |       await plannerPage.closeFirstOrderCongratulationsModalIfVisible(page);
+  1225 |       await page.waitForTimeout(2000);
+  1226 |     }
+  1227 | 
+  1228 |     await verifyDiscardedModal(page2, planner2, locationName);
+  1229 | 
+  1230 |     // The row stays with an empty cell. Client 2 opened the planner after the order was placed, which is when stage
+  1231 |     // removes the row instead (bug 25878), so this fails until that is fixed.
+> 1232 |     await expect(targetInputClient2, 'Step 5: the row should stay with an empty cell (bug 25878)').toBeVisible();
+       |                                                                                                    ^ Error: Step 5: the row should stay with an empty cell (bug 25878)
+  1233 |     const client2ValueAfterDiscard = await targetInputClient2.inputValue();
+  1234 |     expect(client2ValueAfterDiscard, 'Step 5: qty=5 should disappear from Client 2 input after modal').not.toBe('5');
+  1235 | 
+  1236 |     // Multi-context trace recording can surface ENOENT errors when closing context2 mid-test
+  1237 |     // (Playwright tries to copy per-context trace files that have already been cleaned). The
+  1238 |     // assertions are complete; swallow any close-time errors so they don't mark the test failed.
+  1239 |     try {
+  1240 |       await Promise.race([context2.close(), new Promise((resolve) => setTimeout(resolve, 5000))]);
+  1241 |     } catch {
+  1242 |       // Ignore; the test's assertions have already passed.
+  1243 |     }
+  1244 |   });
+  1245 | 
+  1246 |   test(`TC:14342 - Check 'Your changes were discarded' modal after order Creating + Order Details for the DIFFERENT locations`, async ({
+  1247 |     page,
+  1248 |     browser,
+  1249 |   }) => {
+  1250 |     const user1 = await ordersPage.setupOrdererUserWithEnterpriseAccess(page, corpnav, ENTERPRISE_WITH_DATA_ID);
+  1251 |     userIdsToDelete.push(user1.userId);
+  1252 |     // This test needs a free cell in each of two locations, so it cannot reuse the once-per-file cleanup.
+  1253 |     await cleanupOrdersIfNeeded(ENTERPRISE_WITH_DATA_ID, true);
+  1254 | 
+  1255 |     await page.goto(urls.orderPlanner);
+  1256 |     await expect(planner.orderModeToggle).toBeVisible({ timeout: 30000 });
+  1257 |     await page.waitForTimeout(3000);
+  1258 | 
+  1259 |     // Discover two distinct locations for this enterprise.
+  1260 |     await planner.locationsDropdown.click();
+  1261 |     await expect(planner.locationsDropdownPanel).toBeVisible({ timeout: 10000 });
+  1262 |     const allOptions = planner.locationsOptions;
+  1263 |     const optionsCount = await allOptions.count();
+  1264 |     const locationNames: string[] = [];
+  1265 |     for (let i = 0; i < optionsCount; i++) {
+  1266 |       const label = await allOptions.nth(i).getAttribute('label');
+  1267 |       const text = (label || (await allOptions.nth(i).textContent()) || '').replace(/✓/g, '').trim();
+  1268 |       if (text && text.toLowerCase() !== 'select all') {
+  1269 |         locationNames.push(text);
+  1270 |         if (locationNames.length === 2) break;
+  1271 |       }
+  1272 |     }
+  1273 |     expect(locationNames.length, 'Expected at least 2 locations for this enterprise').toBeGreaterThanOrEqual(2);
+  1274 |     await page.keyboard.press('Escape');
+  1275 |     await page.waitForTimeout(500);
+  1276 | 
+  1277 |     const [location1, location2] = locationNames;
+  1278 | 
+  1279 |     // Client 1 places an order in each of the two different locations.
+  1280 |     const order1 = await createFirstOrderInLocation(page, planner, location1);
+  1281 |     await createFirstOrderInLocation(page, planner, location2);
+  1282 | 
+  1283 |     // Client 1 now views both locations together.
+  1284 |     await plannerPage.setLocations(page, [location1, location2], true);
+  1285 |     await page.keyboard.press('Escape').catch(() => {});
+  1286 |     await page.waitForTimeout(2000);
+  1287 |     await plannerPage.switchOrderMode(page, true);
+  1288 |     await expect(planner.weekHeaders.first()).toBeVisible({ timeout: 30000 });
+  1289 | 
+  1290 |     // Client 2 (same user) opens the same planner with both locations and Order mode on.
+  1291 |     const { context2, page2, planner2 } = await setupClient2(browser, user1, [location1, location2]);
+  1292 | 
+  1293 |     // Client 2 makes an unsaved matrix edit. The first empty cell belongs to location1 (rendered first),
+  1294 |     // so this dirty state is tied to location1 — the location Client 1 will update next.
+  1295 |     const client2Inputs = planner2.orderableInputs;
+  1296 |     // orderable-cell test ids repeat across locations, so keep the resolved locator instead of
+  1297 |     // re-querying by data-testid (which would resolve to one cell per rendered location).
+  1298 |     let client2DirtyInput: Locator | null = null;
+  1299 |     for (let i = 0; i < Math.min(await client2Inputs.count(), 200); i++) {
+  1300 |       const tempInput = client2Inputs.nth(i);
+  1301 |       if (!(await tempInput.isEditable().catch(() => false))) continue;
+  1302 |       if (await tempInput.isDisabled().catch(() => true)) continue;
+  1303 |       if (!(await tempInput.getAttribute('data-testid'))) continue;
+  1304 |       if ((await tempInput.inputValue()).trim() !== '') continue;
+  1305 |       client2DirtyInput = tempInput;
+  1306 |       break;
+  1307 |     }
+  1308 |     expect(client2DirtyInput, 'Expected an empty cell for Client 2 to make unsaved changes').not.toBeNull();
+  1309 |     await client2DirtyInput!.scrollIntoViewIfNeeded();
+  1310 |     await client2DirtyInput!.click();
+  1311 |     await client2DirtyInput!.fill('999');
+  1312 |     await page2.waitForTimeout(1000);
+  1313 | 
+  1314 |     // Client 1 focuses location1 and creates another order there, pushing newer data for that location.
+  1315 |     await plannerPage.setLocations(page, [location1], true);
+  1316 |     await page.keyboard.press('Escape').catch(() => {});
+  1317 |     await page.waitForTimeout(2000);
+  1318 |     await expect(planner.weekHeaders.first()).toBeVisible({ timeout: 30000 });
+  1319 | 
+  1320 |     const c1Inputs = planner.orderableInputs;
+  1321 |     let newOrderTestId = '';
+  1322 |     for (let i = 0; i < Math.min(await c1Inputs.count(), 200); i++) {
+  1323 |       const tempInput = c1Inputs.nth(i);
+  1324 |       if (!(await tempInput.isEditable().catch(() => false))) continue;
+  1325 |       if (await tempInput.isDisabled().catch(() => true)) continue;
+  1326 |       const testId = (await tempInput.getAttribute('data-testid')) || '';
+  1327 |       if (!testId || testId === order1.testId) continue;
+  1328 |       if ((await tempInput.inputValue()).trim() !== '') continue;
+  1329 |       newOrderTestId = testId;
+  1330 |       break;
+  1331 |     }
+  1332 |     expect(newOrderTestId, 'Expected an empty cell for Client 1 to create another order').toBeTruthy();
+```

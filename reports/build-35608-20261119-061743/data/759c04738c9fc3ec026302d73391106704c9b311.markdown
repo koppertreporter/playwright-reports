@@ -1,0 +1,285 @@
+# Instructions
+
+- Following Playwright test failed.
+- Explain why, be concise, respect Playwright best practices.
+- Provide a snippet of code with the fix, if possible.
+
+# Test info
+
+- Name: planner_orderbox_colors.spec.ts >> Planner - Order Box Colors >> TC:21411 - [Orderbox] Order mode ON: delivery days without orders show no order box
+- Location: playwright/specs/planner_orderbox_colors.spec.ts:154:7
+
+# Error details
+
+```
+Error: Failed to fetch locations for enterprise cfc0f4d4-ce0c-461e-ada2-d527f0e4222c: {"id":"7c7b3a9b-62de-4ddf-8f73-d1c307efa5fb","message":"Token has been revoked","statusCode":401,"metadata":[{"defaultMessage":"Token has been revoked","translationCode":"backend.exceptions.auth.tokenRevoked","code":"TOKEN_REVOKED"}]}
+```
+
+# Page snapshot
+
+```yaml
+- generic [active] [ref=e1]:
+  - generic [ref=e3]:
+    - generic [ref=e4]: You're on DEVELOPMENT OR STAGE
+    - generic [ref=e6]:
+      - img [ref=e7] [cursor=pointer]
+      - generic [ref=e14]:
+        - generic [ref=e15]: Plkw P. van Geest Maasland B.V.
+        - generic [ref=e16] [cursor=pointer]:
+          - img "user" [ref=e17]:
+            - img [ref=e18]
+          - text: Playwright DudeSnPvwex
+    - generic [ref=e21]:
+      - generic [ref=e22]:
+        - heading "Hi, Playwright DudeSnPvwex!" [level=1] [ref=e23]
+        - strong [ref=e25]: Welcome to Koppert One
+        - generic [ref=e26]:
+          - heading "Need help ?" [level=5] [ref=e27]
+          - separator [ref=e28]
+          - generic [ref=e29]:
+            - img [ref=e31]
+            - generic [ref=e32]:
+              - heading "Koppert One support" [level=5] [ref=e33]
+              - link "mail support@koppert.one" [ref=e35] [cursor=pointer]:
+                - /url: mailto:support@koppert.one
+                - img "mail" [ref=e36]:
+                  - img [ref=e37]
+                - text: support@koppert.one
+                - img [ref=e39]
+              - link "phone +31 1 051 405 17" [ref=e43] [cursor=pointer]:
+                - /url: tel:+31105140517
+                - img "phone" [ref=e44]:
+                  - img [ref=e45]
+                - text: +31 1 051 405 17
+                - img [ref=e47]
+      - generic [ref=e51]:
+        - generic [ref=e52] [cursor=pointer]:
+          - img [ref=e54]
+          - generic [ref=e57]: Order
+          - generic [ref=e59]: View, place and manage orders
+          - img [ref=e61]
+        - generic [ref=e63] [cursor=pointer]:
+          - img [ref=e65]
+          - generic [ref=e69]: Knowledge
+          - generic [ref=e71]: Explore chemical compatibility with Koppert's natural enemies and bumblebees
+          - img [ref=e73]
+        - generic [ref=e75] [cursor=pointer]:
+          - img [ref=e77]
+          - generic [ref=e79]: Scout
+          - generic [ref=e81]: Discover trends in pest development and beneficial insect counts to know when to act
+          - img [ref=e83]
+        - generic [ref=e85] [cursor=pointer]:
+          - img [ref=e87]
+          - generic [ref=e89]: Organization
+          - generic [ref=e91]: Manage team members and their access to locations
+          - img [ref=e93]
+  - button "Feedback" [ref=e95] [cursor=pointer]:
+    - generic [ref=e97]: Feedback
+```
+
+# Test source
+
+```ts
+  67  |   const productIds = await getOrderableProductIds(defaultEnterpriseId, location, token);
+  68  |   if (!productIds.length) {
+  69  |     throw new Error(`Failed to resolve orderable products for enterprise ${defaultEnterpriseId}`);
+  70  |   }
+  71  | 
+  72  |   let lastError = '';
+  73  |   for (const productId of productIds) {
+  74  |     const payload = buildOrderData(location, productId);
+  75  |     const response = await submitOrder(payload, defaultEnterpriseId, token, true);
+  76  |     if (response.ok) {
+  77  |       return response.body;
+  78  |     }
+  79  | 
+  80  |     lastError = response.errorText;
+  81  |     if (isRetryableProductError(response.errorText)) {
+  82  |       continue;
+  83  |     }
+  84  | 
+  85  |     throw new Error(`Failed to create order: ${response.errorText}`);
+  86  |   }
+  87  | 
+  88  |   throw new Error(`Failed to create order: ${lastError || 'No orderable product accepted'}`);
+  89  | }
+  90  | 
+  91  | // Delivery dates have to be resolved in the timezone the browser runs in (playwright.config sets
+  92  | // Europe/Warsaw), not in UTC. toISOString() on a machine whose clock is ahead of UTC yields yesterday's
+  93  | // date for part of the night, which silently shifts a seeded order onto a day - often a Sunday - that
+  94  | // the planner does not render at all.
+  95  | function deliveryDateOffsetByDays(days: number): string {
+  96  |   const date = moment.tz(APP_TIMEZONE).add(days, 'days');
+  97  |   return date.format('YYYY-MM-DD');
+  98  | }
+  99  | 
+  100 | function getDeliveryDateInThreeDays(): string {
+  101 |   return deliveryDateOffsetByDays(4);
+  102 | }
+  103 | 
+  104 | export function getDeliveryDateInFuture(daysInFuture: number = 7): string {
+  105 |   return deliveryDateOffsetByDays(daysInFuture);
+  106 | }
+  107 | 
+  108 | function getDeliveryDateInPast(daysInPast: number = 7): string {
+  109 |   return deliveryDateOffsetByDays(-daysInPast);
+  110 | }
+  111 | 
+  112 | function getDeliveryDateForCurrentWeek(): string {
+  113 |   return deliveryDateOffsetByDays(3);
+  114 | }
+  115 | 
+  116 | function getDeliveryDateForNextYear(weekNumber: number): string {
+  117 |   const today = new Date();
+  118 |   const nextYear = today.getFullYear() + 1;
+  119 |   const januaryFirst = new Date(nextYear, 0, 1);
+  120 |   const daysOffset = (weekNumber - 1) * 7;
+  121 |   const targetDate = new Date(januaryFirst);
+  122 |   targetDate.setDate(januaryFirst.getDate() + daysOffset);
+  123 |   const dayOfWeek = targetDate.getDay();
+  124 |   const daysToMonday = dayOfWeek === 0 ? 1 : dayOfWeek === 6 ? 2 : 0;
+  125 |   targetDate.setDate(targetDate.getDate() + daysToMonday);
+  126 |   return targetDate.toISOString().split('T')[0];
+  127 | }
+  128 | 
+  129 | function buildOrderData(location: OrderLocation, productId: string): OrderData[] {
+  130 |   const deliveryDate = location.deliveryDates?.find((entry) => entry?.date)?.date || getDeliveryDateInThreeDays();
+  131 |   const shippingAddressId = location.erpKey || location.erpLocationId || location.id;
+  132 | 
+  133 |   if (!shippingAddressId) {
+  134 |     throw new Error(`Failed to resolve shippingAddressId for location ${location.id}`);
+  135 |   }
+  136 | 
+  137 |   return [
+  138 |     {
+  139 |       items: [
+  140 |         {
+  141 |           productId,
+  142 |           quantity: 1,
+  143 |         },
+  144 |       ],
+  145 |       shippingAddressId,
+  146 |       deliveryDate,
+  147 |     },
+  148 |   ];
+  149 | }
+  150 | 
+  151 | async function getOrderLocation(enterpriseId: string, token?: string): Promise<OrderLocation> {
+  152 |   const response = await (
+  153 |     await api(token)
+  154 |   ).get(`${process.env.apiURL}/api/v1/locations`, {
+  155 |     params: {
+  156 |       page: 1,
+  157 |       limit: 99,
+  158 |       enterpriseId,
+  159 |     },
+  160 |     headers: {
+  161 |       'x-enterprise-id': enterpriseId,
+  162 |     },
+  163 |   });
+  164 | 
+  165 |   if (!response.ok()) {
+  166 |     const errorText = await response.text();
+> 167 |     throw new Error(`Failed to fetch locations for enterprise ${enterpriseId}: ${errorText}`);
+      |           ^ Error: Failed to fetch locations for enterprise cfc0f4d4-ce0c-461e-ada2-d527f0e4222c: {"id":"7c7b3a9b-62de-4ddf-8f73-d1c307efa5fb","message":"Token has been revoked","statusCode":401,"metadata":[{"defaultMessage":"Token has been revoked","translationCode":"backend.exceptions.auth.tokenRevoked","code":"TOKEN_REVOKED"}]}
+  168 |   }
+  169 | 
+  170 |   const data = await response.json();
+  171 |   const locations: OrderLocation[] = Array.isArray(data?.items) ? data.items : [];
+  172 |   if (!locations.length) {
+  173 |     throw new Error(`No locations available for enterprise ${enterpriseId}`);
+  174 |   }
+  175 | 
+  176 |   const nonInvoice = locations.filter((location) => location.purpose?.toLowerCase() !== 'invoice');
+  177 |   const candidates = nonInvoice.length ? nonInvoice : locations;
+  178 |   const withDeliveryDates = candidates.find((location) => location.deliveryDates?.length);
+  179 |   return withDeliveryDates || candidates[0];
+  180 | }
+  181 | 
+  182 | /**
+  183 |  * The UTC offset the enterprise's delivery deadlines are expressed in, e.g. "-06:00", read from the
+  184 |  * first advertised delivery date that carries a deadline. The backend derives it from the timezone of
+  185 |  * the enterprise's F&O warehouse, so it is whatever that warehouse is set to on stage. Undefined when
+  186 |  * no delivery date has a deadline or the deadline carries no offset.
+  187 |  */
+  188 | export async function getLocationDeadlineOffset(enterpriseId: string, token?: string): Promise<string | undefined> {
+  189 |   const location = await getOrderLocation(enterpriseId, token);
+  190 |   const deadline = (location.deliveryDates || []).map((entry) => entry?.deadline).find(Boolean);
+  191 |   const offset = deadline?.match(/([+-]\d{2}:\d{2}|Z)$/)?.[1];
+  192 |   return offset === 'Z' ? '+00:00' : offset;
+  193 | }
+  194 | 
+  195 | async function getOrderableProductIds(
+  196 |   enterpriseId: string,
+  197 |   location: OrderLocation,
+  198 |   token?: string,
+  199 | ): Promise<string[]> {
+  200 |   // /api/v1/ordering/products returns a demo/test catalog (10 items) that the backend rejects
+  201 |   // with FORBIDDEN_PRODUCTS on upsert. The Planner UI uses /api/v1/ordering/products/enterprise,
+  202 |   // which returns the actual orderable catalog for the enterprise (~1600 items, ~500 active).
+  203 |   const products = await fetchProducts('/api/v1/ordering/products/enterprise', {}, enterpriseId, token);
+  204 |   return collectOrderableProductIds(products);
+  205 | }
+  206 | 
+  207 | /**
+  208 |  * Whether the order form lets a product be ordered for a delivery date - the portal's own rule
+  209 |  * (web order/features/ordering/utils/leadtimes.ts, applied by OrderForm's checkIfProductBlocked).
+  210 |  *
+  211 |  * The Add product modal offers every product regardless of the order's date, and one that cannot be
+  212 |  * delivered by then is still added - as a line whose quantity is readonly, with Save disabled and no
+  213 |  * explanation. A product is blocked when it is inactive or hidden, or when today is already past its
+  214 |  * last order day: the delivery date minus its lead time for that weekday. `leadTimeDays` is indexed
+  215 |  * Monday = 0 .. Sunday = 6, a single entry applies to every day, and null or 0 means no lead time.
+  216 |  */
+  217 | export function isProductOrderableOn(product: OrderProduct, deliveryDate: string): boolean {
+  218 |   if (product?.isActive === false || product?.isVisible === false) return false;
+  219 | 
+  220 |   const leadTimeDays: number[] | null | undefined = product?.leadTimeDays;
+  221 |   if (!leadTimeDays?.length) return true;
+  222 | 
+  223 |   const delivery = moment.tz(deliveryDate, 'YYYY-MM-DD', APP_TIMEZONE);
+  224 |   const leadTime = leadTimeDays.length === 1 ? leadTimeDays[0] : leadTimeDays[delivery.isoWeekday() - 1];
+  225 |   if (!leadTime) return true;
+  226 | 
+  227 |   const lastOrderDay = delivery.clone().subtract(leadTime, 'days');
+  228 |   const daysPastLastOrderDay = Math.floor(moment.tz(APP_TIMEZONE).diff(lastOrderDay, 'hours') / 24);
+  229 |   return daysPastLastOrderDay < 0;
+  230 | }
+  231 | 
+  232 | /** Ids of the enterprise's products that the order form accepts for this delivery date. */
+  233 | export async function getProductIdsOrderableOn(
+  234 |   enterpriseId: string,
+  235 |   deliveryDate: string,
+  236 |   token?: string,
+  237 | ): Promise<string[]> {
+  238 |   const products = await fetchProducts('/api/v1/ordering/products/enterprise', {}, enterpriseId, token);
+  239 |   return products.filter((product) => isProductOrderableOn(product, deliveryDate)).map((product) => String(product.id));
+  240 | }
+  241 | 
+  242 | export interface ProductOrderConstraints {
+  243 |   minimumQuantity: number | null;
+  244 |   quantityStep: number | null;
+  245 | }
+  246 | 
+  247 | /**
+  248 |  * Per-product order quantity rules, keyed by product id.
+  249 |  *
+  250 |  * Products carry a minimum and a step size ("Acadian LSC Conventional/bottle" is 180/180), and a
+  251 |  * quantity that breaks either is rejected by the create-order form: the field turns red, the submit
+  252 |  * button stays enabled and clicking it does nothing at all. A fixed quantity therefore only works
+  253 |  * until the form happens to pick a product with a coarser step.
+  254 |  */
+  255 | export async function getProductOrderConstraints(
+  256 |   enterpriseId: string,
+  257 |   token?: string,
+  258 | ): Promise<Map<string, ProductOrderConstraints>> {
+  259 |   const products = await fetchProducts('/api/v1/ordering/products/enterprise', {}, enterpriseId, token);
+  260 | 
+  261 |   const constraints = new Map<string, ProductOrderConstraints>();
+  262 |   for (const product of products) {
+  263 |     const id = product?.id ?? product?.productId;
+  264 |     if (!id) continue;
+  265 |     constraints.set(String(id), {
+  266 |       minimumQuantity: product?.minimumQuantity ?? null,
+  267 |       quantityStep: product?.quantityStep ?? null,
+```

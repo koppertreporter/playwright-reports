@@ -1,0 +1,291 @@
+# Instructions
+
+- Following Playwright test failed.
+- Explain why, be concise, respect Playwright best practices.
+- Provide a snippet of code with the fix, if possible.
+
+# Test info
+
+- Name: orders.spec.ts >> Orders >> TC:14210 - [Cancellation] Check if multiple orders are deleted from Order Details when entering Zero/Removing quantities
+- Location: playwright/specs/orders.spec.ts:216:7
+
+# Error details
+
+```
+Error: expect(received).toBeGreaterThan(expected)
+
+Expected: > 3
+Received:   2
+
+Call Log:
+- Timeout 10000ms exceeded while waiting on the predicate
+```
+
+# Page snapshot
+
+```yaml
+- generic [active] [ref=e1]:
+  - generic [ref=e3]:
+    - generic [ref=e4]: You're on DEVELOPMENT OR STAGE
+    - generic [ref=e6]:
+      - img [ref=e7] [cursor=pointer]
+      - generic [ref=e14]:
+        - generic [ref=e15]: 4Innovations Horti B.V.
+        - generic [ref=e16] [cursor=pointer]:
+          - img "user" [ref=e17]:
+            - img [ref=e18]
+          - text: Playwright DudeFyLePTy
+    - generic [ref=e21]:
+      - generic [ref=e22]:
+        - heading "Hi, Playwright DudeFyLePTy!" [level=1] [ref=e23]
+        - strong [ref=e25]: Welcome to Koppert One
+        - generic [ref=e26]:
+          - heading "Need help ?" [level=5] [ref=e27]
+          - separator [ref=e28]
+          - generic [ref=e29]:
+            - img [ref=e31]
+            - generic [ref=e32]:
+              - heading "Koppert One support" [level=5] [ref=e33]
+              - link "mail support@koppert.one" [ref=e35] [cursor=pointer]:
+                - /url: mailto:support@koppert.one
+                - img "mail" [ref=e36]:
+                  - img [ref=e37]
+                - text: support@koppert.one
+                - img [ref=e39]
+              - link "phone +31 1 051 405 17" [ref=e43] [cursor=pointer]:
+                - /url: tel:+31105140517
+                - img "phone" [ref=e44]:
+                  - img [ref=e45]
+                - text: +31 1 051 405 17
+                - img [ref=e47]
+      - generic [ref=e51]:
+        - generic [ref=e52] [cursor=pointer]:
+          - img [ref=e54]
+          - generic [ref=e57]: Order
+          - generic [ref=e59]: View, place and manage orders
+          - img [ref=e61]
+        - generic [ref=e63] [cursor=pointer]:
+          - img [ref=e65]
+          - generic [ref=e69]: Knowledge
+          - generic [ref=e71]: Explore chemical compatibility with Koppert's natural enemies and bumblebees
+          - img [ref=e73]
+        - generic [ref=e75] [cursor=pointer]:
+          - img [ref=e77]
+          - generic [ref=e79]: Scout
+          - generic [ref=e81]: Discover trends in pest development and beneficial insect counts to know when to act
+          - img [ref=e83]
+        - generic [ref=e85] [cursor=pointer]:
+          - img [ref=e87]
+          - generic [ref=e89]: Organization
+          - generic [ref=e91]: Manage team members and their access to locations
+          - img [ref=e93]
+  - button "Feedback" [ref=e95] [cursor=pointer]:
+    - generic [ref=e97]: Feedback
+```
+
+# Test source
+
+```ts
+  16  |     ordersSel: ReturnType<typeof ordersSelectors>,
+  17  |     page: Page,
+  18  |     minProductsToKeep = 1,
+  19  |   ) {
+  20  |     minProductsToKeep = Math.max(0, minProductsToKeep);
+  21  |     const deleteIcons = page.locator('span[aria-label="delete"]');
+  22  | 
+  23  |     while (true) {
+  24  |       const before = await deleteIcons.count();
+  25  | 
+  26  |       if (before <= minProductsToKeep) break;
+  27  | 
+  28  |       await deleteIcons.nth(before - 1).click();
+  29  | 
+  30  |       await expect(ordersSel.deleteOrderLineModal).toBeVisible({ timeout: 10000 });
+  31  |       await ordersSel.deleteOrderLineConfirmButton.click();
+  32  |       await expect(ordersSel.deleteOrderLineModal).toBeHidden({ timeout: 10000 });
+  33  | 
+  34  |       await expect.poll(async () => await deleteIcons.count(), { timeout: 10000 }).toBeLessThan(before);
+  35  |     }
+  36  |   },
+  37  | 
+  38  |   async deleteProductLineByName(ordersSel: ReturnType<typeof ordersSelectors>, page: Page, productName: string) {
+  39  |     const row = getProductRowByName(ordersSel, page, productName);
+  40  |     await expect(row).toBeVisible({ timeout: 10000 });
+  41  | 
+  42  |     await row.locator('[aria-label="delete"]').click();
+  43  |     await expect(ordersSel.deleteOrderLineModal).toBeVisible({ timeout: 10000 });
+  44  |     await ordersSel.deleteOrderLineConfirmButton.click();
+  45  |     await expect(ordersSel.deleteOrderLineModal).toBeHidden({ timeout: 10000 });
+  46  | 
+  47  |     await expect(row).toBeHidden({ timeout: 10000 });
+  48  |   },
+  49  | 
+  50  |   async setQtyInExistingProductRowByName(
+  51  |     ordersSel: ReturnType<typeof ordersSelectors>,
+  52  |     page: Page,
+  53  |     productName: string,
+  54  |     qty: string,
+  55  |   ) {
+  56  |     const row = getProductRowByName(ordersSel, page, productName);
+  57  |     await expect(row).toBeVisible({ timeout: 10000 });
+  58  | 
+  59  |     const qtyInput = getQtyInputInRow(row);
+  60  |     await expect(qtyInput).toBeVisible();
+  61  | 
+  62  |     await qtyInput.fill(qty);
+  63  |     await qtyInput.blur();
+  64  |   },
+  65  | 
+  66  |   async clearQtyInExistingProductRowByName(
+  67  |     ordersSel: ReturnType<typeof ordersSelectors>,
+  68  |     page: Page,
+  69  |     productName: string,
+  70  |   ) {
+  71  |     await ordersProducts.setQtyInExistingProductRowByName(ordersSel, page, productName, '');
+  72  |   },
+  73  | 
+  74  |   async captureQuantityByProductName(
+  75  |     ordersSel: ReturnType<typeof ordersSelectors>,
+  76  |     page: Page,
+  77  |     productName: string,
+  78  |   ): Promise<string> {
+  79  |     const row = getProductRowByName(ordersSel, page, productName);
+  80  |     await expect(row).toBeVisible({ timeout: 10000 });
+  81  | 
+  82  |     const qtyInput = getQtyInputInRow(row);
+  83  |     await expect(qtyInput).toBeVisible();
+  84  | 
+  85  |     return await qtyInput.inputValue();
+  86  |   },
+  87  | 
+  88  |   async changeQuantityByProductName(
+  89  |     ordersSel: ReturnType<typeof ordersSelectors>,
+  90  |     page: Page,
+  91  |     productName: string,
+  92  |     originalQty: string,
+  93  |   ) {
+  94  |     const row = getProductRowByName(ordersSel, page, productName);
+  95  |     await expect(row).toBeVisible({ timeout: 10000 });
+  96  | 
+  97  |     const qtyInput = getQtyInputInRow(row);
+  98  |     await expect(qtyInput).toBeVisible();
+  99  | 
+  100 |     const newQty = String(Math.floor(Math.random() * 20) + 1);
+  101 | 
+  102 |     await qtyInput.fill(newQty);
+  103 |     await qtyInput.blur();
+  104 |   },
+  105 | 
+  106 |   async fillQtyInProductRowByName(
+  107 |     ordersSel: ReturnType<typeof ordersSelectors>,
+  108 |     page: Page,
+  109 |     productName: string,
+  110 |     qty: string,
+  111 |     previousQtyInputsCount: number,
+  112 |   ) {
+  113 |     await page.waitForTimeout(500);
+  114 |     await expect
+  115 |       .poll(async () => await ordersSel.productQtyInputs.count(), { timeout: 10000 })
+> 116 |       .toBeGreaterThan(previousQtyInputsCount);
+      |        ^ Error: expect(received).toBeGreaterThan(expected)
+  117 | 
+  118 |     const row = getProductRowByName(ordersSel, page, productName);
+  119 |     await expect(row).toBeVisible({ timeout: 10000 });
+  120 | 
+  121 |     const qtyInput = getQtyInputInRow(row);
+  122 |     await expect(qtyInput).toBeVisible();
+  123 | 
+  124 |     await qtyInput.fill(qty);
+  125 |     await qtyInput.blur();
+  126 |   },
+  127 | 
+  128 |   async addFirstProductFromModalAndReturnMeta(
+  129 |     ordersSel: ReturnType<typeof ordersSelectors>,
+  130 |     page: Page,
+  131 |   ): Promise<{ value: string; labelText: string }> {
+  132 |     await ordersSel.addProductButton.click();
+  133 |     await expect(ordersSel.productModal).toBeVisible();
+  134 | 
+  135 |     const firstLabel = ordersSel.productModalFirstProductLabel;
+  136 |     await expect(firstLabel).toBeVisible();
+  137 | 
+  138 |     const checkbox = ordersSel.productModalCheckboxInputInLabel(firstLabel);
+  139 |     const value = (await checkbox.getAttribute('value')) || '';
+  140 |     const labelText = (await firstLabel.textContent())?.trim() || '';
+  141 | 
+  142 |     expect(value, 'Expected checkbox value to exist').toBeTruthy();
+  143 |     expect(labelText, 'Expected product label text to exist').toBeTruthy();
+  144 | 
+  145 |     await firstLabel.click();
+  146 |     await ordersSel.productAddButton.click();
+  147 |     await ordersSel.productModal.waitFor({ state: 'hidden', timeout: 5000 });
+  148 | 
+  149 |     return { value, labelText };
+  150 |   },
+  151 | 
+  152 |   async verifyProductDisabledWhenReAddingAndTooltipShown(
+  153 |     ordersSel: ReturnType<typeof ordersSelectors>,
+  154 |     page: Page,
+  155 |     productValue: string,
+  156 |   ) {
+  157 |     await ordersSel.addProductButton.click();
+  158 |     await expect(ordersSel.productModal).toBeVisible();
+  159 | 
+  160 |     const label = ordersSel.productModalLabelByCheckboxValue(productValue);
+  161 |     await expect(label).toBeVisible();
+  162 | 
+  163 |     const checkbox = ordersSel.productModalCheckboxInputInLabel(label);
+  164 |     await expect(checkbox).toBeDisabled();
+  165 |     expect(await checkbox.isChecked()).toBeTruthy();
+  166 | 
+  167 |     await label.hover({ force: true });
+  168 | 
+  169 |     const tooltipAppeared = await expect(ordersSel.tooltip)
+  170 |       .toBeVisible()
+  171 |       .then(() => true)
+  172 |       .catch(() => false);
+  173 | 
+  174 |     if (tooltipAppeared) {
+  175 |       const tooltipText = await ordersSel.tooltip.textContent();
+  176 |       expect(tooltipText).toBeTruthy();
+  177 |     }
+  178 | 
+  179 |     await label.click({ force: true }).catch(() => {});
+  180 |     expect(await checkbox.isChecked()).toBeTruthy();
+  181 |   },
+  182 | 
+  183 |   async searchInAddProductModal(ordersSel: ReturnType<typeof ordersSelectors>, page: Page, text: string) {
+  184 |     const q = (text || '').trim();
+  185 |     await expect(ordersSel.productModalSearchInput).toBeVisible({ timeout: 10000 });
+  186 |     await ordersSel.productModalSearchInput.fill(q);
+  187 |     await page.waitForTimeout(400);
+  188 |   },
+  189 | 
+  190 |   async clearSearchInAddProductModal(ordersSel: ReturnType<typeof ordersSelectors>, page: Page) {
+  191 |     await expect(ordersSel.productModalSearchInput).toBeVisible({ timeout: 10000 });
+  192 |     await ordersSel.productModalSearchInput.fill('');
+  193 |     await page.waitForTimeout(300);
+  194 |   },
+  195 | 
+  196 |   async expectProductVisibleInAddModal(ordersSel: ReturnType<typeof ordersSelectors>, page: Page, productName: string) {
+  197 |     const shortName = getShortProductName(productName);
+  198 |     const label = ordersSel.productModalProductLabels.filter({ hasText: shortName }).first();
+  199 |     await expect(label, `Expected product "${shortName}" to be visible in Add product modal`).toBeVisible({
+  200 |       timeout: 10000,
+  201 |     });
+  202 |   },
+  203 | 
+  204 |   async expectProductNotVisibleInAddModal(
+  205 |     ordersSel: ReturnType<typeof ordersSelectors>,
+  206 |     page: Page,
+  207 |     productName: string,
+  208 |   ) {
+  209 |     const shortName = getShortProductName(productName);
+  210 |     const label = ordersSel.productModalProductLabels.filter({ hasText: shortName }).first();
+  211 |     await expect(label, `Expected product "${shortName}" to be hidden in Add product modal`).toBeHidden({
+  212 |       timeout: 10000,
+  213 |     });
+  214 |   },
+  215 | 
+  216 |   async expectProductCheckboxStateInAddModal(
+```

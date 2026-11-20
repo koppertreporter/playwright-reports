@@ -1,0 +1,301 @@
+# Instructions
+
+- Following Playwright test failed.
+- Explain why, be concise, respect Playwright best practices.
+- Provide a snippet of code with the fix, if possible.
+
+# Test info
+
+- Name: organization_locations.spec.ts >> Organization > Locations - List, details & navigation >> TC:19655 - [Locations] Verify enterprise selector on Locations page
+- Location: playwright/specs/organization_locations.spec.ts:191:7
+
+# Error details
+
+```
+Error: User creation request failed: {"id":"b00cc673-1931-4aeb-9965-2aa3c07e1099","message":"Admin/Local Admin role cannot be assigned to non-Koppert employees","statusCode":403,"metadata":[{"defaultMessage":"Admin/Local Admin role cannot be assigned to non-Koppert employees","translationCode":"backend.exceptions.user.adminRoleRequiresKoppertEmail","code":"ADMIN_ROLE_REQUIRES_KOPPERT_EMAIL"}]}
+```
+
+# Page snapshot
+
+```yaml
+- generic [ref=e1]:
+  - generic [ref=e3]:
+    - generic [ref=e4]: You're on DEVELOPMENT OR STAGE
+    - generic [ref=e6]:
+      - img [ref=e7] [cursor=pointer]
+      - menu [ref=e14]:
+        - menuitem "Overview" [ref=e15] [cursor=pointer]:
+          - link "Overview" [ref=e17]:
+            - /url: /apps/overview
+        - menuitem "Order" [ref=e18] [cursor=pointer]:
+          - link "Order" [ref=e20]:
+            - /url: /apps/order
+        - menuitem "Scout" [ref=e21] [cursor=pointer]:
+          - link "Scout" [ref=e23]:
+            - /url: https://www.natutecscout.com/apps/scout
+        - menuitem "Organization" [ref=e24] [cursor=pointer]:
+          - link "Organization" [ref=e26]:
+            - /url: /apps/organization
+        - menuitem "Admin" [ref=e27] [cursor=pointer]:
+          - link "Admin" [ref=e29]:
+            - /url: /apps/admin
+      - generic [ref=e30]:
+        - generic [ref=e31]: AGRICOLA SUAGO, S.L.
+        - generic [ref=e32] [cursor=pointer]:
+          - img "user" [ref=e33]:
+            - img [ref=e34]
+          - text: Superuser for autotests
+    - generic [ref=e36]:
+      - complementary [ref=e38]:
+        - menu [ref=e40]:
+          - menuitem "swap Side Effects" [ref=e41] [cursor=pointer]:
+            - img "swap" [ref=e42]:
+              - img [ref=e43]
+            - link "Side Effects" [ref=e46]:
+              - /url: /apps/protect/side-effects
+          - menuitem "Visit reports" [ref=e47] [cursor=pointer]:
+            - img [ref=e48]
+            - link "Visit reports" [ref=e54]:
+              - /url: /apps/protect/visit-reports
+          - menuitem "search Solution finder" [ref=e55] [cursor=pointer]:
+            - img "search" [ref=e56]:
+              - img [ref=e57]
+            - link "Solution finder" [ref=e60]:
+              - /url: /apps/protect/solution-finder
+        - img "left" [ref=e62] [cursor=pointer]:
+          - img [ref=e63]
+      - main [ref=e65]:
+        - generic [ref=e66]:
+          - generic [ref=e67]:
+            - generic [ref=e68]:
+              - generic [ref=e70]: Beneficial
+              - button "Select product" [ref=e71] [cursor=pointer]:
+                - generic [ref=e72]: Select product
+            - generic [ref=e73]:
+              - generic [ref=e75]: Active ingredient
+              - button "Select product" [ref=e76] [cursor=pointer]:
+                - generic [ref=e77]: Select product
+          - generic [ref=e78]:
+            - generic "Side Effects" [ref=e82]
+            - generic [ref=e83]:
+              - generic [ref=e85]:
+                - img [ref=e88]
+                - generic [ref=e90]: Nothing has been selected yet
+                - generic [ref=e91]: Select one or more beneficials and active ingredients to show side effects.
+              - button "Digital Assistant" [ref=e93] [cursor=pointer]:
+                - img [ref=e94]
+                - generic [ref=e99]: Digital Assistant
+            - generic [ref=e102]: All rights reserved. © Koppert 2026
+  - generic [active]:
+    - generic:
+      - generic:
+        - button "Open Privacy Settings" [ref=e103] [cursor=pointer]:
+          - img [ref=e105]
+        - dialog "Privacy Settings" [ref=e110]:
+          - generic [ref=e114]:
+            - generic [ref=e116]:
+              - img [ref=e119]
+              - heading "Privacy Settings" [level=1] [ref=e122]
+              - generic [ref=e125]: This site uses third-party website tracking technologies to provide and continually improve our services, and to display advertisements according to users' interests. I agree and may revoke or change my consent at any time with effect for the future.
+              - generic [ref=e126]:
+                - generic [ref=e127]:
+                  - link "Privacy Policy" [ref=e128] [cursor=pointer]:
+                    - /url: https://www.koppert.com/privacy-statement/
+                  - link "Cookie Statement" [ref=e129] [cursor=pointer]:
+                    - /url: https://www.koppert.com/cookie-statement/
+                - button "More Information" [ref=e131] [cursor=pointer]:
+                  - generic [ref=e132]: More Information
+            - generic [ref=e134]:
+              - generic [ref=e137]:
+                - generic [ref=e138] [cursor=pointer]: Marketing
+                - switch "Marketing" [ref=e139] [cursor=pointer]:
+                  - img [ref=e140]
+              - generic [ref=e149]:
+                - generic [ref=e150] [cursor=pointer]: Functional
+                - switch "Functional" [ref=e151] [cursor=pointer]:
+                  - img [ref=e152]
+              - generic [ref=e161]:
+                - generic [ref=e162] [cursor=pointer]: Essential
+                - switch "Essential" [checked] [disabled] [ref=e163] [cursor=pointer]:
+                  - img [ref=e164]
+          - generic [ref=e172]:
+            - generic [ref=e174]:
+              - button "Save Settings" [ref=e175] [cursor=pointer]
+              - button "Accept All" [ref=e176] [cursor=pointer]
+            - link "Powered by Usercentrics Consent Management" [ref=e178] [cursor=pointer]:
+              - /url: https://usercentrics.com/consent-management-platform-powered-by-usercentrics/?utm_source=banner_uc&utm_medium=referral&utm_content=v2
+```
+
+# Test source
+
+```ts
+  1   | import { api, getWithRetry } from './apiContext';
+  2   | import { urls } from '../../fixtures/urls';
+  3   | import { generateRandomString, generateStrongPassword, getCurrentIsoTimestamp } from '../utils';
+  4   | import { Page, expect } from '@playwright/test';
+  5   | export let globalUser: any;
+  6   | import { restoreSession, login } from './auth';
+  7   | import { removeAllUserEnterprises } from './enterprises';
+  8   | import { getSuperuserId } from './superuser';
+  9   | import { unifiedEmailHelper as emailHelper } from 'helpers/email';
+  10  | import { executeQuery } from '../db/database';
+  11  | 
+  12  | export async function getCurrentUserEntity(token?: string) {
+  13  |   const response = await (
+  14  |     await api(token)
+  15  |   ).get(urls.api.me, {
+  16  |     data: {},
+  17  |   });
+  18  | 
+  19  |   if (!response.ok()) {
+  20  |     const errorText = await response.text();
+  21  |     throw new Error(`Failed to fetch user entity data: ${errorText}`);
+  22  |   }
+  23  |   return await response.json();
+  24  | }
+  25  | 
+  26  | export type Role =
+  27  |   | 'Orderer'
+  28  |   | 'Allowed Country Advisor'
+  29  |   | 'Admin'
+  30  |   | 'Advisor'
+  31  |   | 'Basic'
+  32  |   | 'Grower'
+  33  |   | 'Local Admin'
+  34  |   | 'Beta user'
+  35  |   | 'Scout2'
+  36  |   | 'Scout';
+  37  | export async function createUser({ page, roles = ['Basic'] }: { page: Page; roles?: Array<Role> }) {
+  38  |   if (roles.includes('Orderer') && !roles.includes('Grower')) {
+  39  |     throw new Error('Orderer role must be paired with Grower role. UI will fail to load without both roles present.');
+  40  |   }
+  41  | 
+  42  |   await login({ page, acceptCookies: false });
+  43  |   const roleIds = [];
+  44  |   const userRoles = await getUserRoles();
+  45  |   userRoles.forEach((role) => {
+  46  |     if (roles) {
+  47  |       if (roles.includes(role.name)) {
+  48  |         roleIds.push(role.id);
+  49  |       }
+  50  |     } else {
+  51  |       roleIds.push(role.id);
+  52  |     }
+  53  |   });
+  54  |   const response = await (
+  55  |     await api()
+  56  |   ).post(urls.api.users, {
+  57  |     data: {
+  58  |       language: 'en',
+  59  |       skipInviteEmail: false,
+  60  |       roleIds: roleIds,
+  61  |       name: 'Playwright Dude' + generateRandomString(),
+  62  |       email: await emailHelper.generateUniqEmail(),
+  63  |     },
+  64  |   });
+  65  | 
+  66  |   if (!response.ok()) {
+  67  |     const errorText = await response.text();
+> 68  |     throw new Error(`User creation request failed: ${errorText}`);
+      |           ^ Error: User creation request failed: {"id":"b00cc673-1931-4aeb-9965-2aa3c07e1099","message":"Admin/Local Admin role cannot be assigned to non-Koppert employees","statusCode":403,"metadata":[{"defaultMessage":"Admin/Local Admin role cannot be assigned to non-Koppert employees","translationCode":"backend.exceptions.user.adminRoleRequiresKoppertEmail","code":"ADMIN_ROLE_REQUIRES_KOPPERT_EMAIL"}]}
+  69  |   }
+  70  | 
+  71  |   const createUserResponse = await response.json();
+  72  |   await logout(page);
+  73  |   const activatedUser = await activateAccountViaEmail(createUserResponse.email, page);
+  74  |   globalUser = activatedUser;
+  75  |   return activatedUser;
+  76  | }
+  77  | 
+  78  | export async function findUserByEmail(email: string, token?: string) {
+  79  |   const response = await (
+  80  |     await api(token)
+  81  |   ).get(`${urls.api.users}?page=1&limit=1&email=${encodeURIComponent(email)}`, {
+  82  |     data: {},
+  83  |   });
+  84  | 
+  85  |   if (!response.ok()) {
+  86  |     const errorText = await response.text();
+  87  |     throw new Error(`Failed to look up user by email ${email}: ${errorText}`);
+  88  |   }
+  89  | 
+  90  |   const { items } = await response.json();
+  91  |   return items?.find((item) => item.email?.toLowerCase() === email.toLowerCase()) ?? null;
+  92  | }
+  93  | 
+  94  | // The list endpoint omits roles, so the detail endpoint is the only way to read them back.
+  95  | export async function getUserById(userId: string, token?: string) {
+  96  |   const response = await (
+  97  |     await api(token)
+  98  |   ).get(`${urls.api.users}/${userId}`, {
+  99  |     data: {},
+  100 |   });
+  101 | 
+  102 |   if (!response.ok()) {
+  103 |     const errorText = await response.text();
+  104 |     throw new Error(`Failed to fetch user ${userId}: ${errorText}`);
+  105 |   }
+  106 | 
+  107 |   return await response.json();
+  108 | }
+  109 | 
+  110 | export async function deleteUser(userId: string) {
+  111 |   if (userId === (await getSuperuserId())) {
+  112 |     throw new Error('You are trying to delete superuser, operation is not allowed');
+  113 |   }
+  114 | 
+  115 |   await removeAllUserEnterprises(userId); // user cannot be deleted if it has enterprises
+  116 | 
+  117 |   const response = await (
+  118 |     await api()
+  119 |   ).delete(`${urls.api.users}/${userId}`, {
+  120 |     data: {},
+  121 |   });
+  122 | 
+  123 |   if (!response.ok()) {
+  124 |     const errorText = await response.text();
+  125 |     throw new Error(`Failed to delete user entity data: ${errorText}`);
+  126 |   }
+  127 | 
+  128 |   const isCI = process.env.CI === 'true' || process.env.CI === '1';
+  129 |   if (!isCI) {
+  130 |     try {
+  131 |       await executeQuery('DELETE FROM authors WHERE user_id = $1', [userId]);
+  132 |     } catch (error) {
+  133 |       console.warn(`Failed to delete author record for user ${userId}:`, error.message);
+  134 |     }
+  135 |   }
+  136 | 
+  137 |   return response;
+  138 | }
+  139 | 
+  140 | export async function getSalesPersons() {
+  141 |   const response = await (
+  142 |     await api()
+  143 |   ).get(urls.api.salesPersons + '?page=1&limit=50', {
+  144 |     data: {},
+  145 |   });
+  146 | 
+  147 |   if (!response.ok()) {
+  148 |     const errorText = await response.text();
+  149 |     throw new Error(`Failed to fetch user entity data: ${errorText}`);
+  150 |   }
+  151 | 
+  152 |   return await response.json();
+  153 | }
+  154 | 
+  155 | export async function resolveRoleIds(roles: Array<Role>): Promise<string[]> {
+  156 |   const roleIds = (await getUserRoles()).filter((role) => roles.includes(role.name)).map((role) => role.id);
+  157 |   if (roleIds.length !== roles.length) {
+  158 |     throw new Error(`Could not resolve every requested role: ${roles.join(', ')}`);
+  159 |   }
+  160 |   return roleIds;
+  161 | }
+  162 | 
+  163 | export async function updateUserRoles(userId: string, roles: Array<Role>, token?: string) {
+  164 |   const response = await (
+  165 |     await api(token)
+  166 |   ).patch(`${urls.api.users}/${userId}`, {
+  167 |     data: { roleIds: await resolveRoleIds(roles) },
+  168 |   });
+```

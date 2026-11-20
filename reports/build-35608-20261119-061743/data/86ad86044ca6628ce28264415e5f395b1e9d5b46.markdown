@@ -1,0 +1,241 @@
+# Instructions
+
+- Following Playwright test failed.
+- Explain why, be concise, respect Playwright best practices.
+- Provide a snippet of code with the fix, if possible.
+
+# Test info
+
+- Name: lagBuster.spec.ts >> Planner - Lag Buster >> TC:14336 - Check 'Your changes were discarded' modal does NOT appear after saving Order details for the SAME location
+- Location: playwright/specs/lagBuster.spec.ts:2010:7
+
+# Error details
+
+```
+Error: Order reference should change in real time for Client 2
+
+expect(locator).toHaveValue(expected) failed
+
+Locator:  locator('.ant-modal:visible .ant-modal-content').filter({ hasText: /Order details/i }).first().locator('input[type="text"]').first()
+Expected: "REF-1795059797935"
+Received: ""
+Timeout:  15000ms
+
+Call log:
+  - Order reference should change in real time for Client 2 with timeout 15000ms
+  - waiting for locator('.ant-modal:visible .ant-modal-content').filter({ hasText: /Order details/i }).first().locator('input[type="text"]').first()
+    34 × locator resolved to <input value="" type="text" maxlength="60" name="reference" class="ant-input ant-input-lg sc-dkmUuB bKBgKr"/>
+       - unexpected value ""
+
+```
+
+```yaml
+- textbox
+```
+
+# Test source
+
+```ts
+  2011 |     page,
+  2012 |     browser,
+  2013 |   }) => {
+  2014 |     const user1 = await ordersPage.setupOrdererUserWithEnterpriseAccess(page, corpnav, ENTERPRISE_WITH_DATA_ID);
+  2015 |     userIdsToDelete.push(user1.userId);
+  2016 |     // Deleted orders stay in the planner's order cache for a while; cells read from them vanish mid-test.
+  2017 |     await cleanupOrdersAndWaitForCache(page);
+  2018 | 
+  2019 |     await page.goto(urls.orderPlanner);
+  2020 |     await expect(planner.orderModeToggle).toBeVisible({ timeout: 30000 });
+  2021 |     await page.waitForTimeout(3000);
+  2022 | 
+  2023 |     const locationName = await selectSingleLocation(page, planner);
+  2024 | 
+  2025 |     await plannerPage.switchOrderMode(page, true);
+  2026 |     await plannerPage.ensureMatrixHasOrderableProducts(page);
+  2027 |     await expect(planner.weekHeaders.first()).toBeVisible({ timeout: 30000 });
+  2028 |     await page.waitForTimeout(2000);
+  2029 | 
+  2030 |     const allInputs = planner.orderableInputs;
+  2031 |     const inputCount = await allInputs.count();
+  2032 |     expect(inputCount, 'Expected to have orderable inputs on planner').toBeGreaterThan(0);
+  2033 | 
+  2034 |     let productNameFromTestId = '';
+  2035 |     const orderCells: string[] = [];
+  2036 | 
+  2037 |     for (let i = 0; i < Math.min(inputCount, 200); i++) {
+  2038 |       const tempInput = allInputs.nth(i);
+  2039 |       const isEditable = await tempInput.isEditable().catch(() => false);
+  2040 |       if (!isEditable) continue;
+  2041 |       const isDisabled = await tempInput.isDisabled().catch(() => true);
+  2042 |       if (isDisabled) continue;
+  2043 |       const testId = (await tempInput.getAttribute('data-testid')) || '';
+  2044 |       if (!testId) continue;
+  2045 |       const productMatch = testId.match(/orderable-cell:([^:]+):/);
+  2046 |       if (!productMatch) continue;
+  2047 |       if (!productNameFromTestId) productNameFromTestId = productMatch[1];
+  2048 |       if (testId.includes(productNameFromTestId)) {
+  2049 |         orderCells.push(testId);
+  2050 |         if (orderCells.length >= 2) break;
+  2051 |       }
+  2052 |     }
+  2053 |     expect(orderCells.length, 'Expected to find at least 2 editable cells for Product 1').toBeGreaterThanOrEqual(2);
+  2054 | 
+  2055 |     const input1 = page.locator(`input[data-testid="${orderCells[0]}"]`);
+  2056 |     await input1.scrollIntoViewIfNeeded();
+  2057 |     const currentValue1 = (await input1.inputValue()).trim();
+  2058 |     const newValue1 = currentValue1 === '3' ? '10' : '3';
+  2059 |     await input1.click();
+  2060 |     await input1.fill(newValue1);
+  2061 |     await input1.press('Tab');
+  2062 |     await page.waitForTimeout(1000);
+  2063 | 
+  2064 |     await confirmOrderOnClient1(page);
+  2065 | 
+  2066 |     const input2 = page.locator(`input[data-testid="${orderCells[1]}"]`);
+  2067 |     await input2.scrollIntoViewIfNeeded();
+  2068 |     const currentValue2 = (await input2.inputValue()).trim();
+  2069 |     const newValue2 = currentValue2 === '5' ? '15' : '5';
+  2070 |     await input2.click();
+  2071 |     await input2.fill(newValue2);
+  2072 |     await input2.press('Tab');
+  2073 |     await page.waitForTimeout(1000);
+  2074 | 
+  2075 |     await confirmOrderOnClient1(page);
+  2076 | 
+  2077 |     const { context2, page2, planner2 } = await setupClient2(browser, user1, locationName);
+  2078 | 
+  2079 |     const dateMatch = orderCells[0].match(/orderable-cell:[^:]+:(\d{4})-(\d{2})-(\d{2})/);
+  2080 |     expect(dateMatch, 'Expected to extract date from cell testid').toBeTruthy();
+  2081 |     const orderDate = `${dateMatch![3]}-${dateMatch![2]}`;
+  2082 | 
+  2083 |     // Round 1: Both clients open order details, Client 1 edits reference
+  2084 |     await openOrderDetailsModal(page2, planner2, orderDate);
+  2085 |     await openOrderDetailsModal(page, planner, orderDate);
+  2086 | 
+  2087 |     const orderRefInput = planner.orderDetailsModalOrderReferenceInput;
+  2088 |     await expect(orderRefInput).toBeVisible({ timeout: 10000 });
+  2089 |     await expect(orderRefInput).toBeEditable({ timeout: 5000 });
+  2090 | 
+  2091 |     const testRef1 = `REF-${Date.now()}`;
+  2092 |     await orderRefInput.scrollIntoViewIfNeeded();
+  2093 |     await orderRefInput.click();
+  2094 |     await orderRefInput.fill(testRef1);
+  2095 |     await page.waitForTimeout(500);
+  2096 | 
+  2097 |     await expect(planner.orderDetailsModalSaveButton).toBeEnabled({ timeout: 10000 });
+  2098 |     await planner.orderDetailsModalSaveButton.click();
+  2099 |     await page.waitForTimeout(3000);
+  2100 | 
+  2101 |     const modalVisible1 = await planner2.changesDiscardedModal.isVisible().catch(() => false);
+  2102 |     expect(modalVisible1, 'Step 4: "Your changes were discarded" modal should NOT appear for Client 2').toBe(false);
+  2103 | 
+  2104 |     await expect(planner2.orderDetailsModal, 'Order details should still be opened for Client 2').toBeVisible({
+  2105 |       timeout: 5000,
+  2106 |     });
+  2107 | 
+  2108 |     await expect(
+  2109 |       planner2.orderDetailsModalOrderReferenceInput,
+  2110 |       'Order reference should change in real time for Client 2',
+> 2111 |     ).toHaveValue(testRef1, { timeout: 15000 });
+       |       ^ Error: Order reference should change in real time for Client 2
+  2112 | 
+  2113 |     if (await planner.orderDetailsModal.isVisible().catch(() => false)) {
+  2114 |       await planner.orderDetailsModalCloseIcon.click();
+  2115 |       await expect(planner.orderDetailsModal).not.toBeVisible({ timeout: 10000 });
+  2116 |     }
+  2117 |     await planner2.orderDetailsModalCloseIcon.click();
+  2118 |     await expect(planner2.orderDetailsModal).not.toBeVisible({ timeout: 5000 });
+  2119 | 
+  2120 |     // Round 2: Both re-open, Client 1 edits notes
+  2121 |     await openOrderDetailsModal(page2, planner2, orderDate);
+  2122 |     await openOrderDetailsModal(page, planner, orderDate);
+  2123 | 
+  2124 |     const orderNoteTextarea = planner.orderDetailsModalOrderNotesTextarea;
+  2125 |     await expect(orderNoteTextarea).toBeVisible({ timeout: 10000 });
+  2126 |     await expect(orderNoteTextarea).toBeEditable({ timeout: 5000 });
+  2127 | 
+  2128 |     const testNote1 = `Note ${Date.now()}`;
+  2129 |     await orderNoteTextarea.scrollIntoViewIfNeeded();
+  2130 |     await orderNoteTextarea.click();
+  2131 |     await orderNoteTextarea.fill(testNote1);
+  2132 |     await page.waitForTimeout(500);
+  2133 | 
+  2134 |     await expect(planner.orderDetailsModalSaveButton).toBeEnabled({ timeout: 10000 });
+  2135 |     await planner.orderDetailsModalSaveButton.click();
+  2136 |     await page.waitForTimeout(3000);
+  2137 | 
+  2138 |     const modalVisible2 = await planner2.changesDiscardedModal.isVisible().catch(() => false);
+  2139 |     expect(modalVisible2, 'Step 5: "Your changes were discarded" modal should NOT appear for Client 2').toBe(false);
+  2140 | 
+  2141 |     await expect(planner2.orderDetailsModal, 'Order details should still be opened for Client 2').toBeVisible({
+  2142 |       timeout: 5000,
+  2143 |     });
+  2144 | 
+  2145 |     await expect(
+  2146 |       planner2.orderDetailsModalOrderNotesTextarea,
+  2147 |       'Order note should change in real time for Client 2',
+  2148 |     ).toHaveValue(testNote1, { timeout: 15000 });
+  2149 | 
+  2150 |     if (await planner.orderDetailsModal.isVisible().catch(() => false)) {
+  2151 |       await planner.orderDetailsModalCloseIcon.click();
+  2152 |       await expect(planner.orderDetailsModal).not.toBeVisible({ timeout: 10000 });
+  2153 |     }
+  2154 |     await planner2.orderDetailsModalCloseIcon.click();
+  2155 |     await expect(planner2.orderDetailsModal).not.toBeVisible({ timeout: 5000 });
+  2156 | 
+  2157 |     // Round 3: Both re-open, Client 1 edits reference + notes
+  2158 |     await openOrderDetailsModal(page2, planner2, orderDate);
+  2159 |     await openOrderDetailsModal(page, planner, orderDate);
+  2160 | 
+  2161 |     const orderRefInput2 = planner.orderDetailsModalOrderReferenceInput;
+  2162 |     await expect(orderRefInput2).toBeVisible({ timeout: 10000 });
+  2163 |     await expect(orderRefInput2).toBeEditable({ timeout: 5000 });
+  2164 | 
+  2165 |     const testRef2 = `REF2-${Date.now()}`;
+  2166 |     await orderRefInput2.scrollIntoViewIfNeeded();
+  2167 |     await orderRefInput2.click();
+  2168 |     await orderRefInput2.fill(testRef2);
+  2169 |     await page.waitForTimeout(500);
+  2170 | 
+  2171 |     const orderNoteTextarea2 = planner.orderDetailsModalOrderNotesTextarea;
+  2172 |     await expect(orderNoteTextarea2).toBeVisible({ timeout: 10000 });
+  2173 |     await expect(orderNoteTextarea2).toBeEditable({ timeout: 5000 });
+  2174 | 
+  2175 |     const testNote2 = `Note2 ${Date.now()}`;
+  2176 |     await orderNoteTextarea2.scrollIntoViewIfNeeded();
+  2177 |     await orderNoteTextarea2.click();
+  2178 |     await orderNoteTextarea2.fill(testNote2);
+  2179 |     await page.waitForTimeout(500);
+  2180 | 
+  2181 |     await expect(planner.orderDetailsModalSaveButton).toBeEnabled({ timeout: 10000 });
+  2182 |     await planner.orderDetailsModalSaveButton.click();
+  2183 |     await page.waitForTimeout(3000);
+  2184 | 
+  2185 |     const modalVisible3 = await planner2.changesDiscardedModal.isVisible().catch(() => false);
+  2186 |     expect(modalVisible3, 'Step 6: "Your changes were discarded" modal should NOT appear for Client 2').toBe(false);
+  2187 | 
+  2188 |     await expect(planner2.orderDetailsModal, 'Order details should still be opened for Client 2').toBeVisible({
+  2189 |       timeout: 5000,
+  2190 |     });
+  2191 | 
+  2192 |     await expect(
+  2193 |       planner2.orderDetailsModalOrderReferenceInput,
+  2194 |       'Order reference should change in real time for Client 2',
+  2195 |     ).toHaveValue(testRef2, { timeout: 15000 });
+  2196 |     await expect(
+  2197 |       planner2.orderDetailsModalOrderNotesTextarea,
+  2198 |       'Order note should change in real time for Client 2',
+  2199 |     ).toHaveValue(testNote2, { timeout: 15000 });
+  2200 | 
+  2201 |     await context2.close();
+  2202 |   });
+  2203 | 
+  2204 |   test(`TC:14338 - Check 'Your changes were discarded' modal after saving Order details + Ordering for the SAME location`, async ({
+  2205 |     page,
+  2206 |     browser,
+  2207 |   }) => {
+  2208 |     const user1 = await ordersPage.setupOrdererUserWithEnterpriseAccess(page, corpnav, ENTERPRISE_WITH_DATA_ID);
+  2209 |     userIdsToDelete.push(user1.userId);
+  2210 |     // The two cells are picked right after cleanup: rows the stale cache still serves for the deleted
+  2211 |     // orders would be picked, then vanish when the cache drops them.
+```

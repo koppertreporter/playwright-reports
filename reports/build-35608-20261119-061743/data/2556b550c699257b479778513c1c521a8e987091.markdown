@@ -1,0 +1,252 @@
+# Instructions
+
+- Following Playwright test failed.
+- Explain why, be concise, respect Playwright best practices.
+- Provide a snippet of code with the fix, if possible.
+
+# Test info
+
+- Name: planner_3.spec.ts >> Planner - Product Availability >> TC:14676 - [Double orders popup] Check Double orders popup and navigation to Order details for Scheduled orders
+- Location: playwright/specs/planner_3.spec.ts:2089:7
+
+# Error details
+
+```
+Error: expect(locator).toBeHidden() failed
+
+Locator:  locator('.ant-modal-content').filter({ hasText: /Ordering in Koppert One/i }).first()
+Expected: hidden
+Received: visible
+Timeout:  15000ms
+
+Call log:
+  - Expect "toBeHidden" with timeout 15000ms
+  - waiting for locator('.ant-modal-content').filter({ hasText: /Ordering in Koppert One/i }).first()
+    34 × locator resolved to <div class="ant-modal-content">…</div>
+       - unexpected value "visible"
+
+```
+
+```yaml
+- text: Ordering in Koppert One Placing your orders at Koppert will now be easier than ever. Accept the following statements to start ordering with Koppert One.
+- separator
+- checkbox "I have read and accept the General Terms and Conditions" [checked] [disabled]
+- text: I have read and accept the
+- link "General Terms and Conditions":
+  - /url: https://www.koppert.one/assets/statements/terms-of-use.pdf
+- separator
+- checkbox "By clicking the 'Save' button, you acknowledge that the order is definitive and legally binding. This applies to every update made in Koppert One." [checked] [disabled]
+- text: By clicking the 'Save' button, you acknowledge that the order is definitive and legally binding. This applies to every update made in Koppert One.
+- separator
+- button "Close" [disabled]
+- button "loading Save" [disabled]:
+  - img "loading"
+  - text: Save
+```
+
+# Test source
+
+```ts
+  1154 |         try {
+  1155 |           await expect
+  1156 |             .poll(isSynced, { timeout: timeoutMs, message: 'Saved order never reached the planner with its F&O number' })
+  1157 |             .toBe(true);
+  1158 |         } finally {
+  1159 |           stop();
+  1160 |         }
+  1161 |         // Let the push that delivered it finish rendering, and clear its modal if it raised one.
+  1162 |         await this.settleLiveSync(page, 2000);
+  1163 |       },
+  1164 |     };
+  1165 |   },
+  1166 | 
+  1167 |   // Like seedEditableOrderViaUI, but returns only once the planner holds the order as F&O numbered it
+  1168 |   // (see trackOwnOrderSync), so the caller can edit the seeded cell without a live-sync push discarding it.
+  1169 |   async seedSyncedOrderViaUI(page: Page, quantity = '10', timeoutMs = 90000): Promise<{ testId: string; value: string }> {
+  1170 |     const sync = this.trackOwnOrderSync(page);
+  1171 |     try {
+  1172 |       const seeded = await this.seedEditableOrderViaUI(page, quantity);
+  1173 |       await sync.waitForSync(timeoutMs);
+  1174 |       return seeded;
+  1175 |     } finally {
+  1176 |       sync.stop();
+  1177 |     }
+  1178 |   },
+  1179 | 
+  1180 |   // A freshly-created user can bounce to Home right after the order-details page first renders, while
+  1181 |   // the app finishes establishing the enterprise context - and the bounce can recur even after the
+  1182 |   // title reappears. Re-navigate to the captured order URL and wait for the Edit button to stay put,
+  1183 |   // retrying through any repeated bounce. Pass the page.url() captured after the order-details title
+  1184 |   // appeared. Returns true once the Edit button is stably visible, false if it never settles.
+  1185 |   async ensureOrderDetailsSettled(page: Page, orderDetailsUrl: string): Promise<boolean> {
+  1186 |     const orders = ordersSelectors(page);
+  1187 |     const isEditStable = async () => {
+  1188 |       const visible = await orders.editButton.isVisible({ timeout: 6000 }).catch(() => false);
+  1189 |       if (!visible) return false;
+  1190 |       await page.waitForTimeout(2000);
+  1191 |       return orders.editButton.isVisible().catch(() => false);
+  1192 |     };
+  1193 | 
+  1194 |     if (await isEditStable()) return true;
+  1195 |     if (!orderDetailsUrl || !/\/orders\//.test(orderDetailsUrl)) return false;
+  1196 | 
+  1197 |     for (let attempt = 0; attempt < 5; attempt++) {
+  1198 |       await page.goto(orderDetailsUrl);
+  1199 |       await orders.orderDetailsPageTitle.isVisible({ timeout: 15000 }).catch(() => false);
+  1200 |       if (await isEditStable()) return true;
+  1201 |     }
+  1202 |     return false;
+  1203 |   },
+  1204 | 
+  1205 |   async verifyOrderingTermsModalStructure(page: Page) {
+  1206 |     const planner = plannerSelectors(page);
+  1207 | 
+  1208 |     await expect(planner.orderingTermsModalContent).toBeVisible({ timeout: 15000 });
+  1209 | 
+  1210 |     await expect(planner.orderingTermsCheckboxes).toHaveCount(2, { timeout: 10000 });
+  1211 |     await expect(planner.orderingTermsCheckboxes.nth(0)).not.toBeChecked();
+  1212 |     await expect(planner.orderingTermsCheckboxes.nth(1)).not.toBeChecked();
+  1213 | 
+  1214 |     await expect(planner.orderingTermsGoBackButton).toBeVisible();
+  1215 |     await expect(planner.orderingTermsGoBackButton).toBeEnabled();
+  1216 | 
+  1217 |     await expect(planner.orderingTermsSaveButton).toBeVisible();
+  1218 |     await expect(planner.orderingTermsSaveButton).toBeDisabled();
+  1219 |   },
+  1220 | 
+  1221 |   async acceptOrderingTermsModalIfVisible(page: Page) {
+  1222 |     const planner = plannerSelectors(page);
+  1223 | 
+  1224 |     const isVisible = await planner.orderingTermsModalContent.isVisible({ timeout: 3000 }).catch(() => false);
+  1225 |     if (!isVisible) return;
+  1226 | 
+  1227 |     await expect(planner.orderingTermsCheckboxes).toHaveCount(2, { timeout: 10000 });
+  1228 | 
+  1229 |     const cb0 = planner.orderingTermsCheckboxes.nth(0);
+  1230 |     const cb1 = planner.orderingTermsCheckboxes.nth(1);
+  1231 | 
+  1232 |     if (!(await cb0.isChecked().catch(() => false))) {
+  1233 |       await cb0.scrollIntoViewIfNeeded();
+  1234 |       await page.waitForTimeout(300);
+  1235 |       await cb0.click({ force: true });
+  1236 |       await expect(cb0).toBeChecked({ timeout: 5000 });
+  1237 |     }
+  1238 |     if (!(await cb1.isChecked().catch(() => false))) {
+  1239 |       await cb1.scrollIntoViewIfNeeded();
+  1240 |       await page.waitForTimeout(300);
+  1241 |       await cb1.click({ force: true });
+  1242 |       await expect(cb1).toBeChecked({ timeout: 5000 });
+  1243 |     }
+  1244 | 
+  1245 |     // Scroll to bottom of terms to enable Save button
+  1246 |     await planner.orderingTermsModalContent.evaluate((el) => {
+  1247 |       el.scrollTop = el.scrollHeight;
+  1248 |     });
+  1249 |     await page.waitForTimeout(1000);
+  1250 | 
+  1251 |     await expect(planner.orderingTermsSaveButton).toBeEnabled({ timeout: 15000 });
+  1252 |     await planner.orderingTermsSaveButton.click();
+  1253 | 
+> 1254 |     await expect(planner.orderingTermsModalContent).toBeHidden({ timeout: 15000 });
+       |                                                     ^ Error: expect(locator).toBeHidden() failed
+  1255 |   },
+  1256 | 
+  1257 |   async verifyTermsModalFirstTime(page: Page) {
+  1258 |     const planner = plannerSelectors(page);
+  1259 | 
+  1260 |     await expect(planner.termsModal).toBeVisible({ timeout: 15000 });
+  1261 | 
+  1262 |     await expect(planner.termsCheckboxes).toHaveCount(2, { timeout: 10000 });
+  1263 |     await expect(planner.termsCheckboxes.nth(0)).not.toBeChecked();
+  1264 |     await expect(planner.termsCheckboxes.nth(1)).not.toBeChecked();
+  1265 | 
+  1266 |     await expect(planner.termsGoBackButton).toBeVisible();
+  1267 |     await expect(planner.termsGoBackButton).toBeEnabled();
+  1268 | 
+  1269 |     await expect(planner.termsSaveButton).toBeVisible();
+  1270 |     await expect(planner.termsSaveButton).toBeDisabled();
+  1271 |   },
+  1272 | 
+  1273 |   // Products are grouped under a location header rendered as a leaf div whose text is the location
+  1274 |   // name, sitting directly above that location's product rows. The location owning the first product
+  1275 |   // row is therefore the header positioned closest above it. Returns that location, i.e. the one
+  1276 |   // whose unsaved changes drive the leave guard. Pass the known location names to match against.
+  1277 |   async getFirstProductLocationName(page: Page, locationNames: string[]) {
+  1278 |     return await page.evaluate((names: string[]) => {
+  1279 |       const firstRow = document.querySelector('[data-testid^="row:"]');
+  1280 |       if (!firstRow) return null;
+  1281 |       const rowTop = firstRow.getBoundingClientRect().top;
+  1282 |       const headers: { title: string; top: number }[] = [];
+  1283 |       const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_ELEMENT);
+  1284 |       let node = walker.nextNode() as HTMLElement | null;
+  1285 |       while (node) {
+  1286 |         if (node.tagName === 'DIV' && node.childElementCount === 0) {
+  1287 |           const text = (node.textContent || '').trim();
+  1288 |           if (names.includes(text)) headers.push({ title: text, top: node.getBoundingClientRect().top });
+  1289 |         }
+  1290 |         node = walker.nextNode() as HTMLElement | null;
+  1291 |       }
+  1292 |       const above = headers.filter((h) => h.top <= rowTop + 5).sort((a, b) => b.top - a.top);
+  1293 |       return above.length ? above[0].title : null;
+  1294 |     }, locationNames);
+  1295 |   },
+  1296 | 
+  1297 |   // The planner receives live server pushes; a delayed echo of freshly-seeded data can surface a
+  1298 |   // "Your changes were discarded" modal. Let it settle and dismiss it before making unsaved edits,
+  1299 |   // so the echo does not land mid-edit and silently wipe the change under test.
+  1300 |   async settleLiveSync(page: Page, waitMs = 6000) {
+  1301 |     const planner = plannerSelectors(page);
+  1302 |     await page.waitForTimeout(waitMs);
+  1303 |     if (await planner.dataDiscardedModal.isVisible().catch(() => false)) {
+  1304 |       await planner.dataDiscardedCloseButton.click().catch(() => {});
+  1305 |       await expect(planner.dataDiscardedModal).toBeHidden({ timeout: 10000 });
+  1306 |     }
+  1307 |   },
+  1308 | 
+  1309 |   async openLocationsDropdown(page: Page) {
+  1310 |     const planner = plannerSelectors(page);
+  1311 |     await page.waitForTimeout(500);
+  1312 |     await planner.locationsDropdown.click();
+  1313 |     await expect(planner.locationsDropdownPanel).toBeVisible({ timeout: 10000 });
+  1314 |   },
+  1315 | 
+  1316 |   async getVisibleLocationNames(page: Page): Promise<string[]> {
+  1317 |     return getVisibleLocationOptionNames(plannerSelectors(page));
+  1318 |   },
+  1319 | 
+  1320 |   async searchLocationsByKeyboard(page: Page, text: string) {
+  1321 |     const planner = plannerSelectors(page);
+  1322 |     await ensureLocationsDropdownOpen(planner);
+  1323 | 
+  1324 |     await planner.locationsDropdown.click({ force: true });
+  1325 | 
+  1326 |     const input = planner.locationsComboboxInput;
+  1327 |     await expect(input).toHaveCount(1, { timeout: 10000 });
+  1328 | 
+  1329 |     await input.evaluate((el: any) => {
+  1330 |       el.removeAttribute('readonly');
+  1331 |       el.readOnly = false;
+  1332 |       el.style.opacity = '1';
+  1333 |     });
+  1334 | 
+  1335 |     await input.fill('', { force: true });
+  1336 | 
+  1337 |     if (text) {
+  1338 |       await input.fill(text, { force: true });
+  1339 |     }
+  1340 | 
+  1341 |     await input.dispatchEvent('input').catch(() => {});
+  1342 |     await input.dispatchEvent('keyup').catch(() => {});
+  1343 |     await input.dispatchEvent('change').catch(() => {});
+  1344 | 
+  1345 |     await page.waitForTimeout(400);
+  1346 |   },
+  1347 | 
+  1348 |   async getAllLocationOptionNames(page: Page) {
+  1349 |     const planner = plannerSelectors(page);
+  1350 |     await ensureLocationsDropdownOpen(planner);
+  1351 |     return getAllLocationOptionNames(planner, page);
+  1352 |   },
+  1353 | 
+  1354 |   async expectLocationsFilteredAndAlphabetical(page: Page) {
+```

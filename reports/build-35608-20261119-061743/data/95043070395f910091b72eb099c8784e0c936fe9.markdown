@@ -1,0 +1,230 @@
+# Instructions
+
+- Following Playwright test failed.
+- Explain why, be concise, respect Playwright best practices.
+- Provide a snippet of code with the fix, if possible.
+
+# Test info
+
+- Name: orders_reference_setting.spec.ts >> Order Reference setting - Optional/Required >> TC:20791 - [Order reference] Order can NOT be created with empty Order Reference when the setting is Required (Planner)
+- Location: playwright/specs/orders_reference_setting.spec.ts:109:7
+
+# Error details
+
+```
+TimeoutError: locator.click: Timeout 30000ms exceeded.
+Call log:
+  - waiting for locator('.ant-modal:visible .ant-modal-content').filter({ hasText: /Order details/i }).first().getByRole('button', { name: /^Save$/i }).first()
+    - locator resolved to <button type="submit" class="ant-btn ant-btn-primary">…</button>
+  - attempting click action
+    - waiting for element to be visible, enabled and stable
+  - element was detached from the DOM, retrying
+
+```
+
+# Test source
+
+```ts
+  3255 | 
+  3256 |     if (!uncheckedRow) {
+  3257 |       throw new Error('product already checked');
+  3258 |     }
+  3259 | 
+  3260 |     await uncheckedRow.click();
+  3261 |     await page.waitForTimeout(500);
+  3262 | 
+  3263 |     await expect(planner.addProductModalAddButton).toBeEnabled({ timeout: 10000 });
+  3264 |     await planner.addProductModalAddButton.click();
+  3265 | 
+  3266 |     await expect(planner.addProductModal).toBeHidden({ timeout: 10000 });
+  3267 | 
+  3268 |     await expect(planner.productRows).toHaveCount(initialRowCount + 1, { timeout: 10000 });
+  3269 |     await page.waitForTimeout(1000);
+  3270 |   },
+  3271 | 
+  3272 |   async setProductQuantity(page: Page, productName: string | null, quantity: number, inputIndex: number = 0) {
+  3273 |     const planner = plannerSelectors(page);
+  3274 | 
+  3275 |     const input = productName
+  3276 |       ? planner.orderableInputsByShortName(getShortProductName(productName)).nth(inputIndex)
+  3277 |       : planner.orderableInputs.nth(inputIndex);
+  3278 | 
+  3279 |     await expect(input).toBeVisible({ timeout: 30000 });
+  3280 |     await input.click();
+  3281 |     await input.fill(String(quantity));
+  3282 |     await page.keyboard.press('Tab');
+  3283 |     await page.waitForTimeout(2000);
+  3284 |   },
+  3285 | 
+  3286 |   async clickOrderButton(page: Page) {
+  3287 |     const planner = plannerSelectors(page);
+  3288 | 
+  3289 |     await expect(planner.orderButton).toBeVisible({ timeout: 30000 });
+  3290 |     await expect(planner.orderButton).toBeEnabled({ timeout: 30000 });
+  3291 |     await planner.orderButton.click();
+  3292 | 
+  3293 |     const handled = await this.handleOrderReferencesMandatoryIfNeeded(page);
+  3294 |     if (handled) {
+  3295 |       await expect(planner.orderButton).toBeVisible({ timeout: 30000 });
+  3296 |       await expect(planner.orderButton).toBeEnabled({ timeout: 30000 });
+  3297 |       await planner.orderButton.click();
+  3298 |     }
+  3299 |   },
+  3300 | 
+  3301 |   async confirmOrdering(page: Page) {
+  3302 |     const planner = plannerSelectors(page);
+  3303 | 
+  3304 |     await this.clickOrderButton(page);
+  3305 | 
+  3306 |     await expect(planner.orderConfirmationModal).toBeVisible({ timeout: 10000 });
+  3307 |     await planner.orderConfirmationModalConfirmButton.click();
+  3308 |   },
+  3309 | 
+  3310 |   async setQuantityAndOrder(page: Page, productName: string, quantity: number, inputIndex: number = 0) {
+  3311 |     await this.setProductQuantity(page, productName, quantity, inputIndex);
+  3312 |     await this.confirmOrdering(page);
+  3313 |   },
+  3314 | 
+  3315 |   async addProductAndOrder(page: Page, productName: string = 'Aphidius', quantity: number = 5) {
+  3316 |     await this.addProductFromPlanner(page, productName);
+  3317 |     await this.setProductQuantity(page, productName, quantity, 0);
+  3318 |     await this.confirmOrdering(page);
+  3319 |   },
+  3320 | 
+  3321 |   async fillReferenceInOrderDetailsModal(page: Page): Promise<boolean> {
+  3322 |     const planner = plannerSelectors(page);
+  3323 | 
+  3324 |     const refInput = planner.orderDetailsModalOrderReferenceInput;
+  3325 |     if (!(await refInput.isVisible({ timeout: 2000 }).catch(() => false))) {
+  3326 |       await planner.orderDetailsModalCloseIcon.click().catch(() => {});
+  3327 |       await expect(planner.orderDetailsModal).toBeHidden({ timeout: 10000 });
+  3328 |       return false;
+  3329 |     }
+  3330 | 
+  3331 |     // The app disables the reference field while an order still carries its temporary #NSO- id, and
+  3332 |     // there it never becomes editable - fill() used to sit out its full 30s against it. Wait briefly
+  3333 |     // so a field disabled only while the modal renders is still filled, and skip one that stays so.
+  3334 |     const becameEditable = await expect(refInput)
+  3335 |       .toBeEditable({ timeout: 5000 })
+  3336 |       .then(() => true)
+  3337 |       .catch(() => false);
+  3338 |     if (!becameEditable) {
+  3339 |       await planner.orderDetailsModalCloseIcon.click().catch(() => {});
+  3340 |       await expect(planner.orderDetailsModal).toBeHidden({ timeout: 10000 });
+  3341 |       return false;
+  3342 |     }
+  3343 | 
+  3344 |     const currentRef = (await refInput.inputValue()).trim();
+  3345 |     if (currentRef) {
+  3346 |       await planner.orderDetailsModalCloseIcon.click();
+  3347 |       await expect(planner.orderDetailsModal).toBeHidden({ timeout: 10000 });
+  3348 |       return false;
+  3349 |     }
+  3350 | 
+  3351 |     await refInput.fill(`REF-${Date.now()}`);
+  3352 | 
+  3353 |     const saveEnabled = await planner.orderDetailsModalSaveButton.isEnabled({ timeout: 3000 }).catch(() => false);
+  3354 |     if (saveEnabled) {
+> 3355 |       await planner.orderDetailsModalSaveButton.click();
+       |                                                 ^ TimeoutError: locator.click: Timeout 30000ms exceeded.
+  3356 |       await expect(planner.orderDetailsModal).toBeHidden({ timeout: 10000 });
+  3357 |       return true;
+  3358 |     }
+  3359 | 
+  3360 |     await planner.orderDetailsModalCloseIcon.click();
+  3361 |     await expect(planner.orderDetailsModal).toBeHidden({ timeout: 10000 });
+  3362 |     return false;
+  3363 |   },
+  3364 | 
+  3365 |   async fillOrderReferencesForAllVisibleOrders(page: Page) {
+  3366 |     const planner = plannerSelectors(page);
+  3367 | 
+  3368 |     const headers = planner.dateHeadersWithOrderIndicator;
+  3369 |     const count = await headers.count();
+  3370 | 
+  3371 |     for (let i = 0; i < count; i++) {
+  3372 |       const header = headers.nth(i);
+  3373 |       if (!(await header.isVisible().catch(() => false))) continue;
+  3374 | 
+  3375 |       const cubeIcon = header.locator('svg[viewBox="0 0 48 48"]').first();
+  3376 |       if (!(await cubeIcon.isVisible().catch(() => false))) continue;
+  3377 | 
+  3378 |       await this.clickOrderCube(cubeIcon);
+  3379 | 
+  3380 |       await page.waitForTimeout(500);
+  3381 | 
+  3382 |       const modalVisible = await planner.orderDetailsModal.isVisible({ timeout: 3000 }).catch(() => false);
+  3383 | 
+  3384 |       if (modalVisible) {
+  3385 |         await this.fillReferenceInOrderDetailsModal(page);
+  3386 |       } else {
+  3387 |         const popupVisible = await planner.dateHeaderPopup.isVisible({ timeout: 2000 }).catch(() => false);
+  3388 |         if (popupVisible) {
+  3389 |           const openButtons = planner.dateHeaderPopup.getByRole('button', { name: /^Open$/i });
+  3390 |           const btnCount = await openButtons.count();
+  3391 | 
+  3392 |           for (let j = 0; j < btnCount; j++) {
+  3393 |             if (j > 0) {
+  3394 |               await this.clickOrderCube(cubeIcon);
+  3395 |               await expect(planner.dateHeaderPopup)
+  3396 |                 .toBeVisible({ timeout: 5000 })
+  3397 |                 .catch(() => {});
+  3398 |             }
+  3399 | 
+  3400 |             const currentUrl = page.url();
+  3401 |             // A day with several orders renders a popup taller than the viewport, and its lower rows
+  3402 |             // cannot be scrolled into view because the popup is absolutely positioned - a real click
+  3403 |             // then fails outright, so fall back to dispatching the event. Re-opening the popup does not
+  3404 |             // always bring the same rows back (orders F&O never numbered render no Open action at all),
+  3405 |             // so a row that is no longer there is skipped rather than waited out - this loop is here to
+  3406 |             // clear a mandatory-reference block, not to assert anything.
+  3407 |             const openButton = openButtons.nth(j);
+  3408 |             if (!(await openButton.isVisible({ timeout: 2000 }).catch(() => false))) continue;
+  3409 |             await openButton.scrollIntoViewIfNeeded().catch(() => {});
+  3410 |             await openButton.click({ force: true, timeout: 5000 }).catch(async () => {
+  3411 |               await openButton.dispatchEvent('click', {}, { timeout: 5000 }).catch(() => {});
+  3412 |             });
+  3413 |             await page.waitForTimeout(500);
+  3414 | 
+  3415 |             if (page.url() !== currentUrl) {
+  3416 |               await page.goto(currentUrl, { waitUntil: 'domcontentloaded' });
+  3417 |               await expect(planner.weekHeaders.first()).toBeVisible({ timeout: 30000 });
+  3418 |               break;
+  3419 |             }
+  3420 | 
+  3421 |             const modalAppeared = await planner.orderDetailsModal.isVisible({ timeout: 3000 }).catch(() => false);
+  3422 |             if (modalAppeared) {
+  3423 |               await this.fillReferenceInOrderDetailsModal(page);
+  3424 |             }
+  3425 |           }
+  3426 | 
+  3427 |           await page.keyboard.press('Escape').catch(() => {});
+  3428 |         }
+  3429 |       }
+  3430 | 
+  3431 |       await page.waitForTimeout(300);
+  3432 |     }
+  3433 |   },
+  3434 | 
+  3435 |   async handleOrderReferencesMandatoryIfNeeded(page: Page): Promise<boolean> {
+  3436 |     const planner = plannerSelectors(page);
+  3437 | 
+  3438 |     const isVisible = await planner.orderReferencesMandatoryModal.isVisible({ timeout: 3000 }).catch(() => false);
+  3439 |     if (!isVisible) return false;
+  3440 | 
+  3441 |     await planner.orderReferencesMandatoryModalCloseButton.click();
+  3442 |     await expect(planner.orderReferencesMandatoryModal).toBeHidden({ timeout: 10000 });
+  3443 | 
+  3444 |     await this.fillOrderReferencesForAllVisibleOrders(page);
+  3445 | 
+  3446 |     return true;
+  3447 |   },
+  3448 | 
+  3449 |   async getOrderBoxStateColor(page: Page, dateKey: string): Promise<string | null> {
+  3450 |     const dateHeader = page.locator(`[data-testid="date-header:${dateKey}"]`).first();
+  3451 |     const headerVisible = await dateHeader.isVisible().catch(() => false);
+  3452 |     if (!headerVisible) return null;
+  3453 | 
+  3454 |     const svg = dateHeader.locator('svg[viewBox="0 0 48 48"]').first();
+  3455 |     const svgVisible = await svg.isVisible().catch(() => false);
+```

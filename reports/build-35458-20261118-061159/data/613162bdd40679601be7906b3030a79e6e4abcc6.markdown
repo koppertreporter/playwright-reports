@@ -1,0 +1,297 @@
+# Instructions
+
+- Following Playwright test failed.
+- Explain why, be concise, respect Playwright best practices.
+- Provide a snippet of code with the fix, if possible.
+
+# Test info
+
+- Name: planner.spec.ts >> Planner >> TC:16271 - [Shipping method selection] shipping method dropdown not visible when no whitelisted methods
+- Location: playwright/specs/planner.spec.ts:436:7
+
+# Error details
+
+```
+Error: expect(locator).toHaveCount(expected) failed
+
+Locator:  locator('text=/Shipping method/i').first().locator('xpath=following::*[contains(@class,"rc-select")][1]')
+Expected: 0
+Received: 1
+Timeout:  15000ms
+
+Call log:
+  - Expect "toHaveCount" with timeout 15000ms
+  - waiting for locator('text=/Shipping method/i').first().locator('xpath=following::*[contains(@class,"rc-select")][1]')
+    34 × locator resolved to 1 element
+       - unexpected value "1"
+
+```
+
+# Page snapshot
+
+```yaml
+- generic [active] [ref=e1]:
+  - generic [ref=e3]:
+    - generic [ref=e4]: You're on DEVELOPMENT OR STAGE
+    - generic [ref=e6]:
+      - img [ref=e7] [cursor=pointer]
+      - generic [ref=e14]:
+        - generic [ref=e15]: Plkw P. van Geest Maasland B.V.
+        - generic [ref=e16] [cursor=pointer]:
+          - img "user" [ref=e17]:
+            - img [ref=e18]
+          - text: Playwright DudeiyLeFCb
+    - generic [ref=e21]:
+      - generic [ref=e22]:
+        - heading "Hi, Playwright DudeiyLeFCb!" [level=1] [ref=e23]
+        - strong [ref=e25]: Welcome to Koppert One
+        - generic [ref=e26]:
+          - heading "Need help ?" [level=5] [ref=e27]
+          - separator [ref=e28]
+          - generic [ref=e29]:
+            - img [ref=e31]
+            - generic [ref=e32]:
+              - heading "Koppert One support" [level=5] [ref=e33]
+              - link "mail support@koppert.one" [ref=e35] [cursor=pointer]:
+                - /url: mailto:support@koppert.one
+                - img "mail" [ref=e36]:
+                  - img [ref=e37]
+                - text: support@koppert.one
+                - img [ref=e39]
+              - link "phone +31 1 051 405 17" [ref=e43] [cursor=pointer]:
+                - /url: tel:+31105140517
+                - img "phone" [ref=e44]:
+                  - img [ref=e45]
+                - text: +31 1 051 405 17
+                - img [ref=e47]
+      - generic [ref=e51]:
+        - generic [ref=e52] [cursor=pointer]:
+          - img [ref=e54]
+          - generic [ref=e57]: Order
+          - generic [ref=e59]: View, place and manage orders
+          - img [ref=e61]
+        - generic [ref=e63] [cursor=pointer]:
+          - img [ref=e65]
+          - generic [ref=e69]: Knowledge
+          - generic [ref=e71]: Explore chemical compatibility with Koppert's natural enemies and bumblebees
+          - img [ref=e73]
+        - generic [ref=e75] [cursor=pointer]:
+          - img [ref=e77]
+          - generic [ref=e79]: Scout
+          - generic [ref=e81]: Discover trends in pest development and beneficial insect counts to know when to act
+          - img [ref=e83]
+        - generic [ref=e85] [cursor=pointer]:
+          - img [ref=e87]
+          - generic [ref=e89]: Organization
+          - generic [ref=e91]: Manage team members and their access to locations
+          - img [ref=e93]
+  - button "Feedback" [ref=e95] [cursor=pointer]:
+    - generic [ref=e97]: Feedback
+```
+
+# Test source
+
+```ts
+  1584 |   },
+  1585 | 
+  1586 |   async clickProductInfoTooltipByName(page: Page, productName: string) {
+  1587 |     const rowHeader = page
+  1588 |       .locator('div.sc-kqGoIF')
+  1589 |       .filter({
+  1590 |         has: page
+  1591 |           .locator('[data-testid^="row:"]')
+  1592 |           .filter({ hasText: new RegExp(productName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'i') }),
+  1593 |       })
+  1594 |       .first();
+  1595 | 
+  1596 |     await expect(rowHeader).toBeVisible({ timeout: 20000 });
+  1597 | 
+  1598 |     const infoIcon = rowHeader.locator('svg.hover-icon').first();
+  1599 |     await expect(infoIcon).toBeVisible({ timeout: 20000 });
+  1600 | 
+  1601 |     await infoIcon.click({ force: true });
+  1602 | 
+  1603 |     await expect(page.locator('.ant-tooltip-inner[role="tooltip"]').first()).toBeVisible({ timeout: 15000 });
+  1604 |   },
+  1605 | 
+  1606 |   async expectProductTooltipVisible(page: Page) {
+  1607 |     const planner = plannerSelectors(page);
+  1608 | 
+  1609 |     await expect(planner.productTooltip).toBeVisible({ timeout: 15000 });
+  1610 |     await expect(planner.productTooltipTitle).toBeVisible();
+  1611 |   },
+  1612 | 
+  1613 |   async closeProductTooltip(page: Page) {
+  1614 |     const planner = plannerSelectors(page);
+  1615 | 
+  1616 |     const visible = await planner.productTooltip.isVisible().catch(() => false);
+  1617 |     if (!visible) return;
+  1618 | 
+  1619 |     await planner.productTooltipCloseIcon.click({ force: true }).catch(async () => {
+  1620 |       await page.keyboard.press('Escape').catch(() => {});
+  1621 |     });
+  1622 | 
+  1623 |     await expect(planner.productTooltip).toBeHidden({ timeout: 15000 });
+  1624 |   },
+  1625 | 
+  1626 |   async openMoreInfoFromTooltip(page: Page) {
+  1627 |     const planner = plannerSelectors(page);
+  1628 | 
+  1629 |     await this.expectProductTooltipVisible(page);
+  1630 | 
+  1631 |     const [newPage] = await Promise.all([
+  1632 |       page.context().waitForEvent('page', { timeout: 15000 }),
+  1633 |       planner.productTooltipMoreInfoButton.click(),
+  1634 |     ]);
+  1635 | 
+  1636 |     await newPage.waitForLoadState('domcontentloaded');
+  1637 | 
+  1638 |     await expect(newPage).toHaveURL(/koppert\./i);
+  1639 | 
+  1640 |     await newPage.close().catch(() => {});
+  1641 |   },
+  1642 | 
+  1643 |   async openOrderDetailsFromPlannerByDate(page: Page, dateKey: string) {
+  1644 |     const headerBlock = page.locator(`div:has([data-testid="date-header:${dateKey}"])`).first();
+  1645 |     await expect(headerBlock).toBeVisible({ timeout: 30000 });
+  1646 | 
+  1647 |     const cubeIcon = headerBlock.locator('div:has(> svg[viewBox="0 0 48 48"])').first();
+  1648 |     await expect(cubeIcon).toBeVisible({ timeout: 30000 });
+  1649 | 
+  1650 |     await cubeIcon.scrollIntoViewIfNeeded().catch(() => {});
+  1651 |     await cubeIcon.click({ force: true });
+  1652 | 
+  1653 |     await page.waitForTimeout(300);
+  1654 |   },
+  1655 | 
+  1656 |   async expectShippingMethodDropdownVisible(page: Page) {
+  1657 |     const planner = plannerSelectors(page);
+  1658 |     await expect(planner.shippingMethodLabel).toBeVisible({ timeout: 15000 });
+  1659 |     await expect(planner.shippingMethodSelect).toBeVisible({ timeout: 15000 });
+  1660 |   },
+  1661 | 
+  1662 |   async expectShippingMethodDropdownEnabled(page: Page) {
+  1663 |     const planner = plannerSelectors(page);
+  1664 |     await this.expectShippingMethodDropdownVisible(page);
+  1665 | 
+  1666 |     const disabled = await planner.shippingMethodSelect
+  1667 |       .evaluate((el) => el.classList.contains('rc-select-disabled'))
+  1668 |       .catch(() => false);
+  1669 |     expect(disabled, 'Expected Shipping method dropdown to be enabled').toBeFalsy();
+  1670 |   },
+  1671 | 
+  1672 |   async expectShippingMethodDropdownDisabled(page: Page) {
+  1673 |     const planner = plannerSelectors(page);
+  1674 |     await this.expectShippingMethodDropdownVisible(page);
+  1675 |     await expect(planner.shippingMethodSelectDisabled).toBeVisible({ timeout: 15000 });
+  1676 |   },
+  1677 | 
+  1678 |   async expectShippingMethodDropdownNotVisible(page: Page) {
+  1679 |     const planner = plannerSelectors(page);
+  1680 |     // With one (or zero) whitelisted shipping method the field renders the method as static
+  1681 |     // text, not an interactive rc-select dropdown. The label is still shown; the rc-select
+  1682 |     // control is absent. (The dropdown only appears when 2+ methods are whitelisted.)
+  1683 |     await expect(planner.shippingMethodLabel).toBeVisible({ timeout: 15000 });
+> 1684 |     await expect(planner.shippingMethodSelect).toHaveCount(0, { timeout: 15000 });
+       |                                                ^ Error: expect(locator).toHaveCount(expected) failed
+  1685 |   },
+  1686 | 
+  1687 |   async waitForOrderDetailsModal(page: Page, timeoutMs = 30000) {
+  1688 |     const planner = plannerSelectors(page);
+  1689 | 
+  1690 |     await expect(planner.orderDetailsModal, 'Expected Order details modal to appear').toBeVisible({
+  1691 |       timeout: timeoutMs,
+  1692 |     });
+  1693 | 
+  1694 |     await expect(planner.orderDetailsModalTitle)
+  1695 |       .toBeVisible({ timeout: 10000 })
+  1696 |       .catch(() => {});
+  1697 |   },
+  1698 | 
+  1699 |   async waitForOrderProcessingToComplete(page: Page) {
+  1700 |     const planner = plannerSelectors(page);
+  1701 |     await expect(planner.orderButton).toBeEnabled();
+  1702 |   },
+  1703 | 
+  1704 |   async getOrderNumberFromOrderDetailsModal(page: Page): Promise<string> {
+  1705 |     const planner = plannerSelectors(page);
+  1706 | 
+  1707 |     await this.waitForOrderDetailsModal(page, 30000);
+  1708 | 
+  1709 |     const raw = (await planner.orderDetailsModalOrderNumberText.textContent().catch(() => '')) || '';
+  1710 |     const orderNo = normalizeOrderNo(raw);
+  1711 | 
+  1712 |     expect(orderNo, `Could not parse order number from modal text: "${raw}"`).toBeTruthy();
+  1713 |     return orderNo;
+  1714 |   },
+  1715 | 
+  1716 |   async clickViewDetailsInOrderDetailsModal(page: Page) {
+  1717 |     const planner = plannerSelectors(page);
+  1718 |     await this.waitForOrderDetailsModal(page, 30000);
+  1719 | 
+  1720 |     await expect(planner.orderDetailsModalViewDetailsLink).toBeVisible({ timeout: 30000 });
+  1721 | 
+  1722 |     await planner.orderDetailsModalViewDetailsLink.click({ force: true });
+  1723 | 
+  1724 |     await this.resolveLeaveGuardIfVisible(page, 'discard');
+  1725 | 
+  1726 |     await page.waitForURL(/\/apps\/order\/(order-list|orders)\/[A-Z0-9]+-SO\d+/i, {
+  1727 |       timeout: 60000,
+  1728 |       waitUntil: 'domcontentloaded',
+  1729 |     });
+  1730 |   },
+  1731 | 
+  1732 |   async closeOrderDetailsModalIfVisible(page: Page) {
+  1733 |     const planner = plannerSelectors(page);
+  1734 | 
+  1735 |     const visible = await planner.orderDetailsModal.isVisible().catch(() => false);
+  1736 |     if (!visible) return;
+  1737 | 
+  1738 |     await planner.orderDetailsModalCloseIcon.click({ force: true }).catch(async () => {
+  1739 |       await page.keyboard.press('Escape').catch(() => {});
+  1740 |     });
+  1741 | 
+  1742 |     await expect(planner.orderDetailsModal).toBeHidden({ timeout: 30000 });
+  1743 |   },
+  1744 | 
+  1745 |   // Takes the ISO delivery date: cells are keyed on YYYY-MM-DD while the date header is keyed on DD-MM,
+  1746 |   // and passing the header key here silently fell through to "fill whatever numeric input comes first",
+  1747 |   // which could set a quantity on a different day than the one the header was then opened for.
+  1748 |   async createOrderFromPlannerWithoutSelectingShippingMethod(
+  1749 |     page: Page,
+  1750 |     isoDeliveryDate: string,
+  1751 |   ): Promise<{ orderNumber: string; dateKey: string }> {
+  1752 |     const planner = plannerSelectors(page);
+  1753 |     const dateKey = this.toPlannerDateKey(isoDeliveryDate);
+  1754 | 
+  1755 |     await this.switchOrderMode(page, true);
+  1756 | 
+  1757 |     await this.setAnyOrderableQtyForDate(page, isoDeliveryDate, '1');
+  1758 |     await page.waitForTimeout(400);
+  1759 | 
+  1760 |     await this.closeFirstOrderCongratulationsModalIfVisible(page);
+  1761 | 
+  1762 |     const headerBlock = page.locator(`div:has([data-testid="date-header:${dateKey}"])`).first();
+  1763 |     await expect(headerBlock, `Date header block not found for ${dateKey}`).toBeVisible({ timeout: 30000 });
+  1764 | 
+  1765 |     const cubeIcon = headerBlock.locator('div:has(> svg[viewBox="0 0 48 48"])').first();
+  1766 |     await expect(cubeIcon, 'Cube icon not found').toBeVisible({ timeout: 30000 });
+  1767 |     await cubeIcon.click({ force: true });
+  1768 | 
+  1769 |     await expect(planner.dateHeaderPopup, 'Date header popup did not appear').toBeVisible({ timeout: 30000 });
+  1770 | 
+  1771 |     const firstRow = planner.dateHeaderPopup
+  1772 |       .locator('div')
+  1773 |       .filter({ hasText: /#\s*[A-Z0-9]+-SO\d+/i })
+  1774 |       .first();
+  1775 |     await expect(firstRow, 'No order rows found in popup').toBeVisible({ timeout: 20000 });
+  1776 | 
+  1777 |     const openBtn = firstRow.getByRole('button', { name: /^Open$/i }).first();
+  1778 |     await expect(openBtn, 'Open button not found in first popup row').toBeVisible({ timeout: 20000 });
+  1779 |     await openBtn.click({ force: true });
+  1780 | 
+  1781 |     await expect(planner.orderDetailsModal, 'Order details modal did not open after clicking Open').toBeVisible({
+  1782 |       timeout: 30000,
+  1783 |     });
+  1784 | 
+```

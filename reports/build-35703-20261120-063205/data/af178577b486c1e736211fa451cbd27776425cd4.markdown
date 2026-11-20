@@ -1,0 +1,186 @@
+# Instructions
+
+- Following Playwright test failed.
+- Explain why, be concise, respect Playwright best practices.
+- Provide a snippet of code with the fix, if possible.
+
+# Test info
+
+- Name: loginSignup.spec.ts >> Authentication Flows >> TC:10001 @smoke - Verify login, logout, invalid credentials and account lockout functionality
+- Location: playwright/specs/loginSignup.spec.ts:48:7
+
+# Error details
+
+```
+Error: page.goto: net::ERR_ABORTED at https://stage.koppert.one/login
+Call log:
+  - navigating to "https://stage.koppert.one/login", waiting until "load"
+
+```
+
+# Page snapshot
+
+```yaml
+- generic [ref=e3]:
+  - generic [ref=e4]: You're on DEVELOPMENT OR STAGE
+  - generic [ref=e6]:
+    - generic [ref=e10]:
+      - img [ref=e11]
+      - heading [level=4]
+    - generic [ref=e20]:
+      - generic [ref=e21]:
+        - strong [ref=e23]: Login
+        - generic [ref=e25]:
+          - generic "Email" [ref=e27]
+          - textbox "Email" [active] [ref=e31]
+        - generic [ref=e32]:
+          - img "info-circle" [ref=e33]:
+            - img [ref=e34]
+          - generic [ref=e37]:
+            - text: SSO login is temporarily unavailable.
+            - link "Set your password here" [ref=e38] [cursor=pointer]:
+              - /url: /forgot-password
+            - text: to log in using your email address and password.
+        - generic [ref=e40]:
+          - generic "Password" [ref=e42]
+          - generic [ref=e46]:
+            - textbox "Password" [ref=e47]
+            - img "eye-invisible" [ref=e49] [cursor=pointer]:
+              - img [ref=e50]
+        - generic [ref=e58]:
+          - button "Login" [ref=e59] [cursor=pointer]:
+            - generic [ref=e60]: Login
+          - link "Forgot password" [ref=e61] [cursor=pointer]:
+            - /url: /forgot-password
+      - separator [ref=e62]
+      - generic [ref=e63]: Don't have an account yet?Create an account
+      - separator [ref=e64]
+      - generic [ref=e65]:
+        - text: New to Koppert One?
+        - link "More info" [ref=e66] [cursor=pointer]:
+          - /url: https://www.koppert.com/koppert-one/
+          - text: More info
+          - img [ref=e67]
+      - separator [ref=e70]
+      - generic [ref=e71]:
+        - generic [ref=e72]: All rights reserved. © Koppert 2026
+        - generic [ref=e73]:
+          - link "Privacy statement" [ref=e74] [cursor=pointer]:
+            - /url: https://stage.koppert.one/assets/statements/privacy-statement.pdf
+          - text: "|"
+          - link "Terms of Use" [ref=e75] [cursor=pointer]:
+            - /url: https://stage.koppert.one/assets/statements/terms-of-use.pdf
+```
+
+# Test source
+
+```ts
+  5   |   page: Page;
+  6   |   generalSelectors: ReturnType<typeof generalSelectors>;
+  7   | 
+  8   |   constructor(page: Page) {
+  9   |     this.page = page;
+  10  |     this.generalSelectors = generalSelectors(page);
+  11  |   }
+  12  | 
+  13  |   async setupCookieBypass(): Promise<void> {
+  14  |     await this.page.addInitScript(() => {
+  15  |       localStorage.setItem('uc_user_interaction', 'true');
+  16  |       localStorage.setItem(
+  17  |         'uc_settings',
+  18  |         JSON.stringify({
+  19  |           version: 2,
+  20  |           language: 'en',
+  21  |           categories: {},
+  22  |           services: {},
+  23  |           consent: {
+  24  |             given: true,
+  25  |             date: new Date().toISOString(),
+  26  |           },
+  27  |         }),
+  28  |       );
+  29  | 
+  30  |       const removeCookieElements = () => {
+  31  |         const root = document.getElementById('usercentrics-root');
+  32  |         if (root) {
+  33  |           root.style.display = 'none';
+  34  |           root.remove();
+  35  |         }
+  36  |         const button = document.getElementById('usercentrics-button');
+  37  |         if (button) {
+  38  |           button.style.display = 'none';
+  39  |           button.remove();
+  40  |         }
+  41  |       };
+  42  | 
+  43  |       const observer = new MutationObserver(() => {
+  44  |         removeCookieElements();
+  45  |       });
+  46  | 
+  47  |       if (document.body) {
+  48  |         observer.observe(document.body, { childList: true, subtree: true });
+  49  |         removeCookieElements();
+  50  |       } else {
+  51  |         document.addEventListener('DOMContentLoaded', () => {
+  52  |           observer.observe(document.body, { childList: true, subtree: true });
+  53  |           removeCookieElements();
+  54  |         });
+  55  |       }
+  56  |     });
+  57  |   }
+  58  | 
+  59  |   async forceDismissCookieModal(): Promise<void> {
+  60  |     await this.page.evaluate(() => {
+  61  |       const rootElement = document.getElementById('usercentrics-root');
+  62  |       const buttonElement = document.getElementById('usercentrics-button');
+  63  | 
+  64  |       if (rootElement) {
+  65  |         rootElement.remove();
+  66  |       }
+  67  |       if (buttonElement) {
+  68  |         buttonElement.remove();
+  69  |       }
+  70  | 
+  71  |       const existingStyle = document.getElementById('cookie-bypass-style');
+  72  |       if (!existingStyle) {
+  73  |         const style = document.createElement('style');
+  74  |         style.id = 'cookie-bypass-style';
+  75  |         style.innerHTML = `
+  76  |           #usercentrics-root,
+  77  |           #usercentrics-button {
+  78  |             display: none !important;
+  79  |             visibility: hidden !important;
+  80  |             opacity: 0 !important;
+  81  |             pointer-events: none !important;
+  82  |           }
+  83  |         `;
+  84  |         document.head.appendChild(style);
+  85  |       }
+  86  |     });
+  87  |   }
+  88  | 
+  89  |   async goToURL(url: string, acceptCookies = false): Promise<void> {
+  90  |     await test.step(`Navigate to the "${url}" url`, async () => {
+  91  |       if (acceptCookies) {
+  92  |         await this.setupCookieBypass();
+  93  |         const fullUrl = url.includes('?') ? `${url}&cookies=accept` : `${url}?cookies=accept`;
+  94  |         await this.page.goto(fullUrl);
+  95  |         await this.page.waitForLoadState('domcontentloaded');
+  96  | 
+  97  |         const modalVisible = await this.page
+  98  |           .locator('#usercentrics-root')
+  99  |           .isVisible()
+  100 |           .catch(() => false);
+  101 |         if (modalVisible) {
+  102 |           await this.forceDismissCookieModal();
+  103 |         }
+  104 |       } else {
+> 105 |         await this.page.goto(url);
+      |                         ^ Error: page.goto: net::ERR_ABORTED at https://stage.koppert.one/login
+  106 |         await this.page.waitForLoadState('domcontentloaded');
+  107 |       }
+  108 |     });
+  109 |   }
+  110 | }
+  111 | 
+```

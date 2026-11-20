@@ -1,0 +1,316 @@
+# Instructions
+
+- Following Playwright test failed.
+- Explain why, be concise, respect Playwright best practices.
+- Provide a snippet of code with the fix, if possible.
+
+# Test info
+
+- Name: organization_locations.spec.ts >> Organization > Locations - List, details & navigation >> TC:19656 - [Locations] Verify the locations list total number and scrolling
+- Location: playwright/specs/organization_locations.spec.ts:161:7
+
+# Error details
+
+```
+Error: Failed to fetch enterprise 19cb4373-4f38-4b0d-9f0f-5594004dc4f8: {"id":"1dec49b6-94d3-4487-86d9-bf2157fb0db2","message":"Token has been revoked","statusCode":401,"metadata":[{"defaultMessage":"Token has been revoked","translationCode":"backend.exceptions.auth.tokenRevoked","code":"TOKEN_REVOKED"}]}
+```
+
+# Page snapshot
+
+```yaml
+- generic [ref=e1]:
+  - generic [ref=e3]:
+    - generic [ref=e4]: You're on DEVELOPMENT OR STAGE
+    - generic [ref=e6]:
+      - generic [ref=e10]:
+        - img [ref=e11]
+        - heading [level=4]
+      - generic [ref=e20]:
+        - generic [ref=e21]:
+          - strong [ref=e23]: Login
+          - generic [ref=e25]:
+            - generic "Email" [ref=e27]
+            - textbox "Email" [ref=e31]
+          - generic [ref=e32]:
+            - img "info-circle" [ref=e33]:
+              - img [ref=e34]
+            - generic [ref=e37]:
+              - text: SSO login is temporarily unavailable.
+              - link "Set your password here" [ref=e38] [cursor=pointer]:
+                - /url: /forgot-password
+              - text: to log in using your email address and password.
+          - generic [ref=e40]:
+            - generic "Password" [ref=e42]
+            - generic [ref=e46]:
+              - textbox "Password" [ref=e47]
+              - img "eye-invisible" [ref=e49] [cursor=pointer]:
+                - img [ref=e50]
+          - generic [ref=e58]:
+            - button "Login" [ref=e59] [cursor=pointer]:
+              - generic [ref=e60]: Login
+            - link "Forgot password" [ref=e61] [cursor=pointer]:
+              - /url: /forgot-password
+        - separator [ref=e62]
+        - generic [ref=e63]: Don't have an account yet?Create an account
+        - separator [ref=e64]
+        - generic [ref=e65]:
+          - text: New to Koppert One?
+          - link "More info" [ref=e66] [cursor=pointer]:
+            - /url: https://www.koppert.com/koppert-one/
+            - text: More info
+            - img [ref=e67]
+        - separator [ref=e70]
+        - generic [ref=e71]:
+          - generic [ref=e72]: All rights reserved. © Koppert 2026
+          - generic [ref=e73]:
+            - link "Privacy statement" [ref=e74] [cursor=pointer]:
+              - /url: https://stage.koppert.one/assets/statements/privacy-statement.pdf
+            - text: "|"
+            - link "Terms of Use" [ref=e75] [cursor=pointer]:
+              - /url: https://stage.koppert.one/assets/statements/terms-of-use.pdf
+  - generic [active]:
+    - generic:
+      - generic:
+        - button "Open Privacy Settings" [ref=e76] [cursor=pointer]:
+          - img [ref=e78]
+        - dialog "Privacy Settings" [ref=e83]:
+          - generic [ref=e87]:
+            - generic [ref=e89]:
+              - img [ref=e92]
+              - heading "Privacy Settings" [level=1] [ref=e95]
+              - generic [ref=e98]: This site uses third-party website tracking technologies to provide and continually improve our services, and to display advertisements according to users' interests. I agree and may revoke or change my consent at any time with effect for the future.
+              - generic [ref=e99]:
+                - generic [ref=e100]:
+                  - link "Privacy Policy" [ref=e101] [cursor=pointer]:
+                    - /url: https://www.koppert.com/privacy-statement/
+                  - link "Cookie Statement" [ref=e102] [cursor=pointer]:
+                    - /url: https://www.koppert.com/cookie-statement/
+                - button "More Information" [ref=e104] [cursor=pointer]:
+                  - generic [ref=e105]: More Information
+            - generic [ref=e107]:
+              - generic [ref=e110]:
+                - generic [ref=e111] [cursor=pointer]: Marketing
+                - switch "Marketing" [ref=e112] [cursor=pointer]:
+                  - img [ref=e113]
+              - generic [ref=e122]:
+                - generic [ref=e123] [cursor=pointer]: Functional
+                - switch "Functional" [ref=e124] [cursor=pointer]:
+                  - img [ref=e125]
+              - generic [ref=e134]:
+                - generic [ref=e135] [cursor=pointer]: Essential
+                - switch "Essential" [checked] [disabled] [ref=e136] [cursor=pointer]:
+                  - img [ref=e137]
+          - generic [ref=e145]:
+            - generic [ref=e147]:
+              - button "Save Settings" [ref=e148] [cursor=pointer]
+              - button "Accept All" [ref=e149] [cursor=pointer]
+            - link "Powered by Usercentrics Consent Management" [ref=e151] [cursor=pointer]:
+              - /url: https://usercentrics.com/consent-management-platform-powered-by-usercentrics/?utm_source=banner_uc&utm_medium=referral&utm_content=v2
+```
+
+# Test source
+
+```ts
+  118 |           }),
+  119 |         );
+  120 |       }, enterpriseId);
+  121 |       break; // Success, exit retry loop
+  122 |     } catch (error) {
+  123 |       retries--;
+  124 |       if (retries === 0) {
+  125 |         console.error('Failed to set enterprise selector in localStorage after 3 attempts:', error);
+  126 |         throw error;
+  127 |       }
+  128 |       console.log(`localStorage set failed, retrying... (${retries} attempts left)`);
+  129 |       await page.waitForTimeout(500);
+  130 |     }
+  131 |   }
+  132 | }
+  133 | 
+  134 | /** The enterprise the UI is currently working in, as the app itself resolves it. */
+  135 | export async function getEnterpriseSelectorFromLocalStorage(page: Page): Promise<string | null> {
+  136 |   return await page.evaluate(() => {
+  137 |     const raw = localStorage.getItem('stores-portal/enterprise-selector');
+  138 |     if (!raw) return null;
+  139 |     try {
+  140 |       return JSON.parse(raw)?.state?.currentEnterpriseId ?? null;
+  141 |     } catch {
+  142 |       return null;
+  143 |     }
+  144 |   });
+  145 | }
+  146 | 
+  147 | export async function addUserToEnterprise(
+  148 |   enterpriseId: string,
+  149 |   userId: string,
+  150 |   token?: string,
+  151 |   options?: { page?: Page; setEnterpriseSelector?: boolean },
+  152 | ) {
+  153 |   const response = await (
+  154 |     await api(token)
+  155 |   ).post(`${urls.api.enterprises}/${enterpriseId}/users`, {
+  156 |     data: {
+  157 |       ids: [userId],
+  158 |       action: 'add',
+  159 |     },
+  160 |   });
+  161 | 
+  162 |   if (!response.ok()) {
+  163 |     const errorText = await response.text();
+  164 |     throw new Error(`Failed to add user to enterprise: ${errorText}`);
+  165 |   }
+  166 | 
+  167 |   // Optionally set enterprise selector in localStorage if page is provided
+  168 |   if (options?.setEnterpriseSelector && options?.page) {
+  169 |     await setEnterpriseSelectorInLocalStorage(options.page, enterpriseId);
+  170 |   }
+  171 | 
+  172 |   return await response.json();
+  173 | }
+  174 | 
+  175 | /**
+  176 |  * Lets `userId` order for the enterprise. Since portal v1.19.0 ordering is the "Order rights" setting of a user on an
+  177 |  * enterprise, not the Orderer role: a Grower can order only where it is turned on. The PUT replaces the whole
+  178 |  * selection, so the users who can already order are sent along - otherwise another test's user on the same
+  179 |  * enterprise would lose the right.
+  180 |  */
+  181 | export async function grantOrderRights(enterpriseId: string, userId: string, token?: string) {
+  182 |   const orderRightsUrl = `${urls.api.settingsEnterprise}/${enterpriseId}/order-rights`;
+  183 | 
+  184 |   const current = await getWithRetry(async () => (await api(token)).get(orderRightsUrl));
+  185 |   if (!current.ok()) {
+  186 |     throw new Error(`Failed to read order rights for enterprise ${enterpriseId}: ${await current.text()}`);
+  187 |   }
+  188 |   const { users = [] } = (await current.json()) as { users?: { id: string; canOrder: boolean }[] };
+  189 |   const userIds = [...new Set([...users.filter((user) => user.canOrder).map((user) => user.id), userId])];
+  190 | 
+  191 |   const response = await (await api(token)).put(orderRightsUrl, { data: { userIds } });
+  192 |   if (!response.ok()) {
+  193 |     throw new Error(`Failed to grant order rights on enterprise ${enterpriseId}: ${await response.text()}`);
+  194 |   }
+  195 | 
+  196 |   return await response.json();
+  197 | }
+  198 | 
+  199 | export interface Enterprise {
+  200 |   id: string;
+  201 |   name: string;
+  202 |   erpCustomerKey: string;
+  203 |   subsidiaryCode: string;
+  204 |   unitsSystem?: string;
+  205 |   weekNumberingSystem?: string;
+  206 |   yearStart?: number;
+  207 |   weekStart?: number;
+  208 |   isBlocked?: boolean;
+  209 |   syncedAt?: string;
+  210 |   erpCustomerGroupId?: string;
+  211 | }
+  212 | 
+  213 | export async function getEnterprise(enterpriseId: string, token?: string): Promise<Enterprise> {
+  214 |   const response = await (await api(token)).get(`${urls.api.enterprises}/${enterpriseId}`);
+  215 | 
+  216 |   if (!response.ok()) {
+  217 |     const errorText = await response.text();
+> 218 |     throw new Error(`Failed to fetch enterprise ${enterpriseId}: ${errorText}`);
+      |           ^ Error: Failed to fetch enterprise 19cb4373-4f38-4b0d-9f0f-5594004dc4f8: {"id":"1dec49b6-94d3-4487-86d9-bf2157fb0db2","message":"Token has been revoked","statusCode":401,"metadata":[{"defaultMessage":"Token has been revoked","translationCode":"backend.exceptions.auth.tokenRevoked","code":"TOKEN_REVOKED"}]}
+  219 |   }
+  220 | 
+  221 |   return await response.json();
+  222 | }
+  223 | 
+  224 | export interface EnterpriseSettings {
+  225 |   id?: string;
+  226 |   canSeePrices?: boolean | null;
+  227 |   canCreateLocations?: boolean | null;
+  228 |   canChangeShippingMethods?: boolean | null;
+  229 |   receiveOrderDetailedEmails?: boolean | null;
+  230 |   orderReferenceMode?: 'optional' | 'required' | null;
+  231 |   enterpriseId?: string;
+  232 |   subsidiaryCode?: string | null;
+  233 |   userId?: string | null;
+  234 | }
+  235 | 
+  236 | export async function getEnterpriseSettings(enterpriseId: string, token?: string): Promise<EnterpriseSettings> {
+  237 |   const response = await (await api(token)).get(`${urls.api.settingsEnterprise}/${enterpriseId}`);
+  238 | 
+  239 |   if (!response.ok()) {
+  240 |     const errorText = await response.text();
+  241 |     throw new Error(`Failed to read settings for enterprise ${enterpriseId}: ${errorText}`);
+  242 |   }
+  243 | 
+  244 |   return (await response.json().catch(() => ({}))) as EnterpriseSettings;
+  245 | }
+  246 | 
+  247 | /**
+  248 |  * Writes enterprise-level settings (admin Settings tab). POST /settings/upsert only behaves as an
+  249 |  * upsert when the existing row's `id` is part of the payload - without it the endpoint tries to
+  250 |  * insert and 500s on the unique enterprise_id constraint. Reads the current row first so the id is
+  251 |  * carried and untouched fields keep their values.
+  252 |  */
+  253 | export async function setEnterpriseSettings(
+  254 |   enterpriseId: string,
+  255 |   changes: Partial<EnterpriseSettings>,
+  256 |   token?: string,
+  257 | ): Promise<EnterpriseSettings> {
+  258 |   const current = await getEnterpriseSettings(enterpriseId, token).catch(() => ({}) as EnterpriseSettings);
+  259 | 
+  260 |   const alreadyMatches = Object.entries(changes).every(([key, value]) => current[key] === value);
+  261 |   if (current.id && alreadyMatches) return current;
+  262 | 
+  263 |   const response = await (
+  264 |     await api(token)
+  265 |   ).post(urls.api.settingsUpsert, {
+  266 |     data: { ...current, enterpriseId, ...changes },
+  267 |   });
+  268 | 
+  269 |   if (!response.ok()) {
+  270 |     const errorText = await response.text();
+  271 |     throw new Error(`Failed to write settings for enterprise ${enterpriseId}: ${errorText}`);
+  272 |   }
+  273 | 
+  274 |   return (await response.json().catch(() => ({}))) as EnterpriseSettings;
+  275 | }
+  276 | 
+  277 | /**
+  278 |  * Sets the enterprise "Price Visibility" setting (canSeePrices). Order details / order list only
+  279 |  * show the "Amount" field when this is enabled, so tests that assert on amount must enable it in
+  280 |  * setup.
+  281 |  */
+  282 | export async function setEnterprisePriceVisibility(enterpriseId: string, canSeePrices: boolean = true, token?: string) {
+  283 |   return await setEnterpriseSettings(enterpriseId, { canSeePrices }, token);
+  284 | }
+  285 | 
+  286 | /**
+  287 |  * Sets the enterprise "Order Reference" requirement. `required` makes the app refuse to commit
+  288 |  * orders that have no reference and raise the mandatory-reference modal instead of the order
+  289 |  * confirmation modal, which breaks every ordering test on that enterprise - so any test that sets
+  290 |  * `required` must restore it.
+  291 |  */
+  292 | export async function setEnterpriseOrderReferenceMode(
+  293 |   enterpriseId: string,
+  294 |   orderReferenceMode: 'optional' | 'required',
+  295 |   token?: string,
+  296 | ) {
+  297 |   return await setEnterpriseSettings(enterpriseId, { orderReferenceMode }, token);
+  298 | }
+  299 | 
+  300 | /**
+  301 |  * Enables the enterprise "Shipping methods" setting. Without it the Shipping method select on the
+  302 |  * create/edit order form and on Order details renders as `rc-select-disabled` and opens no options,
+  303 |  * so every shipping-method test must switch it on as part of setup rather than relying on the
+  304 |  * shared stage enterprise still carrying the setting.
+  305 |  */
+  306 | export async function setEnterpriseShippingMethodSelection(
+  307 |   enterpriseId: string,
+  308 |   canChangeShippingMethods: boolean = true,
+  309 |   token?: string,
+  310 | ) {
+  311 |   return await setEnterpriseSettings(enterpriseId, { canChangeShippingMethods }, token);
+  312 | }
+  313 | 
+  314 | export async function getEnterprises(page: number = 1, limit: number = 100, token?: string) {
+  315 |   const response = await (
+  316 |     await api(token)
+  317 |   ).get(`${urls.api.enterprises}?page=${page}&limit=${limit}`, {
+  318 |     data: {},
+```
