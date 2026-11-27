@@ -1,0 +1,321 @@
+# Instructions
+
+- Following Playwright test failed.
+- Explain why, be concise, respect Playwright best practices.
+- Provide a snippet of code with the fix, if possible.
+
+# Test info
+
+- Name: lagBuster.spec.ts >> Planner - Lag Buster >> TC:14338 - Check 'Your changes were discarded' modal after saving Order details + Ordering for the SAME location
+- Location: playwright/specs/lagBuster.spec.ts:2204:7
+
+# Error details
+
+```
+Error: "Your changes were discarded" modal should appear for Client 2
+
+expect(locator).toBeVisible() failed
+
+Locator: locator('.ant-modal:visible .ant-modal-content').filter({ hasText: /Your changes were discarded/i }).first()
+Expected: visible
+Timeout: 60000ms
+Error: element(s) not found
+
+Call log:
+  - "Your changes were discarded" modal should appear for Client 2 with timeout 60000ms
+  - waiting for locator('.ant-modal:visible .ant-modal-content').filter({ hasText: /Your changes were discarded/i }).first()
+
+```
+
+```yaml
+- text: You're on DEVELOPMENT OR STAGE
+- img
+- menu:
+  - menuitem "Order":
+    - link "Order":
+      - /url: /apps/order
+  - menuitem "Knowledge":
+    - link "Knowledge":
+      - /url: /apps/protect
+  - menuitem "Scout":
+    - link "Scout":
+      - /url: https://www.natutecscout.com/apps/scout
+  - menuitem "Organization":
+    - link "Organization":
+      - /url: /apps/organization
+- text: Plkw P. van Geest Maasland B.V.
+- img "user"
+- text: Playwright DudeDIFgIlA
+- complementary:
+  - menu:
+    - menuitem "Planner":
+      - img
+      - link "Planner":
+        - /url: /apps/order/planner
+    - menuitem "Order list":
+      - img
+      - link "Order list":
+        - /url: /apps/order/order-list
+  - img "left"
+- main:
+  - heading "Planner" [level=2]
+  - separator
+  - text: Locations Plkw P. van Geest B.V. - Loc. Gerbera
+  - combobox
+  - switch [checked]
+  - text: Order mode
+  - textbox "Search..."
+  - img
+  - text: "Week selection:"
+  - textbox "week 42 - 2026":
+    - /placeholder: Start week
+  - img "calendar"
+  - text: "-"
+  - textbox "week 53 - 2026":
+    - /placeholder: End week
+  - img "calendar"
+  - img
+  - text: Plkw P. van Geest B.V. - Loc. Gerbera week 53 Mon 28-12 Tue 29-12 Wed 30-12 Thu 31-12 week 52 Mon 21-12 Tue 22-12 Wed 23-12 Thu 24-12 week 51 Mon 14-12 Tue 15-12 Wed 16-12 Thu 17-12 Fri 18-12 week 50 Mon 07-12
+  - img
+  - text: Tue 08-12
+  - img
+  - text: Wed 09-12
+  - img
+  - text: Thu 10-12
+  - img
+  - text: Fri 11-12
+  - img
+  - text: week 49 Mon 30-11
+  - img
+  - text: Tue 01-12
+  - img
+  - text: Wed 02-12 Thu 03-12 Fri 04-12 week 48 week 47 week 46 week 45 week 44 week 43 week 42
+  - img
+  - text: Halyosan/single bag of 2 traps + Add product
+  - textbox: "3"
+  - textbox: "15"
+  - textbox: "97"
+  - textbox: "333"
+  - textbox: "8"
+  - textbox: "999"
+  - textbox: "12"
+  - textbox
+  - textbox
+  - textbox
+  - text: — — — — — — —
+  - button "Discard changes"
+  - button "Order"
+  - text: 1 location has unsaved changes
+  - button "Order all"
+  - text: All rights reserved. © Koppert 2026
+  - button "Digital Assistant":
+    - img
+    - text: Digital Assistant
+```
+
+# Test source
+
+```ts
+  204 | // "The modal does NOT appear" has to hold for a whole window: one isVisible() after a sleep samples a single
+  205 | // instant (isVisible ignores its timeout), so a modal raised by a later live-sync push would go unnoticed.
+  206 | async function expectDiscardedModalToStayHidden(
+  207 |   p: Page,
+  208 |   pl: ReturnType<typeof plannerSelectors>,
+  209 |   durationMs: number,
+  210 |   message: string,
+  211 | ) {
+  212 |   const deadline = Date.now() + durationMs;
+  213 |   while (Date.now() < deadline) {
+  214 |     expect(await pl.changesDiscardedModal.isVisible(), message).toBe(false);
+  215 |     await p.waitForTimeout(500);
+  216 |   }
+  217 | }
+  218 | 
+  219 | // The planner renders only the weeks in its horizontal window, and a reload or live-sync re-render puts the
+  220 | // window back on the current week - cells further ahead are then not in the DOM at all. Scroll right until
+  221 | // every cell in `testIds` is there.
+  222 | async function scrollPlannerToCells(p: Page, testIds: string[]) {
+  223 |   const scrollRight = p.locator('[data-testid^="scroll-right"]').first();
+  224 |   for (let attempt = 0; attempt < 15; attempt++) {
+  225 |     const counts = await Promise.all(testIds.map((id) => p.locator(`input[data-testid="${id}"]`).count()));
+  226 |     if (counts.every((c) => c > 0)) return;
+  227 |     const arrowVisible = await scrollRight
+  228 |       .waitFor({ state: 'visible', timeout: 3000 })
+  229 |       .then(() => true)
+  230 |       .catch(() => false);
+  231 |     if (!arrowVisible) return;
+  232 |     await scrollRight.click({ timeout: 5000 }).catch(() => {});
+  233 |     await p.waitForTimeout(1000);
+  234 |   }
+  235 | }
+  236 | 
+  237 | // First empty, editable cell of `productName` not in `exclude`, as `p` sees it (scrolling the matrix right if needed).
+  238 | async function findEmptyEditableCell(
+  239 |   p: Page,
+  240 |   pl: ReturnType<typeof plannerSelectors>,
+  241 |   productName: string,
+  242 |   exclude: string[],
+  243 | ): Promise<string> {
+  244 |   const inputs = pl.orderableInputs;
+  245 |   for (let i = 0; i < Math.min(await inputs.count(), 200); i++) {
+  246 |     const input = inputs.nth(i);
+  247 |     if (!(await input.isEditable().catch(() => false))) continue;
+  248 |     const testId = (await input.getAttribute('data-testid')) || '';
+  249 |     if (!testId.includes(`:${productName}:`) || exclude.includes(testId)) continue;
+  250 |     if ((await input.inputValue()).trim() !== '') continue;
+  251 |     return testId;
+  252 |   }
+  253 |   throw new Error(`No empty editable cell of ${productName} outside ${exclude.join(', ')}`);
+  254 | }
+  255 | 
+  256 | // Like openOrderDetailsModal, but opens the order on `dateKey` in `locationName`. openOrderDetailsModal's
+  257 | // `div:has(date-header)` also matches an ancestor of every date header, so it clicks the first cube on screen.
+  258 | async function openOrderDetailsModalForDate(
+  259 |   p: Page,
+  260 |   pl: ReturnType<typeof plannerSelectors>,
+  261 |   locationName: string,
+  262 |   dateKey: string,
+  263 | ) {
+  264 |   const block = plannerPage.locationBlock(p, locationName);
+  265 |   const cubeIcon = block.locator(`[data-testid="date-header:${dateKey}"] svg[viewBox="0 0 48 48"]`).first();
+  266 | 
+  267 |   // The matrix shows a window of weeks: page it towards the date until its cube is on screen.
+  268 |   const scrollRight = block.locator(`[data-testid="scroll-right:${locationName}"]`);
+  269 |   const scrollLeft = block.locator(`[data-testid="scroll-left:${locationName}"]`);
+  270 |   for (let i = 0; i < 6 && !(await isCubeIconFullyVisible(cubeIcon)); i++) {
+  271 |     if ((await scrollRight.count()) === 0) break;
+  272 |     await scrollRight.click().catch(() => {});
+  273 |     await p.waitForTimeout(2000);
+  274 |   }
+  275 |   for (let i = 0; i < 12 && !(await isCubeIconFullyVisible(cubeIcon)); i++) {
+  276 |     if ((await scrollLeft.count()) === 0) break;
+  277 |     await scrollLeft.click().catch(() => {});
+  278 |     await p.waitForTimeout(2000);
+  279 |   }
+  280 | 
+  281 |   await expect(cubeIcon, `Expected an order cube for ${dateKey} in "${locationName}"`).toBeVisible({ timeout: 30000 });
+  282 |   await cubeIcon.scrollIntoViewIfNeeded().catch(() => {});
+  283 |   await cubeIcon.click({ force: true });
+  284 |   await p.waitForTimeout(1000);
+  285 | 
+  286 |   try {
+  287 |     await expect(pl.dateHeaderPopup).toBeVisible({ timeout: 3000 });
+  288 |     await pl.dateHeaderPopup
+  289 |       .locator('button', { hasText: /^Open$/i })
+  290 |       .first()
+  291 |       .click();
+  292 |     await p.waitForTimeout(1000);
+  293 |   } catch {
+  294 |     // No popup — modal opens directly for single-order dates
+  295 |   }
+  296 | 
+  297 |   await expect(pl.orderDetailsModal).toBeVisible({ timeout: 30000 });
+  298 | }
+  299 | 
+  300 | async function verifyDiscardedModal(page2: Page, planner2: ReturnType<typeof plannerSelectors>, locationName: string) {
+  301 |   await expect(
+  302 |     planner2.changesDiscardedModal,
+  303 |     '"Your changes were discarded" modal should appear for Client 2',
+> 304 |   ).toBeVisible({ timeout: 60000 });
+      |     ^ Error: "Your changes were discarded" modal should appear for Client 2
+  305 | 
+  306 |   await expect(planner2.changesDiscardedModalTitle).toBeVisible({ timeout: 5000 });
+  307 |   await expect(planner2.changesDiscardedModalMessage).toBeVisible({ timeout: 5000 });
+  308 | 
+  309 |   const modalText = await planner2.changesDiscardedModal.textContent();
+  310 |   const cleanLocationName = locationName.replace(/✓/g, '').trim();
+  311 |   expect(modalText, `Modal should mention location "${cleanLocationName}"`).toContain(cleanLocationName);
+  312 | 
+  313 |   await planner2.changesDiscardedModalCloseButton.click();
+  314 |   await expect(planner2.changesDiscardedModal).not.toBeVisible({ timeout: 5000 });
+  315 | }
+  316 | 
+  317 | // Selects a single location, seeds products into it, and places a fresh order on the first empty
+  318 | // orderable cell. Returns the created cell's testId and its date key (last testId segment), used to
+  319 | // open the matching Order Details later. Mirrors the proven creation flow of TC:14329.
+  320 | async function createFirstOrderInLocation(page: Page, planner: ReturnType<typeof plannerSelectors>, location: string) {
+  321 |   await plannerPage.setLocations(page, [location], true);
+  322 |   await page.keyboard.press('Escape').catch(() => {});
+  323 |   await page.waitForTimeout(2000);
+  324 | 
+  325 |   await plannerPage.switchOrderMode(page, true);
+  326 |   await plannerPage.ensureMatrixHasOrderableProducts(page);
+  327 |   await plannerPage.settleLiveSync(page);
+  328 |   // The live-sync tick can drop the client-side rows again; re-seeding is a no-op when it did not.
+  329 |   await plannerPage.ensureMatrixHasOrderableProducts(page);
+  330 | 
+  331 |   const allInputs = planner.orderableInputs;
+  332 |   const inputCount = await allInputs.count();
+  333 |   expect(inputCount, `Expected orderable inputs for location "${location}"`).toBeGreaterThan(0);
+  334 | 
+  335 |   let createdTestId = '';
+  336 |   for (let i = 0; i < Math.min(inputCount, 200); i++) {
+  337 |     const tempInput = allInputs.nth(i);
+  338 |     if (!(await tempInput.isEditable().catch(() => false))) continue;
+  339 |     if (await tempInput.isDisabled().catch(() => true)) continue;
+  340 |     const value = (await tempInput.inputValue()).trim();
+  341 |     if (value && value !== '0') continue;
+  342 |     const testId = (await tempInput.getAttribute('data-testid')) || '';
+  343 |     if (!testId) continue;
+  344 | 
+  345 |     // Dismiss any leftover modal that could intercept the cell click.
+  346 |     const visibleModal = page.locator('.ant-modal-wrap:visible').first();
+  347 |     if (await visibleModal.isVisible({ timeout: 500 }).catch(() => false)) {
+  348 |       const closeBtn = visibleModal
+  349 |         .locator('button.ant-btn-circle, button.ant-modal-close, button:has-text("Close")')
+  350 |         .first();
+  351 |       await closeBtn.click({ timeout: 2000 }).catch(() => {});
+  352 |       await visibleModal.waitFor({ state: 'hidden', timeout: 5000 }).catch(() => {});
+  353 |     }
+  354 | 
+  355 |     const inp = page.locator(`input[data-testid="${testId}"]`);
+  356 |     await inp.scrollIntoViewIfNeeded();
+  357 |     await inp.click();
+  358 |     await inp.fill('4');
+  359 |     await inp.press('Tab');
+  360 |     await page.waitForTimeout(500);
+  361 |     createdTestId = testId;
+  362 |     break;
+  363 |   }
+  364 |   expect(createdTestId, `Expected an empty orderable cell for location "${location}"`).toBeTruthy();
+  365 | 
+  366 |   await plannerPage.clickOrderButton(page);
+  367 |   await page.waitForTimeout(1000);
+  368 |   await expect(planner.orderConfirmationModal).toBeVisible({ timeout: 10000 });
+  369 |   await planner.orderConfirmationModalConfirmButton.click();
+  370 |   await expect(planner.orderConfirmationModal).not.toBeVisible({ timeout: 10000 });
+  371 |   await page.waitForTimeout(3000);
+  372 |   await plannerPage.closeFirstOrderCongratulationsModalIfVisible(page);
+  373 |   await page.waitForTimeout(2000);
+  374 | 
+  375 |   // The cell date is always the last testid segment (YYYY-MM-DD); some products carry an extra
+  376 |   // segment (e.g. ":6:") so match the tail. The date-header testid used by openOrderDetailsModal is DD-MM.
+  377 |   const dateStr = createdTestId.split(':').pop() || '';
+  378 |   const dateMatch = dateStr.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+  379 |   expect(dateMatch, `Expected to extract date from cell testid "${createdTestId}"`).toBeTruthy();
+  380 |   const dateKey = `${dateMatch![3]}-${dateMatch![2]}`;
+  381 |   return { testId: createdTestId, dateKey };
+  382 | }
+  383 | 
+  384 | test.describe('Planner - Lag Buster', () => {
+  385 |   let planner: ReturnType<typeof plannerSelectors>;
+  386 |   let corpnav: ReturnType<typeof corpnavSelectors>;
+  387 |   const userIdsToDelete: string[] = [];
+  388 | 
+  389 |   const ENTERPRISE_WITH_DATA_ID = 'cfc0f4d4-ce0c-461e-ada2-d527f0e4222c';
+  390 |   const cleanedEnterprises = new Set<string>();
+  391 | 
+  392 |   // force=true is for tests that need empty cells in a specific location: the once-per-file guard
+  393 |   // is not enough because the preceding tests place orders on the same enterprise.
+  394 |   async function cleanupOrdersIfNeeded(enterpriseId: string = ENTERPRISE_WITH_DATA_ID, force = false) {
+  395 |     if (!force && cleanedEnterprises.has(enterpriseId)) return;
+  396 |     const result = await removeAllOrders(enterpriseId);
+  397 |     console.log(`Cleaned orders for ${enterpriseId}: ${result.removed.length} removed, ${result.failed.length} failed`);
+  398 |     cleanedEnterprises.add(enterpriseId);
+  399 |   }
+  400 | 
+  401 |   // Like cleanupOrdersIfNeeded, but also waits until the planner's order cache stops serving the deleted
+  402 |   // orders - see plannerPage.waitForOrderCacheToDrop. Call it with the user logged in on `page`.
+  403 |   async function cleanupOrdersAndWaitForCache(page: Page, enterpriseId: string = ENTERPRISE_WITH_DATA_ID) {
+  404 |     if (cleanedEnterprises.has(enterpriseId)) return;
+```

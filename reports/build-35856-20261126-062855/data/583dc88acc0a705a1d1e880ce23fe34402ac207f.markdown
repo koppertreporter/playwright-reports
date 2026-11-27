@@ -1,0 +1,295 @@
+# Instructions
+
+- Following Playwright test failed.
+- Explain why, be concise, respect Playwright best practices.
+- Provide a snippet of code with the fix, if possible.
+
+# Test info
+
+- Name: lagBuster.spec.ts >> Planner - Lag Buster >> TC:14333 - Check 'Your changes were discarded' modal + Order deadline timer for the SAME location
+- Location: playwright/specs/lagBuster.spec.ts:1606:7
+
+# Error details
+
+```
+Error: Saved order never reached the planner with its F&O number
+
+Saved order never reached the planner with its F&O number
+
+expect(received).toBe(expected) // Object.is equality
+
+Expected: true
+Received: false
+
+Call Log:
+- Timeout 90000ms exceeded while waiting on the predicate
+```
+
+# Page snapshot
+
+```yaml
+- generic [active] [ref=e1]:
+  - generic [ref=e3]:
+    - generic [ref=e4]: You're on DEVELOPMENT OR STAGE
+    - generic [ref=e6]:
+      - img [ref=e7] [cursor=pointer]
+      - generic [ref=e14]:
+        - generic [ref=e15]: Plkw P. van Geest Maasland B.V.
+        - generic [ref=e16] [cursor=pointer]:
+          - img "user" [ref=e17]:
+            - img [ref=e18]
+          - text: Playwright DudefprkUhT
+    - generic [ref=e21]:
+      - generic [ref=e22]:
+        - heading "Hi, Playwright DudefprkUhT!" [level=1] [ref=e23]
+        - strong [ref=e25]: Welcome to Koppert One
+        - generic [ref=e26]:
+          - heading "Need help ?" [level=5] [ref=e27]
+          - separator [ref=e28]
+          - generic [ref=e29]:
+            - img [ref=e31]
+            - generic [ref=e32]:
+              - heading "Koppert One support" [level=5] [ref=e33]
+              - link "mail support@koppert.one" [ref=e35] [cursor=pointer]:
+                - /url: mailto:support@koppert.one
+                - img "mail" [ref=e36]:
+                  - img [ref=e37]
+                - text: support@koppert.one
+                - img [ref=e39]
+              - link "phone +31 1 051 405 17" [ref=e43] [cursor=pointer]:
+                - /url: tel:+31105140517
+                - img "phone" [ref=e44]:
+                  - img [ref=e45]
+                - text: +31 1 051 405 17
+                - img [ref=e47]
+      - generic [ref=e51]:
+        - generic [ref=e52] [cursor=pointer]:
+          - img [ref=e54]
+          - generic [ref=e57]: Order
+          - generic [ref=e59]: View, place and manage orders
+          - img [ref=e61]
+        - generic [ref=e63] [cursor=pointer]:
+          - img [ref=e65]
+          - generic [ref=e69]: Knowledge
+          - generic [ref=e71]: Explore chemical compatibility with Koppert's natural enemies and bumblebees
+          - img [ref=e73]
+        - generic [ref=e75] [cursor=pointer]:
+          - img [ref=e77]
+          - generic [ref=e79]: Scout
+          - generic [ref=e81]: Discover trends in pest development and beneficial insect counts to know when to act
+          - img [ref=e83]
+        - generic [ref=e85] [cursor=pointer]:
+          - img [ref=e87]
+          - generic [ref=e89]: Organization
+          - generic [ref=e91]: Manage team members and their access to locations
+          - img [ref=e93]
+  - button "Feedback" [ref=e95] [cursor=pointer]:
+    - generic [ref=e97]: Feedback
+```
+
+# Test source
+
+```ts
+  1057 |     }
+  1058 |     if (!targetTestId) throw new Error('No editable empty orderable cell available to seed an order');
+  1059 | 
+  1060 |     const target = page.locator(`[data-testid="${targetTestId}"]`);
+  1061 |     await target.scrollIntoViewIfNeeded();
+  1062 |     await target.click();
+  1063 |     await target.fill(quantity);
+  1064 |     await page.keyboard.press('Tab');
+  1065 |     await page.waitForTimeout(500);
+  1066 | 
+  1067 |     await this.clickOrderButton(page);
+  1068 |     if (await planner.orderConfirmationModal.isVisible({ timeout: 5000 }).catch(() => false)) {
+  1069 |       await planner.orderConfirmationModalConfirmButton.click();
+  1070 |       await expect(planner.orderConfirmationModal).toBeHidden({ timeout: 10000 });
+  1071 |     }
+  1072 |     await page.waitForTimeout(3000);
+  1073 |     await this.dismissPostOrderModals(page);
+  1074 | 
+  1075 |     // A freshly-created user can bounce to Home once right after placing their first order (the app
+  1076 |     // finishes establishing the enterprise context). If that happened, re-load the planner so the
+  1077 |     // caller continues against the matrix rather than the Home page.
+  1078 |     if (!page.url().includes('/apps/order/planner')) {
+  1079 |       await this.gotoPlannerStable(page);
+  1080 |       await this.switchOrderMode(page, true);
+  1081 |       await expect(planner.weekHeaders.first()).toBeVisible({ timeout: 30000 });
+  1082 |     }
+  1083 | 
+  1084 |     return { testId: targetTestId, value: quantity };
+  1085 |   },
+  1086 | 
+  1087 |   // Watches the planner's own order reads (no extra API calls) for the order this page saves next. After a
+  1088 |   // save the planner keeps reading the pre-save cache snapshot for a few seconds; once the ERP cache takes
+  1089 |   // the change, a live-sync push delivers the new snapshot (for a new order, with its F&O number instead of
+  1090 |   // the temporary NSO- id). The planner takes that push as newer data for the location, so an edit made
+  1091 |   // before it lands is thrown away with "Your changes were discarded". Start tracking before pressing Order,
+  1092 |   // then `waitForSync()` before touching the matrix again: it resolves once a read taken from a snapshot
+  1093 |   // newer than the save shows the saved location and date as a numbered order carrying the saved product
+  1094 |   // and quantity, and clears the push's modal if any. The snapshot check matters when the save lands in an
+  1095 |   // order that is already numbered: that order reads as numbered straight away, from the stale snapshot.
+  1096 |   trackOwnOrderSync(page: Page) {
+  1097 |     type SavedLine = { locationId: string; deliveryDate: string; productId: string; quantity: number };
+  1098 |     type PlannerOrders = {
+  1099 |       timestamp?: string;
+  1100 |       items?: {
+  1101 |         locationId: string;
+  1102 |         data?: { orders?: { id: string; deliveryDate: string; items?: { productId: string; quantity: number }[] }[] }[];
+  1103 |       }[];
+  1104 |     };
+  1105 | 
+  1106 |     let saved: SavedLine | undefined;
+  1107 |     let savedAt = 0;
+  1108 |     const plannerReads: PlannerOrders[] = [];
+  1109 |     const onResponse = async (response: Response) => {
+  1110 |       const url = response.url();
+  1111 |       if (!response.ok()) return;
+  1112 |       if (url.includes('/ordering/orders/upsert') && response.request().method() === 'POST') {
+  1113 |         const order = (await response.json().catch(() => null))?.items?.[0];
+  1114 |         const line = order?.items?.[0];
+  1115 |         if (order && line) {
+  1116 |           // The server's clock, so it compares with the snapshot timestamps the reads carry.
+  1117 |           savedAt = Date.parse(response.headers()['date'] ?? '') || Date.now();
+  1118 |           saved = {
+  1119 |             locationId: order.locationId,
+  1120 |             deliveryDate: order.deliveryDate,
+  1121 |             productId: line.productId,
+  1122 |             quantity: line.quantity,
+  1123 |           };
+  1124 |         }
+  1125 |       } else if (url.includes('/api/v2/ordering/orders?')) {
+  1126 |         const body = await response.json().catch(() => null);
+  1127 |         if (body) plannerReads.push(body);
+  1128 |       }
+  1129 |     };
+  1130 |     const isSynced = () =>
+  1131 |       !!saved &&
+  1132 |       plannerReads.some((read) =>
+  1133 |         Date.parse(read.timestamp ?? '') >= savedAt &&
+  1134 |         (read.items ?? [])
+  1135 |           .filter((location) => location.locationId === saved!.locationId)
+  1136 |           .flatMap((location) => location.data ?? [])
+  1137 |           .flatMap((week) => week.orders ?? [])
+  1138 |           .some(
+  1139 |             (order) =>
+  1140 |               order.deliveryDate === saved!.deliveryDate &&
+  1141 |               !order.id.startsWith('NSO-') &&
+  1142 |               (order.items ?? []).some(
+  1143 |                 (item) => item.productId === saved!.productId && item.quantity === saved!.quantity,
+  1144 |               ),
+  1145 |           ),
+  1146 |       );
+  1147 | 
+  1148 |     page.on('response', onResponse);
+  1149 |     const stop = () => page.off('response', onResponse);
+  1150 | 
+  1151 |     return {
+  1152 |       stop,
+  1153 |       waitForSync: async (timeoutMs = 90000) => {
+  1154 |         try {
+  1155 |           await expect
+  1156 |             .poll(isSynced, { timeout: timeoutMs, message: 'Saved order never reached the planner with its F&O number' })
+> 1157 |             .toBe(true);
+       |              ^ Error: Saved order never reached the planner with its F&O number
+  1158 |         } finally {
+  1159 |           stop();
+  1160 |         }
+  1161 |         // Let the push that delivered it finish rendering, and clear its modal if it raised one.
+  1162 |         await this.settleLiveSync(page, 2000);
+  1163 |       },
+  1164 |     };
+  1165 |   },
+  1166 | 
+  1167 |   // Like seedEditableOrderViaUI, but returns only once the planner holds the order as F&O numbered it
+  1168 |   // (see trackOwnOrderSync), so the caller can edit the seeded cell without a live-sync push discarding it.
+  1169 |   async seedSyncedOrderViaUI(page: Page, quantity = '10', timeoutMs = 90000): Promise<{ testId: string; value: string }> {
+  1170 |     const sync = this.trackOwnOrderSync(page);
+  1171 |     try {
+  1172 |       const seeded = await this.seedEditableOrderViaUI(page, quantity);
+  1173 |       await sync.waitForSync(timeoutMs);
+  1174 |       return seeded;
+  1175 |     } finally {
+  1176 |       sync.stop();
+  1177 |     }
+  1178 |   },
+  1179 | 
+  1180 |   // A freshly-created user can bounce to Home right after the order-details page first renders, while
+  1181 |   // the app finishes establishing the enterprise context - and the bounce can recur even after the
+  1182 |   // title reappears. Re-navigate to the captured order URL and wait for the Edit button to stay put,
+  1183 |   // retrying through any repeated bounce. Pass the page.url() captured after the order-details title
+  1184 |   // appeared. Returns true once the Edit button is stably visible, false if it never settles.
+  1185 |   async ensureOrderDetailsSettled(page: Page, orderDetailsUrl: string): Promise<boolean> {
+  1186 |     const orders = ordersSelectors(page);
+  1187 |     const isEditStable = async () => {
+  1188 |       const visible = await orders.editButton.isVisible({ timeout: 6000 }).catch(() => false);
+  1189 |       if (!visible) return false;
+  1190 |       await page.waitForTimeout(2000);
+  1191 |       return orders.editButton.isVisible().catch(() => false);
+  1192 |     };
+  1193 | 
+  1194 |     if (await isEditStable()) return true;
+  1195 |     if (!orderDetailsUrl || !/\/orders\//.test(orderDetailsUrl)) return false;
+  1196 | 
+  1197 |     for (let attempt = 0; attempt < 5; attempt++) {
+  1198 |       await page.goto(orderDetailsUrl);
+  1199 |       await orders.orderDetailsPageTitle.isVisible({ timeout: 15000 }).catch(() => false);
+  1200 |       if (await isEditStable()) return true;
+  1201 |     }
+  1202 |     return false;
+  1203 |   },
+  1204 | 
+  1205 |   async verifyOrderingTermsModalStructure(page: Page) {
+  1206 |     const planner = plannerSelectors(page);
+  1207 | 
+  1208 |     await expect(planner.orderingTermsModalContent).toBeVisible({ timeout: 15000 });
+  1209 | 
+  1210 |     await expect(planner.orderingTermsCheckboxes).toHaveCount(2, { timeout: 10000 });
+  1211 |     await expect(planner.orderingTermsCheckboxes.nth(0)).not.toBeChecked();
+  1212 |     await expect(planner.orderingTermsCheckboxes.nth(1)).not.toBeChecked();
+  1213 | 
+  1214 |     await expect(planner.orderingTermsGoBackButton).toBeVisible();
+  1215 |     await expect(planner.orderingTermsGoBackButton).toBeEnabled();
+  1216 | 
+  1217 |     await expect(planner.orderingTermsSaveButton).toBeVisible();
+  1218 |     await expect(planner.orderingTermsSaveButton).toBeDisabled();
+  1219 |   },
+  1220 | 
+  1221 |   async acceptOrderingTermsModalIfVisible(page: Page) {
+  1222 |     const planner = plannerSelectors(page);
+  1223 | 
+  1224 |     const isVisible = await planner.orderingTermsModalContent.isVisible({ timeout: 3000 }).catch(() => false);
+  1225 |     if (!isVisible) return;
+  1226 | 
+  1227 |     await expect(planner.orderingTermsCheckboxes).toHaveCount(2, { timeout: 10000 });
+  1228 | 
+  1229 |     const cb0 = planner.orderingTermsCheckboxes.nth(0);
+  1230 |     const cb1 = planner.orderingTermsCheckboxes.nth(1);
+  1231 | 
+  1232 |     if (!(await cb0.isChecked().catch(() => false))) {
+  1233 |       await cb0.scrollIntoViewIfNeeded();
+  1234 |       await page.waitForTimeout(300);
+  1235 |       await cb0.click({ force: true });
+  1236 |       await expect(cb0).toBeChecked({ timeout: 5000 });
+  1237 |     }
+  1238 |     if (!(await cb1.isChecked().catch(() => false))) {
+  1239 |       await cb1.scrollIntoViewIfNeeded();
+  1240 |       await page.waitForTimeout(300);
+  1241 |       await cb1.click({ force: true });
+  1242 |       await expect(cb1).toBeChecked({ timeout: 5000 });
+  1243 |     }
+  1244 | 
+  1245 |     // Scroll to bottom of terms to enable Save button
+  1246 |     await planner.orderingTermsModalContent.evaluate((el) => {
+  1247 |       el.scrollTop = el.scrollHeight;
+  1248 |     });
+  1249 |     await page.waitForTimeout(1000);
+  1250 | 
+  1251 |     await expect(planner.orderingTermsSaveButton).toBeEnabled({ timeout: 15000 });
+  1252 |     await planner.orderingTermsSaveButton.click();
+  1253 | 
+  1254 |     await expect(planner.orderingTermsModalContent).toBeHidden({ timeout: 15000 });
+  1255 |   },
+  1256 | 
+  1257 |   async verifyTermsModalFirstTime(page: Page) {
+```

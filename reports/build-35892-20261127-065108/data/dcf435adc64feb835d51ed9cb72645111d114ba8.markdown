@@ -1,0 +1,300 @@
+# Instructions
+
+- Following Playwright test failed.
+- Explain why, be concise, respect Playwright best practices.
+- Provide a snippet of code with the fix, if possible.
+
+# Test info
+
+- Name: visitReports_list_filters.spec.ts >> Visit Reports - list search & locations filter >> TC:22491 - [Locations Filter + Search] Verify smart search on VRs list
+- Location: playwright/specs/visitReports_list_filters.spec.ts:261:7
+
+# Error details
+
+```
+Error: Search "FRUTAS ANTONIO DI LOS TRANCOS" should return "FRUTAS ANTONIO DI", got: AGRICOLA SUAGO | ANDUJAR AMATE IGNACIA FRANCISCA PU | ANGULAR GALVEZ MIGUEL DI | FRUTAS Y PAQUI PU
+
+expect(received).toBe(expected) // Object.is equality
+
+Expected: true
+Received: false
+```
+
+# Page snapshot
+
+```yaml
+- generic [ref=e3]:
+  - generic [ref=e4]: You're on DEVELOPMENT OR STAGE
+  - generic [ref=e6]:
+    - img [ref=e7] [cursor=pointer]
+    - menu [ref=e14]:
+      - menuitem "Overview" [ref=e15] [cursor=pointer]:
+        - link "Overview" [ref=e17]:
+          - /url: /apps/overview
+      - menuitem "Order" [ref=e18] [cursor=pointer]:
+        - link "Order" [ref=e20]:
+          - /url: /apps/order
+      - menuitem "Scout" [ref=e21] [cursor=pointer]:
+        - link "Scout" [ref=e23]:
+          - /url: https://www.natutecscout.com/apps/scout
+      - menuitem "Organization" [ref=e24] [cursor=pointer]:
+        - link "Organization" [ref=e26]:
+          - /url: /apps/organization
+      - menuitem "Admin" [ref=e27] [cursor=pointer]:
+        - link "Admin" [ref=e29]:
+          - /url: /apps/admin
+    - generic [ref=e30]:
+      - generic [ref=e31]: AGRICOLA SUAGO, S.L.
+      - generic [ref=e32] [cursor=pointer]:
+        - img "user" [ref=e33]:
+          - img [ref=e34]
+        - text: Superuser for autotests
+  - generic [ref=e36]:
+    - complementary [ref=e38]:
+      - menu [ref=e40]:
+        - menuitem "swap Side Effects" [ref=e41] [cursor=pointer]:
+          - img "swap" [ref=e42]:
+            - img [ref=e43]
+          - link "Side Effects" [ref=e46]:
+            - /url: /apps/protect/side-effects
+        - menuitem "Visit reports" [ref=e47] [cursor=pointer]:
+          - img [ref=e48]
+          - link "Visit reports" [ref=e54]:
+            - /url: /apps/protect/visit-reports
+        - menuitem "search Solution finder" [ref=e55] [cursor=pointer]:
+          - img "search" [ref=e56]:
+            - img [ref=e57]
+          - link "Solution finder" [ref=e60]:
+            - /url: /apps/protect/solution-finder
+      - img "left" [ref=e62] [cursor=pointer]:
+        - img [ref=e63]
+    - main [ref=e65]:
+      - generic [ref=e66]:
+        - generic [ref=e67]:
+          - generic [ref=e68]:
+            - generic [ref=e70]: Beneficial
+            - button "Select product" [ref=e71] [cursor=pointer]:
+              - generic [ref=e72]: Select product
+          - generic [ref=e73]:
+            - generic [ref=e75]: Active ingredient
+            - button "Select product" [ref=e76] [cursor=pointer]:
+              - generic [ref=e77]: Select product
+        - generic [ref=e78]:
+          - generic "Side Effects" [ref=e82]
+          - generic [ref=e83]:
+            - generic [ref=e85]:
+              - img [ref=e88]
+              - generic [ref=e90]: Nothing has been selected yet
+              - generic [ref=e91]: Select one or more beneficials and active ingredients to show side effects.
+            - button "Digital Assistant" [ref=e93] [cursor=pointer]:
+              - img [ref=e94]
+              - generic [ref=e99]: Digital Assistant
+          - generic [ref=e102]: All rights reserved. © Koppert 2026
+```
+
+# Test source
+
+```ts
+  176 |     expect(await visitReportsPage.readLocationsControlText(page)).toMatch(counterFor(total - 2, total));
+  177 | 
+  178 |     // Only reports of the selected locations are listed
+  179 |     const listedLocations = await visitReportsPage.getListLocations(page);
+  180 |     expect(listedLocations).not.toContain(locations[0].name);
+  181 | 
+  182 |     // Re-check one -> counter climbs back by one
+  183 |     await visitReportsPage.setLocationChecked(page, locations[0].name, true);
+  184 |     await visitReportsPage.expectSelectAllChecked(page, false);
+  185 |     expect(await visitReportsPage.readLocationsControlText(page)).toMatch(counterFor(total - 1, total));
+  186 | 
+  187 |     // 'Select All' -> everything selected again
+  188 |     await visitReportsPage.setSelectAll(page, true);
+  189 |     expect(await visitReportsPage.readLocationsControlText(page)).toMatch(counterFor(total, total));
+  190 | 
+  191 |     // Deselect all -> no counter, placeholder + prompt on the list
+  192 |     await visitReportsPage.setSelectAll(page, false);
+  193 |     const emptyControlText = await visitReportsPage.readLocationsControlText(page);
+  194 |     expect(emptyControlText).not.toMatch(COUNTER_REGEX);
+  195 |     expect(emptyControlText).toMatch(/Select location/i);
+  196 |     await expect(visitReports.locationsFilter.selectLocationMessage).toBeVisible({ timeout: 15000 });
+  197 | 
+  198 |     // Exactly one selected -> the location name replaces the counter
+  199 |     await visitReportsPage.setLocationChecked(page, locations[0].name, true);
+  200 |     const singleControlText = await visitReportsPage.readLocationsControlText(page);
+  201 |     expect(singleControlText).not.toMatch(COUNTER_REGEX);
+  202 |     expect(singleControlText).toContain(locations[0].name);
+  203 | 
+  204 |     // A second selection brings the counter back
+  205 |     await visitReportsPage.setLocationChecked(page, locations[1].name, true);
+  206 |     expect(await visitReportsPage.readLocationsControlText(page)).toMatch(counterFor(2, total));
+  207 |   });
+  208 | 
+  209 |   test(`TC:21003 - [Locations Filter + Search] Verify 'Select only search results' button for 10+ locations on Visit reports`, async ({
+  210 |     page,
+  211 |   }) => {
+  212 |     const locations = await getLocations();
+  213 |     const total = locations.length;
+  214 |     await seedVisitReport({ locationId: locations[0].id, title: `SelectOnly ${generateRandomString(6)}` });
+  215 | 
+  216 |     await openVisitReportsList(page);
+  217 | 
+  218 |     // Start from a partial selection so 'Select All' is unchecked
+  219 |     await visitReportsPage.setSelectAll(page, true);
+  220 |     await visitReportsPage.setLocationChecked(page, locations[0].name, false);
+  221 |     await visitReportsPage.setLocationChecked(page, locations[1].name, false);
+  222 |     await visitReportsPage.expectSelectAllChecked(page, false);
+  223 |     expect(await visitReportsPage.readLocationsControlText(page)).toMatch(counterFor(total - 2, total));
+  224 | 
+  225 |     // Activating the search shows the counter as placeholder text
+  226 |     await visitReportsPage.openLocationsDropdown(page);
+  227 |     await visitReportsPage.activateLocationsSearch(page);
+  228 | 
+  229 |     // Search on a stem shared by a strict subset of the locations
+  230 |     const searchTerm = locations[2].name.trim().slice(0, 5);
+  231 |     await visitReportsPage.typeLocationsSearch(page, searchTerm);
+  232 | 
+  233 |     const matched = await visitReportsPage.getAllLocationNames(page);
+  234 |     expect(matched.length, 'Search must narrow the list for this scenario to be meaningful').toBeGreaterThan(0);
+  235 |     expect(matched.length).toBeLessThan(total);
+  236 | 
+  237 |     await expect(visitReports.locationsFilter.selectOnlySearchResultsButton).toBeVisible({ timeout: 10000 });
+  238 |     await visitReports.locationsFilter.selectOnlySearchResultsButton.click();
+  239 |     await expect(visitReports.locationsFilter.dropdownPanel).toBeHidden({ timeout: 10000 });
+  240 | 
+  241 |     const controlText = await visitReports.locationsFilter.control.innerText();
+  242 |     if (matched.length === 1) {
+  243 |       expect(controlText).toContain(matched[0]);
+  244 |     } else {
+  245 |       expect(controlText).toMatch(counterFor(matched.length, total));
+  246 |     }
+  247 | 
+  248 |     // Only the searched-for locations stay checked
+  249 |     await visitReportsPage.openLocationsDropdown(page);
+  250 |     await visitReportsPage.expectSelectAllChecked(page, false);
+  251 |     for (const name of matched) {
+  252 |       await visitReportsPage.expectLocationChecked(page, name, true);
+  253 |     }
+  254 |     const unmatched = locations.map((l) => l.name).filter((name) => !matched.includes(name));
+  255 |     for (const name of unmatched.slice(0, 3)) {
+  256 |       await visitReportsPage.expectLocationChecked(page, name, false);
+  257 |     }
+  258 |     await visitReportsPage.closeLocationsDropdown(page);
+  259 |   });
+  260 | 
+  261 |   test('TC:22491 - [Locations Filter + Search] Verify smart search on VRs list', async ({ page }) => {
+  262 |     const locations = await getLocations();
+  263 |     await seedVisitReport({ locationId: locations[0].id, title: `SmartSearch ${generateRandomString(6)}` });
+  264 | 
+  265 |     await openVisitReportsList(page);
+  266 |     await visitReportsPage.openLocationsDropdown(page);
+  267 |     await visitReportsPage.activateLocationsSearch(page);
+  268 | 
+  269 |     // Options are labelled "<name> - <building complement>", so match on the name as a prefix.
+  270 |     async function expectMatch(term: string, expectedLocation: string) {
+  271 |       await visitReportsPage.typeLocationsSearch(page, term);
+  272 |       const names = await visitReportsPage.getAllLocationNames(page);
+  273 |       expect(
+  274 |         names.some((name) => name.startsWith(expectedLocation)),
+  275 |         `Search "${term}" should return "${expectedLocation}", got: ${names.join(' | ')}`,
+> 276 |       ).toBe(true);
+      |         ^ Error: Search "FRUTAS ANTONIO DI LOS TRANCOS" should return "FRUTAS ANTONIO DI", got: AGRICOLA SUAGO | ANDUJAR AMATE IGNACIA FRANCISCA PU | ANGULAR GALVEZ MIGUEL DI | FRUTAS Y PAQUI PU
+  277 |     }
+  278 | 
+  279 |     const half = (value: string, min: number) =>
+  280 |       value.trim().slice(0, Math.max(min, Math.ceil(value.trim().length / 2)));
+  281 | 
+  282 |     const withCity = locations.find((l) => l.city && l.city.trim().length > 3);
+  283 |     expect(withCity, 'Fixture enterprise must have a location with a city').toBeTruthy();
+  284 |     await expectMatch(withCity!.city.trim(), withCity!.name);
+  285 | 
+  286 |     const withComplement = locations.find((l) => l.buildingComplement && l.buildingComplement.trim().length > 2);
+  287 |     if (withComplement) {
+  288 |       await expectMatch(
+  289 |         `${withComplement.name.trim()} ${withComplement.buildingComplement!.trim()}`,
+  290 |         withComplement.name,
+  291 |       );
+  292 |       await expectMatch(
+  293 |         `${half(withComplement.name, 4)} ${half(withComplement.buildingComplement!, 2)}`,
+  294 |         withComplement.name,
+  295 |       );
+  296 |     }
+  297 | 
+  298 |     const withAddress = locations.find(
+  299 |       (l) => l.city?.trim().length > 3 && l.street?.trim().length > 2 && l.zip?.trim().length > 2,
+  300 |     );
+  301 |     expect(withAddress, 'Fixture enterprise must have a location with city, street and zip').toBeTruthy();
+  302 |     await expectMatch(
+  303 |       `${withAddress!.city.trim()} ${withAddress!.street.trim()} ${withAddress!.zip.trim()}`,
+  304 |       withAddress!.name,
+  305 |     );
+  306 |     await expectMatch(
+  307 |       `${half(withAddress!.city, 3)} ${half(withAddress!.street, 3)} ${half(withAddress!.zip, 2)}`,
+  308 |       withAddress!.name,
+  309 |     );
+  310 | 
+  311 |     // A zip made of two parts is matched regardless of the order of those parts
+  312 |     const withSplitZip = locations.find((l) => /\s/.test((l.zip || '').trim()));
+  313 |     if (withSplitZip) {
+  314 |       const parts = withSplitZip.zip.trim().split(/\s+/);
+  315 |       await expectMatch(`${parts[1]} ${parts[0]}`, withSplitZip.name);
+  316 |     }
+  317 | 
+  318 |     // Numeric fragments across two fields
+  319 |     const withHouseNumber = locations.find((l) => l.houseNumber?.trim() && l.zip?.trim().length > 2);
+  320 |     if (withHouseNumber) {
+  321 |       await expectMatch(
+  322 |         `${withHouseNumber.houseNumber.trim().slice(0, 1)} ${withHouseNumber.zip.trim().slice(0, 2)}`,
+  323 |         withHouseNumber.name,
+  324 |       );
+  325 |     }
+  326 | 
+  327 |     // Punctuation in the street is ignored by the matcher
+  328 |     const withPunctuation = locations.find((l) => /[.,\-#_]/.test(l.street || ''));
+  329 |     if (withPunctuation) {
+  330 |       const cleaned = withPunctuation.street
+  331 |         .trim()
+  332 |         .split(/\s+/)
+  333 |         .find((word) => /[.,\-#_]/.test(word) && word.replace(/[.,\-#_]/g, '').length > 1);
+  334 |       if (cleaned) {
+  335 |         await expectMatch(cleaned.replace(/[.,\-#_]/g, ''), withPunctuation.name);
+  336 |       }
+  337 |     }
+  338 | 
+  339 |     // US-only fields: county / state. Stage has no US enterprise with both these fields populated and
+  340 |     // the 10+ locations the search box requires, so these two steps only run if the fixture gains them.
+  341 |     const withCounty = locations.find((l) => l.county?.trim() && l.state?.trim() && l.country?.trim());
+  342 |     if (withCounty) {
+  343 |       await expectMatch(
+  344 |         `${withCounty.county!.trim()} ${withCounty.state.trim()} ${withCounty.country.trim()}`,
+  345 |         withCounty.name,
+  346 |       );
+  347 |       await expectMatch(
+  348 |         `${half(withCounty.county!, 3)} ${half(withCounty.state, 2)} ${half(withCounty.country, 2)}`,
+  349 |         withCounty.name,
+  350 |       );
+  351 |     }
+  352 | 
+  353 |     await visitReportsPage.closeLocationsDropdown(page);
+  354 |   });
+  355 | 
+  356 |   test('TC:16775 - [Locations Filter + Search] Check Search in the Locations drop-down + less than 10 locations for Visit reports editing', async ({
+  357 |     page,
+  358 |   }) => {
+  359 |     // The search magnifier only appears once a select holds 10+ options, so use a small enterprise.
+  360 |     const smallEnterpriseId = US_ENTERPRISE_NOT_BLOCKED;
+  361 |     const user = await createUser({ page, roles: ['Advisor', 'Admin'] });
+  362 |     userIdsToDelete.push(user.userId);
+  363 |     await addUserToEnterprise(smallEnterpriseId, user.userId);
+  364 |     await restoreSession(page, user.refreshToken);
+  365 |     await setEnterpriseSelectorInLocalStorage(page, smallEnterpriseId);
+  366 |     const smallEnterpriseToken = await getTokenFromLocalStorage(page);
+  367 |     const locations = (await getVisitReportLocations(smallEnterpriseId, smallEnterpriseToken)).items;
+  368 |     expect(locations.length, 'Fixture enterprise must have 2..9 visit-report locations').toBeGreaterThanOrEqual(2);
+  369 |     expect(locations.length).toBeLessThan(10);
+  370 | 
+  371 |     const title = `SmallEnterprise ${generateRandomString(6)}`;
+  372 |     const report = await createVisitReport({
+  373 |       enterpriseId: smallEnterpriseId,
+  374 |       token: smallEnterpriseToken,
+  375 |       locationId: locations[0].id,
+  376 |       title,
+```

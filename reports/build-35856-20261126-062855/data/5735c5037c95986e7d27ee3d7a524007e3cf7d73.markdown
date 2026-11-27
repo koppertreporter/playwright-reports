@@ -1,0 +1,285 @@
+# Instructions
+
+- Following Playwright test failed.
+- Explain why, be concise, respect Playwright best practices.
+- Provide a snippet of code with the fix, if possible.
+
+# Test info
+
+- Name: planner.spec.ts >> Planner >> TC:16271 - [Shipping method selection] shipping method dropdown not visible when no whitelisted methods
+- Location: playwright/specs/planner.spec.ts:436:7
+
+# Error details
+
+```
+Error: No openable order found from the planner date headers (dateKey=auto): the popover held no order-number row
+```
+
+# Page snapshot
+
+```yaml
+- generic [active] [ref=e1]:
+  - generic [ref=e3]:
+    - generic [ref=e4]: You're on DEVELOPMENT OR STAGE
+    - generic [ref=e6]:
+      - img [ref=e7] [cursor=pointer]
+      - generic [ref=e14]:
+        - generic [ref=e15]: Plkw P. van Geest Maasland B.V.
+        - generic [ref=e16] [cursor=pointer]:
+          - img "user" [ref=e17]:
+            - img [ref=e18]
+          - text: Playwright DudegGbTnOq
+    - generic [ref=e21]:
+      - generic [ref=e22]:
+        - heading "Hi, Playwright DudegGbTnOq!" [level=1] [ref=e23]
+        - strong [ref=e25]: Welcome to Koppert One
+        - generic [ref=e26]:
+          - heading "Need help ?" [level=5] [ref=e27]
+          - separator [ref=e28]
+          - generic [ref=e29]:
+            - img [ref=e31]
+            - generic [ref=e32]:
+              - heading "Koppert One support" [level=5] [ref=e33]
+              - link "mail support@koppert.one" [ref=e35] [cursor=pointer]:
+                - /url: mailto:support@koppert.one
+                - img "mail" [ref=e36]:
+                  - img [ref=e37]
+                - text: support@koppert.one
+                - img [ref=e39]
+              - link "phone +31 1 051 405 17" [ref=e43] [cursor=pointer]:
+                - /url: tel:+31105140517
+                - img "phone" [ref=e44]:
+                  - img [ref=e45]
+                - text: +31 1 051 405 17
+                - img [ref=e47]
+      - generic [ref=e51]:
+        - generic [ref=e52] [cursor=pointer]:
+          - img [ref=e54]
+          - generic [ref=e57]: Order
+          - generic [ref=e59]: View, place and manage orders
+          - img [ref=e61]
+        - generic [ref=e63] [cursor=pointer]:
+          - img [ref=e65]
+          - generic [ref=e69]: Knowledge
+          - generic [ref=e71]: Explore chemical compatibility with Koppert's natural enemies and bumblebees
+          - img [ref=e73]
+        - generic [ref=e75] [cursor=pointer]:
+          - img [ref=e77]
+          - generic [ref=e79]: Scout
+          - generic [ref=e81]: Discover trends in pest development and beneficial insect counts to know when to act
+          - img [ref=e83]
+        - generic [ref=e85] [cursor=pointer]:
+          - img [ref=e87]
+          - generic [ref=e89]: Organization
+          - generic [ref=e91]: Manage team members and their access to locations
+          - img [ref=e93]
+  - button "Feedback" [ref=e95] [cursor=pointer]:
+    - generic [ref=e97]: Feedback
+```
+
+# Test source
+
+```ts
+  2059 | 
+  2060 |     const leaveGuard = page.locator('[role="dialog"]').filter({ hasText: /Are you sure\?/i });
+  2061 |     const discard = leaveGuard.getByRole('button', { name: /^Discard$/i }).first();
+  2062 | 
+  2063 |     await expect(leaveGuard).toBeVisible({ timeout: 15000 });
+  2064 |     await expect(discard).toBeVisible({ timeout: 15000 });
+  2065 |     await discard.click();
+  2066 |     await expect(leaveGuard).toBeHidden({ timeout: 30000 });
+  2067 | 
+  2068 |     await page.waitForLoadState('networkidle', { timeout: 10000 }).catch(() => {});
+  2069 |   },
+  2070 | 
+  2071 |   async triggerDeletingQuantitiesModalByOrdering(page: Page) {
+  2072 |     await this.clickOrderButton(page);
+  2073 | 
+  2074 |     const modal = page
+  2075 |       .locator('[role="dialog"]:visible, .ant-modal:visible')
+  2076 |       .filter({ hasText: /Deleting quantities/i })
+  2077 |       .first();
+  2078 |     await expect(modal).toBeVisible({ timeout: 15000 });
+  2079 |   },
+  2080 | 
+  2081 |   async cancelDeletingQuantitiesModal(page: Page) {
+  2082 |     const modal = page
+  2083 |       .locator('[role="dialog"]:visible, .ant-modal:visible')
+  2084 |       .filter({ hasText: /Deleting quantities/i })
+  2085 |       .first();
+  2086 |     const cancel = modal.getByRole('button', { name: /^Cancel$/i }).first();
+  2087 |     const closeIcon = modal
+  2088 |       .locator('button.ant-btn-circle, button[aria-label="Close"], button')
+  2089 |       .filter({ has: page.locator('svg') })
+  2090 |       .first();
+  2091 | 
+  2092 |     if (await cancel.isVisible().catch(() => false)) {
+  2093 |       await cancel.click();
+  2094 |     } else if (await closeIcon.isVisible().catch(() => false)) {
+  2095 |       await closeIcon.click();
+  2096 |     } else {
+  2097 |       await page.keyboard.press('Escape').catch(() => {});
+  2098 |     }
+  2099 | 
+  2100 |     await expect(modal).toBeHidden({ timeout: 30000 });
+  2101 |     await page.waitForLoadState('networkidle', { timeout: 10000 }).catch(() => {});
+  2102 |   },
+  2103 | 
+  2104 |   async confirmDeletingQuantitiesModal(page: Page) {
+  2105 |     const modal = page
+  2106 |       .locator('[role="dialog"]:visible, .ant-modal:visible')
+  2107 |       .filter({ hasText: /Deleting quantities/i })
+  2108 |       .first();
+  2109 |     const confirm = modal.getByRole('button', { name: /^Confirm$/i }).first();
+  2110 |     await expect(confirm).toBeVisible({ timeout: 15000 });
+  2111 |     await confirm.click();
+  2112 |     await expect(modal).toBeHidden({ timeout: 30000 });
+  2113 |     await page.waitForLoadState('networkidle', { timeout: 10000 }).catch(() => {});
+  2114 |   },
+  2115 | 
+  2116 |   async resolveLeaveGuardIfVisible(page: Page, action: 'discard' | 'cancel' = 'discard') {
+  2117 |     const planner = plannerSelectors(page);
+  2118 | 
+  2119 |     const visible = await planner.leaveGuardModal.isVisible().catch(() => false);
+  2120 |     if (!visible) return;
+  2121 | 
+  2122 |     if (action === 'discard') {
+  2123 |       await expect(planner.leaveGuardDiscardButton).toBeVisible({ timeout: 15000 });
+  2124 |       await planner.leaveGuardDiscardButton.click({ force: true });
+  2125 |     } else {
+  2126 |       await expect(planner.leaveGuardCancelButton).toBeVisible({ timeout: 15000 });
+  2127 |       await planner.leaveGuardCancelButton.click({ force: true });
+  2128 |     }
+  2129 | 
+  2130 |     await expect(planner.leaveGuardModal).toBeHidden({ timeout: 30000 });
+  2131 |   },
+  2132 | 
+  2133 |   async openExistingOrderDetailsFromPlannerByDate(page: Page, dateKey?: string) {
+  2134 |     // Falling back to "any header with a cube" when a dateKey was given would open somebody else's order
+  2135 |     // and report success, so the fallback only applies when the caller did not name a date.
+  2136 |     const headers = dateKey
+  2137 |       ? page.locator(`[data-testid="date-header:${dateKey}"]`)
+  2138 |       : page.locator('[data-testid^="date-header:"]').filter({
+  2139 |           has: page.locator('svg[viewBox="0 0 48 48"]'),
+  2140 |         });
+  2141 | 
+  2142 |     await expect(headers.first(), `No date header found (dateKey=${dateKey ?? 'auto'})`).toBeVisible({
+  2143 |       timeout: 30000,
+  2144 |     });
+  2145 | 
+  2146 |     // A day can carry nothing but orders F&O never numbered (#NSO-...). Those rows render no "Open"
+  2147 |     // action, so a cube is not on its own a promise that the day holds an openable order - when the
+  2148 |     // caller let us pick the day, walk the cube days until one does.
+  2149 |     const candidates = dateKey ? 1 : Math.min(await headers.count(), 12);
+  2150 |     let lastReason = '';
+  2151 | 
+  2152 |     for (let i = 0; i < candidates; i++) {
+  2153 |       const opened = await this.tryOpenOrderDetailsFromDateHeader(page, headers.nth(i));
+  2154 |       if (opened.ok) return;
+  2155 |       lastReason = opened.reason;
+  2156 |       await page.keyboard.press('Escape').catch(() => {});
+  2157 |     }
+  2158 | 
+> 2159 |     throw new Error(
+       |           ^ Error: No openable order found from the planner date headers (dateKey=auto): the popover held no order-number row
+  2160 |       `No openable order found from the planner date headers (dateKey=${dateKey ?? 'auto'}): ${lastReason}`,
+  2161 |     );
+  2162 |   },
+  2163 | 
+  2164 |   // Clicks the order cube in `header` and resolves the order it stands for: a single-order day opens the
+  2165 |   // details modal, a multi-order day opens a popover listing the day's orders. Returns instead of throwing
+  2166 |   // so the caller can move on to the next day.
+  2167 |   async tryOpenOrderDetailsFromDateHeader(page: Page, header: Locator): Promise<{ ok: boolean; reason: string }> {
+  2168 |     const cube = header.locator('svg[viewBox="0 0 48 48"]').first();
+  2169 |     if (!(await cube.isVisible().catch(() => false))) return { ok: false, reason: 'no cube icon in the date header' };
+  2170 | 
+  2171 |     await this.clickOrderCube(cube);
+  2172 | 
+  2173 |     const planner = plannerSelectors(page);
+  2174 | 
+  2175 |     if (await planner.orderDetailsModal.isVisible({ timeout: 5000 }).catch(() => false)) {
+  2176 |       return { ok: true, reason: '' };
+  2177 |     }
+  2178 | 
+  2179 |     const popover = page
+  2180 |       .locator(
+  2181 |         '.ant-popover:visible .ant-popover-inner, .ant-tooltip:visible .ant-tooltip-inner, .ant-popover-inner[role="tooltip"]:visible, .ant-tooltip-inner[role="tooltip"]:visible',
+  2182 |       )
+  2183 |       .filter({ has: page.getByRole('button', { name: /^Open$/i }) })
+  2184 |       .first();
+  2185 | 
+  2186 |     if (!(await popover.isVisible({ timeout: 10000 }).catch(() => false))) {
+  2187 |       return { ok: false, reason: 'the popover listed no order with an Open action (F&O-unnumbered #NSO- orders)' };
+  2188 |     }
+  2189 | 
+  2190 |     const firstOrderRow = popover
+  2191 |       .locator('div')
+  2192 |       .filter({ hasText: /#\s*[A-Z0-9]+-SO\d+/i })
+  2193 |       .first();
+  2194 |     if (!(await firstOrderRow.isVisible({ timeout: 10000 }).catch(() => false))) {
+  2195 |       return { ok: false, reason: 'the popover held no order-number row' };
+  2196 |     }
+  2197 | 
+  2198 |     const openBtn = firstOrderRow.getByRole('button', { name: /^Open$/i }).first();
+  2199 |     await expect(openBtn, 'Open button not found in the order row').toBeVisible({ timeout: 15000 });
+  2200 | 
+  2201 |     await popover.scrollIntoViewIfNeeded().catch(() => {});
+  2202 |     await openBtn.scrollIntoViewIfNeeded().catch(() => {});
+  2203 |     await page.waitForLoadState('domcontentloaded').catch(() => {});
+  2204 | 
+  2205 |     await firstOrderRow
+  2206 |       .getByRole('button', { name: /^Open$/i })
+  2207 |       .first()
+  2208 |       .click({ timeout: 30000 });
+  2209 |     await page.waitForURL(/\/apps\/order\/(order-list|orders)\/[A-Z0-9]+-SO\d+/i, { timeout: 60000 });
+  2210 |     return { ok: true, reason: '' };
+  2211 |   },
+  2212 | 
+  2213 |   async openOrderDetailsPageFromDatePopoverByOrderNumber(page: Page, dateKey: string, orderNumber: string) {
+  2214 |     const normalized = orderNumber.startsWith('#') ? orderNumber : `#${orderNumber}`;
+  2215 | 
+  2216 |     const header = page.locator(`[data-testid="date-header:${dateKey}"]`).first();
+  2217 |     await expect(header, `Date header not found for ${dateKey}`).toBeVisible({ timeout: 30000 });
+  2218 | 
+  2219 |     const headerBlock = header.locator('xpath=ancestor::div[1]').first();
+  2220 |     const cube = headerBlock
+  2221 |       .locator('div.sc-leSDtu svg[viewBox="0 0 48 48"]')
+  2222 |       .first()
+  2223 |       .or(headerBlock.locator('svg[viewBox="0 0 48 48"]').first());
+  2224 | 
+  2225 |     await expect(cube, `Cube icon not found inside date header block for ${dateKey}`).toBeVisible({ timeout: 30000 });
+  2226 |     await cube.scrollIntoViewIfNeeded().catch(() => {});
+  2227 | 
+  2228 |     const popover = page
+  2229 |       .locator(
+  2230 |         '.ant-popover:visible .ant-popover-inner, .ant-tooltip:visible .ant-tooltip-inner, .ant-popover-inner[role="tooltip"]:visible, .ant-tooltip-inner[role="tooltip"]:visible',
+  2231 |       )
+  2232 |       .filter({ has: page.getByRole('button', { name: /^Open$/i }) })
+  2233 |       .first();
+  2234 | 
+  2235 |     // The popover dismisses itself after a few seconds, and a click that lands after it has gone falls
+  2236 |     // through to the grid cell underneath - so open it and click Open in one go, and start over rather
+  2237 |     // than waiting out a navigation that is never coming.
+  2238 |     const ORDER_URL = /\/apps\/order\/(order-list|orders)\/[A-Z0-9]+-SO\d+/i;
+  2239 |     let lastReason = '';
+  2240 | 
+  2241 |     for (let attempt = 1; attempt <= 3; attempt++) {
+  2242 |       await this.clickOrderCube(cube);
+  2243 | 
+  2244 |       if (!(await popover.isVisible({ timeout: 10000 }).catch(() => false))) {
+  2245 |         lastReason = 'the popover with an Open action did not appear';
+  2246 |         continue;
+  2247 |       }
+  2248 | 
+  2249 |       const row = popover
+  2250 |         .locator('div')
+  2251 |         .filter({ hasText: new RegExp(normalized.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')) })
+  2252 |         .first();
+  2253 |       const openBtn = row.getByRole('button', { name: /^Open$/i }).first();
+  2254 | 
+  2255 |       if (!(await openBtn.isVisible({ timeout: 5000 }).catch(() => false))) {
+  2256 |         lastReason = `no Open action for order ${normalized} in the popover`;
+  2257 |         continue;
+  2258 |       }
+  2259 | 
+```

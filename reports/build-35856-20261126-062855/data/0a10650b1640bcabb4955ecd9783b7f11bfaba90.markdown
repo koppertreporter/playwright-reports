@@ -1,0 +1,324 @@
+# Instructions
+
+- Following Playwright test failed.
+- Explain why, be concise, respect Playwright best practices.
+- Provide a snippet of code with the fix, if possible.
+
+# Test info
+
+- Name: searchInSelectors.spec.ts >> Search in Selectors >> TC:19687 - Check the Search behaviour when starting typing in the Search field
+- Location: playwright/specs/searchInSelectors.spec.ts:164:7
+
+# Error details
+
+```
+Error: apiRequestContext.post: getaddrinfo ENOTFOUND stage.login.koppert.one
+Call log:
+  - → POST https://stage.login.koppert.one/frontegg/identity/resources/users/v1/activate
+    - user-agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/149.0.7827.55 Safari/537.36
+    - accept: */*
+    - accept-encoding: gzip,deflate,br
+    - Content-Type: application/json
+    - content-length: 164
+
+```
+
+# Page snapshot
+
+```yaml
+- generic [ref=e1]:
+  - generic [ref=e3]:
+    - generic [ref=e4]: You're on DEVELOPMENT OR STAGE
+    - generic [ref=e6]:
+      - generic [ref=e10]:
+        - img [ref=e11]
+        - heading [level=4]
+      - generic [ref=e20]:
+        - generic [ref=e21]:
+          - strong [ref=e23]: Login
+          - generic [ref=e25]:
+            - generic "Email" [ref=e27]
+            - textbox "Email" [ref=e31]
+          - generic [ref=e32]:
+            - img "info-circle" [ref=e33]:
+              - img [ref=e34]
+            - generic [ref=e37]:
+              - text: SSO login is temporarily unavailable.
+              - link "Set your password here" [ref=e38] [cursor=pointer]:
+                - /url: /forgot-password
+              - text: to log in using your email address and password.
+          - generic [ref=e40]:
+            - generic "Password" [ref=e42]
+            - generic [ref=e46]:
+              - textbox "Password" [ref=e47]
+              - img "eye-invisible" [ref=e49] [cursor=pointer]:
+                - img [ref=e50]
+          - generic [ref=e58]:
+            - button "Login" [ref=e59] [cursor=pointer]:
+              - generic [ref=e60]: Login
+            - link "Forgot password" [ref=e61] [cursor=pointer]:
+              - /url: /forgot-password
+        - separator [ref=e62]
+        - generic [ref=e63]: Don't have an account yet?Create an account
+        - separator [ref=e64]
+        - generic [ref=e65]:
+          - text: New to Koppert One?
+          - link "More info" [ref=e66] [cursor=pointer]:
+            - /url: https://www.koppert.com/koppert-one/
+            - text: More info
+            - img [ref=e67]
+        - separator [ref=e70]
+        - generic [ref=e71]:
+          - generic [ref=e72]: All rights reserved. © Koppert 2026
+          - generic [ref=e73]:
+            - link "Privacy statement" [ref=e74] [cursor=pointer]:
+              - /url: https://stage.koppert.one/assets/statements/privacy-statement.pdf
+            - text: "|"
+            - link "Terms of Use" [ref=e75] [cursor=pointer]:
+              - /url: https://stage.koppert.one/assets/statements/terms-of-use.pdf
+  - generic [active]:
+    - generic:
+      - generic:
+        - button "Open Privacy Settings" [ref=e76] [cursor=pointer]:
+          - img [ref=e78]
+        - dialog "Privacy Settings" [ref=e83]:
+          - generic [ref=e87]:
+            - generic [ref=e89]:
+              - img [ref=e92]
+              - heading "Privacy Settings" [level=1] [ref=e95]
+              - generic [ref=e98]: This site uses third-party website tracking technologies to provide and continually improve our services, and to display advertisements according to users' interests. I agree and may revoke or change my consent at any time with effect for the future.
+              - generic [ref=e99]:
+                - generic [ref=e100]:
+                  - link "Privacy Policy" [ref=e101] [cursor=pointer]:
+                    - /url: https://www.koppert.com/privacy-statement/
+                  - link "Cookie Statement" [ref=e102] [cursor=pointer]:
+                    - /url: https://www.koppert.com/cookie-statement/
+                - button "More Information" [ref=e104] [cursor=pointer]:
+                  - generic [ref=e105]: More Information
+            - generic [ref=e107]:
+              - generic [ref=e110]:
+                - generic [ref=e111] [cursor=pointer]: Marketing
+                - switch "Marketing" [ref=e112] [cursor=pointer]:
+                  - img [ref=e113]
+              - generic [ref=e122]:
+                - generic [ref=e123] [cursor=pointer]: Functional
+                - switch "Functional" [ref=e124] [cursor=pointer]:
+                  - img [ref=e125]
+              - generic [ref=e134]:
+                - generic [ref=e135] [cursor=pointer]: Essential
+                - switch "Essential" [checked] [disabled] [ref=e136] [cursor=pointer]:
+                  - img [ref=e137]
+          - generic [ref=e145]:
+            - generic [ref=e147]:
+              - button "Save Settings" [ref=e148] [cursor=pointer]
+              - button "Accept All" [ref=e149] [cursor=pointer]
+            - link "Powered by Usercentrics Consent Management" [ref=e151] [cursor=pointer]:
+              - /url: https://usercentrics.com/consent-management-platform-powered-by-usercentrics/?utm_source=banner_uc&utm_medium=referral&utm_content=v2
+```
+
+# Test source
+
+```ts
+  106 | 
+  107 |   return await response.json();
+  108 | }
+  109 | 
+  110 | export async function deleteUser(userId: string) {
+  111 |   if (userId === (await getSuperuserId())) {
+  112 |     throw new Error('You are trying to delete superuser, operation is not allowed');
+  113 |   }
+  114 | 
+  115 |   await removeAllUserEnterprises(userId); // user cannot be deleted if it has enterprises
+  116 | 
+  117 |   const response = await (
+  118 |     await api()
+  119 |   ).delete(`${urls.api.users}/${userId}`, {
+  120 |     data: {},
+  121 |   });
+  122 | 
+  123 |   if (!response.ok()) {
+  124 |     const errorText = await response.text();
+  125 |     throw new Error(`Failed to delete user entity data: ${errorText}`);
+  126 |   }
+  127 | 
+  128 |   const isCI = process.env.CI === 'true' || process.env.CI === '1';
+  129 |   if (!isCI) {
+  130 |     try {
+  131 |       await executeQuery('DELETE FROM authors WHERE user_id = $1', [userId]);
+  132 |     } catch (error) {
+  133 |       console.warn(`Failed to delete author record for user ${userId}:`, error.message);
+  134 |     }
+  135 |   }
+  136 | 
+  137 |   return response;
+  138 | }
+  139 | 
+  140 | export async function getSalesPersons() {
+  141 |   const response = await (
+  142 |     await api()
+  143 |   ).get(urls.api.salesPersons + '?page=1&limit=50', {
+  144 |     data: {},
+  145 |   });
+  146 | 
+  147 |   if (!response.ok()) {
+  148 |     const errorText = await response.text();
+  149 |     throw new Error(`Failed to fetch user entity data: ${errorText}`);
+  150 |   }
+  151 | 
+  152 |   return await response.json();
+  153 | }
+  154 | 
+  155 | export async function resolveRoleIds(roles: Array<Role>): Promise<string[]> {
+  156 |   const roleIds = (await getUserRoles()).filter((role) => roles.includes(role.name)).map((role) => role.id);
+  157 |   if (roleIds.length !== roles.length) {
+  158 |     throw new Error(`Could not resolve every requested role: ${roles.join(', ')}`);
+  159 |   }
+  160 |   return roleIds;
+  161 | }
+  162 | 
+  163 | export async function updateUserRoles(userId: string, roles: Array<Role>, token?: string) {
+  164 |   const response = await (
+  165 |     await api(token)
+  166 |   ).patch(`${urls.api.users}/${userId}`, {
+  167 |     data: { roleIds: await resolveRoleIds(roles) },
+  168 |   });
+  169 | 
+  170 |   if (!response.ok()) {
+  171 |     const errorText = await response.text();
+  172 |     throw new Error(`Failed to update roles of user ${userId}: ${errorText}`);
+  173 |   }
+  174 | 
+  175 |   return await response.json();
+  176 | }
+  177 | 
+  178 | export async function getUserRoles(): Promise<Array<any>> {
+  179 |   const response = await getWithRetry(async () => (await api()).get(urls.api.roles, { data: {} }));
+  180 | 
+  181 |   if (!response.ok()) {
+  182 |     const errorText = await response.text();
+  183 |     throw new Error(`Failed to fetch user entity data: ${errorText}`);
+  184 |   }
+  185 |   return await response.json();
+  186 | }
+  187 | 
+  188 | export async function activateAccountViaEmail(email: string, page: Page, password = generateStrongPassword(12)) {
+  189 |   const emailSubject = 'Activate Your Account';
+  190 |   const letter = await emailHelper.getLetter(email, emailSubject);
+  191 |   if (!letter) {
+  192 |     throw new Error(`Email with subject "${emailSubject}" not found for ${email}`);
+  193 |   }
+  194 |   const verificationLink = emailHelper.getVerificationLink(letter);
+  195 |   if (!verificationLink) {
+  196 |     throw new Error('Verification link not found in the email');
+  197 |   }
+  198 | 
+  199 |   const extractedData = emailHelper.extractUserIdAndToken(verificationLink);
+  200 |   if (!extractedData) {
+  201 |     throw new Error('Failed to extract userId and token from the verification link');
+  202 |   }
+  203 |   const { userId, token } = extractedData;
+  204 | 
+  205 |   // Use direct request to verify/activate account (public endpoint)
+> 206 |   const response = await page.request.post(urls.api.accountActivation, {
+      |                                       ^ Error: apiRequestContext.post: getaddrinfo ENOTFOUND stage.login.koppert.one
+  207 |     headers: {
+  208 |       'Content-Type': 'application/json',
+  209 |       accept: '*/*',
+  210 |     },
+  211 |     data: {
+  212 |       password: password,
+  213 |       token: token,
+  214 |       userId: userId,
+  215 |       lastTermsCheck: getCurrentIsoTimestamp(),
+  216 |     },
+  217 |   });
+  218 | 
+  219 |   if (!response.ok()) {
+  220 |     const errorText = await response.text();
+  221 |     throw new Error(`Failed to activate account via API: ${errorText}`);
+  222 |   }
+  223 |   const responseData = await response.json();
+  224 | 
+  225 |   const userEntity = await getCurrentUserEntity(responseData.accessToken);
+  226 |   const userIdFromEntity = userEntity.id;
+  227 | 
+  228 |   return {
+  229 |     ...responseData,
+  230 |     email: email,
+  231 |     password: password,
+  232 |     userId: userIdFromEntity,
+  233 |     name: userEntity.name,
+  234 |     roles: userEntity.roles,
+  235 |     enterprises: userEntity.enterprises,
+  236 |   };
+  237 | }
+  238 | 
+  239 | export async function getActivationLinkFromEmail(email: string) {
+  240 |   const emailSubject = 'Activate Your Account';
+  241 |   const letter = await emailHelper.getLetter(email, emailSubject);
+  242 |   const verificationLink = emailHelper.getVerificationLink(letter);
+  243 |   if (!verificationLink) {
+  244 |     throw new Error('Verification link not found in the email');
+  245 |   }
+  246 |   return verificationLink;
+  247 | }
+  248 | 
+  249 | export async function logout(page: Page) {
+  250 |   // Note: We don't clear global token variables here because:
+  251 |   // 1. They will be overwritten by the next login() call anyway
+  252 |   // 2. Setting them to empty strings can cause "Token has been revoked" errors
+  253 |   // 3. logout() is for cleaning browser state, not module-level API state
+  254 | 
+  255 |   await page.context().clearCookies();
+  256 |   await page.goto(urls.login, { waitUntil: 'load' });
+  257 |   await page.waitForLoadState('networkidle', { timeout: 10000 }).catch(() => {
+  258 |     console.log('Network not idle after 10s, proceeding anyway');
+  259 |   });
+  260 | 
+  261 |   // Retry logic to handle potential navigation races
+  262 |   let retries = 3;
+  263 |   while (retries > 0) {
+  264 |     try {
+  265 |       await page.evaluate(() => {
+  266 |         localStorage.clear();
+  267 |         sessionStorage.clear();
+  268 | 
+  269 |         // Set cookie consent values to prevent the annoying cookie modal
+  270 |         localStorage.setItem('uc_user_interaction', 'true');
+  271 |         localStorage.setItem(
+  272 |           'uc_gcm',
+  273 |           JSON.stringify({
+  274 |             adsDataRedaction: true,
+  275 |             adPersonalization: 'denied',
+  276 |             adStorage: 'denied',
+  277 |             adUserData: 'denied',
+  278 |             analyticsStorage: 'granted',
+  279 |           }),
+  280 |         );
+  281 |       });
+  282 |       break; // Success, exit retry loop
+  283 |     } catch (error) {
+  284 |       retries--;
+  285 |       if (retries === 0) {
+  286 |         console.error('Failed to clear storage after 3 attempts:', error.message);
+  287 |         throw error;
+  288 |       }
+  289 |       console.log(`Storage clear failed, retrying... (${retries} attempts left)`);
+  290 |       await page.waitForTimeout(500);
+  291 |     }
+  292 |   }
+  293 | }
+  294 | 
+  295 | export async function getAuthFromLocalStorage(page: Page) {
+  296 |   return await page.evaluate(() => {
+  297 |     const authData = localStorage.getItem('stores-portal/auth');
+  298 |     if (authData) {
+  299 |       const parsedData = JSON.parse(authData);
+  300 |       return parsedData.state?.auth;
+  301 |     }
+  302 |     return null;
+  303 |   });
+  304 | }
+  305 | 
+  306 | export async function getTokenFromLocalStorage(page: Page) {
+```

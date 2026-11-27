@@ -1,0 +1,311 @@
+# Instructions
+
+- Following Playwright test failed.
+- Explain why, be concise, respect Playwright best practices.
+- Provide a snippet of code with the fix, if possible.
+
+# Test info
+
+- Name: visitReports.spec.ts >> Visit Reports >> TC:15776 - US format for visit reports
+- Location: playwright/specs/visitReports.spec.ts:2819:7
+
+# Error details
+
+```
+Error: expect(locator).toBeVisible() failed
+
+Locator: locator('[class="ant-spin-container"] > :nth-child(4) > div').filter({ has: locator('button:has-text("View")') }).filter({ hasText: 'US Format Test - hBxdGRzJ' }).first().locator('button:has-text("View")')
+Expected: visible
+Timeout: 40000ms
+Error: element(s) not found
+
+Call log:
+  - Expect "toBeVisible" with timeout 40000ms
+  - waiting for locator('[class="ant-spin-container"] > :nth-child(4) > div').filter({ has: locator('button:has-text("View")') }).filter({ hasText: 'US Format Test - hBxdGRzJ' }).first().locator('button:has-text("View")')
+
+```
+
+```yaml
+- text: You're on DEVELOPMENT OR STAGE
+- img
+- menu:
+  - menuitem "Overview":
+    - link "Overview":
+      - /url: /apps/overview
+  - menuitem "Order":
+    - link "Order":
+      - /url: /apps/order
+  - menuitem "Knowledge":
+    - link "Knowledge":
+      - /url: /apps/protect
+  - menuitem "Scout":
+    - link "Scout":
+      - /url: https://www.natutecscout.com/apps/scout
+  - menuitem "Organization":
+    - link "Organization":
+      - /url: /apps/organization
+  - menuitem "Admin":
+    - link "Admin":
+      - /url: /apps/admin
+- text: AGROCENTRO ABONOS VELEZ S.L.
+- img "user"
+- text: Playwright DudeBcrAlfl
+- complementary:
+  - menu:
+    - menuitem "swap Side Effects":
+      - img "swap"
+      - link "Side Effects":
+        - /url: /apps/protect/side-effects
+    - menuitem "Visit reports":
+      - img
+      - link "Visit reports":
+        - /url: /apps/protect/visit-reports
+    - menuitem "search Solution finder":
+      - img "search"
+      - link "Solution finder":
+        - /url: /apps/protect/solution-finder
+  - img "left"
+- main:
+  - text: Visit report
+  - separator
+  - text: Date and location
+  - textbox "27-11-2026":
+    - /placeholder: Select date
+  - img "calendar"
+  - combobox
+  - text: AGROCENTRO ABONOS VELEZ EL MORCHE
+  - separator
+  - text: Title
+  - textbox "Title": US Format Test - hBxdGRzJ
+  - text: E-mail notifications
+  - combobox
+  - text: Nobody
+  - button "Load last visit report" [disabled]
+  - text: General notes
+  - textbox "Start typing..."
+  - button "Attachments":
+    - img
+    - text: Attachments
+  - separator
+  - tablist:
+    - tab "+ Cultivar"
+  - strong: Observations
+  - button "+ Scoutable"
+  - separator
+  - button "Cancel"
+  - button "Save as draft"
+  - button "Create visit report"
+  - text: All rights reserved. © Koppert 2026
+- dialog:
+  - text: Are you sure? You have unsaved data, continuing will discard any unsaved data.
+  - separator
+  - button "Discard"
+  - button "Cancel"
+```
+
+# Test source
+
+```ts
+  2677 |     await loginPage.goToURL(urls.visitReports, false);
+  2678 |     await page.waitForLoadState('domcontentloaded');
+  2679 | 
+  2680 |     const enterpriseSelector = general.enterpriseSelector;
+  2681 |     const isEnterpriseSelectorVisible = await enterpriseSelector.isVisible();
+  2682 |     if (isEnterpriseSelectorVisible) {
+  2683 |       const enterpriseName = await enterpriseSelector.textContent();
+  2684 |       expect(enterpriseName, 'Expected US enterprise to be selected').toBeTruthy();
+  2685 |     }
+  2686 | 
+  2687 |     await expect(visitReports.addVisitReportButton).toBeVisible();
+  2688 |     await visitReports.addVisitReportButton.click();
+  2689 |     await expect(visitReports.formContainer).toBeVisible();
+  2690 | 
+  2691 |     await expect(visitReports.dateField).toBeVisible();
+  2692 |     await visitReports.dateField.click();
+  2693 | 
+  2694 |     await expect(visitReports.datePickerDropdown).toBeVisible();
+  2695 | 
+  2696 |     const datePickerHeader = visitReports.datePickerDropdown.locator('.ant-picker-header-view');
+  2697 |     await expect(datePickerHeader).toBeVisible();
+  2698 |     const headerText = await datePickerHeader.textContent();
+  2699 |     expect(headerText, 'Expected date picker header to be visible').toBeTruthy();
+  2700 | 
+  2701 |     const todayCell = visitReports.datePickerDropdown.locator('.ant-picker-cell-today');
+  2702 |     await expect(todayCell).toBeVisible();
+  2703 |     await todayCell.click();
+  2704 | 
+  2705 |     await expect(visitReports.datePickerDropdown).toBeHidden();
+  2706 | 
+  2707 |     const selectedDateValue = await visitReports.dateField.inputValue();
+  2708 |     expect(selectedDateValue, 'Expected date to be selected').toBeTruthy();
+  2709 | 
+  2710 |     const usDateRegex = /^\d{2}\/\d{2}\/\d{4}$/;
+  2711 |     const euDateRegex = /^\d{2}-\d{2}-\d{4}$/;
+  2712 | 
+  2713 |     const isUsFormat = usDateRegex.test(selectedDateValue);
+  2714 |     const isEuFormat = euDateRegex.test(selectedDateValue);
+  2715 | 
+  2716 |     expect(
+  2717 |       isUsFormat || isEuFormat,
+  2718 |       `Expected date to be in either US (MM/DD/YYYY) or EU (DD-MM-YYYY) format, but got: ${selectedDateValue}`,
+  2719 |     ).toBeTruthy();
+  2720 | 
+  2721 |     let month: number;
+  2722 |     let day: number;
+  2723 | 
+  2724 |     if (isUsFormat) {
+  2725 |       const dateParts = selectedDateValue.split('/');
+  2726 |       month = parseInt(dateParts[0], 10);
+  2727 |       day = parseInt(dateParts[1], 10);
+  2728 |     } else {
+  2729 |       const dateParts = selectedDateValue.split('-');
+  2730 |       day = parseInt(dateParts[0], 10);
+  2731 |       month = parseInt(dateParts[1], 10);
+  2732 |     }
+  2733 | 
+  2734 |     expect(month, 'Expected month to be between 1 and 12').toBeGreaterThanOrEqual(1);
+  2735 |     expect(month, 'Expected month to be between 1 and 12').toBeLessThanOrEqual(12);
+  2736 |     expect(day, 'Expected day to be between 1 and 31').toBeGreaterThanOrEqual(1);
+  2737 |     expect(day, 'Expected day to be between 1 and 31').toBeLessThanOrEqual(31);
+  2738 | 
+  2739 |     await visitReports.locationDropdown.click();
+  2740 |     await expect(visitReports.locationOptions.first()).toBeVisible();
+  2741 |     await visitReports.locationOptions.first().click();
+  2742 | 
+  2743 |     const scoutablesResponsePromise = page
+  2744 |       .waitForResponse((response) => response.url().includes('/scoutables') || response.url().includes('/items'), {
+  2745 |         timeout: 10000,
+  2746 |       })
+  2747 |       .catch(() => null);
+  2748 |     await scoutablesResponsePromise;
+  2749 | 
+  2750 |     const visitReportTitle = `US Format Test - ${generateRandomString(8)}`;
+  2751 |     await expect(visitReports.titleField).toBeVisible();
+  2752 |     await visitReports.titleField.fill(visitReportTitle);
+  2753 | 
+  2754 |     await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
+  2755 | 
+  2756 |     const responsePromise = page.waitForResponse(
+  2757 |       (response) =>
+  2758 |         response.url().includes(urls.api.visitReports) &&
+  2759 |         response.request().method() === 'POST' &&
+  2760 |         response.status() === 201,
+  2761 |     );
+  2762 | 
+  2763 |     await expect(visitReports.saveButton).toBeVisible();
+  2764 |     await visitReports.saveButton.click();
+  2765 | 
+  2766 |     const response = await responsePromise;
+  2767 |     expect(response.ok()).toBeTruthy();
+  2768 |     const responseBody = await response.json();
+  2769 | 
+  2770 |     expect(responseBody).toBeTruthy();
+  2771 |     expect(responseBody.id).toBeTruthy();
+  2772 | 
+  2773 |     await expect(general.toastNotificationWithText(`${visitReportTitle} has been saved`)).toBeVisible();
+  2774 | 
+  2775 |     await page.waitForLoadState('domcontentloaded');
+  2776 |     const viewButton = visitReports.viewButton(visitReportTitle);
+> 2777 |     await expect(viewButton).toBeVisible();
+       |                              ^ Error: expect(locator).toBeVisible() failed
+  2778 |     await viewButton.click();
+  2779 |     await page.waitForLoadState('domcontentloaded');
+  2780 | 
+  2781 |     const dateLabel = page.locator('text=/Date:/i').locator('..').locator('text=/\\d{1,2}\\s+\\w+\\s+\\d{4}/').first();
+  2782 |     await expect(dateLabel).toBeVisible({ timeout: 10000 });
+  2783 |     const viewModeDate = await dateLabel.textContent();
+  2784 |     expect(viewModeDate, 'Expected date to be displayed in view mode').toBeTruthy();
+  2785 | 
+  2786 |     await expect(visitReports.editButton).toBeVisible();
+  2787 |     await visitReports.editButton.click();
+  2788 | 
+  2789 |     await expect(visitReports.dateField).toBeVisible();
+  2790 |     const editModeDateValue = await visitReports.dateField.inputValue();
+  2791 | 
+  2792 |     const editIsUsFormat = usDateRegex.test(editModeDateValue);
+  2793 |     const editIsEuFormat = euDateRegex.test(editModeDateValue);
+  2794 |     expect(
+  2795 |       editIsUsFormat || editIsEuFormat,
+  2796 |       `Expected date in edit mode to be in valid format, but got: ${editModeDateValue}`,
+  2797 |     ).toBeTruthy();
+  2798 | 
+  2799 |     let editMonth: number;
+  2800 |     let editDay: number;
+  2801 | 
+  2802 |     if (editIsUsFormat) {
+  2803 |       const editDateParts = editModeDateValue.split('/');
+  2804 |       editMonth = parseInt(editDateParts[0], 10);
+  2805 |       editDay = parseInt(editDateParts[1], 10);
+  2806 |     } else {
+  2807 |       const editDateParts = editModeDateValue.split('-');
+  2808 |       editDay = parseInt(editDateParts[0], 10);
+  2809 |       editMonth = parseInt(editDateParts[1], 10);
+  2810 |     }
+  2811 | 
+  2812 |     expect(editMonth, 'Expected month in edit mode to be between 1 and 12').toBeGreaterThanOrEqual(1);
+  2813 |     expect(editMonth, 'Expected month in edit mode to be between 1 and 12').toBeLessThanOrEqual(12);
+  2814 |     expect(editDay, 'Expected day in edit mode to be between 1 and 31').toBeGreaterThanOrEqual(1);
+  2815 |     expect(editDay, 'Expected day in edit mode to be between 1 and 31').toBeLessThanOrEqual(31);
+  2816 |   };
+  2817 | 
+  2818 |   test('TC:16451 - US format for visit reports', scenarioTC16451);
+  2819 |   test('TC:15776 - US format for visit reports', scenarioTC16451);
+  2820 | 
+  2821 |   test('TC:16778 - [Cultivar tabs] View visit report with cultivar tabs and switch between', async ({
+  2822 |     loginPage,
+  2823 |     page,
+  2824 |   }) => {
+  2825 |     const user = await createUser({ page, roles: ['Admin'] });
+  2826 |     userIdsToDelete.push(user.userId);
+  2827 | 
+  2828 |     const enterpriseId = '443c71b5-9c17-4e1e-8f86-0f7434ae9a3f';
+  2829 |     await addUserToEnterprise(enterpriseId, user.userId);
+  2830 |     await restoreSession(page, user.refreshToken);
+  2831 |     await setEnterpriseSelectorInLocalStorage(page, enterpriseId);
+  2832 | 
+  2833 |     await loginPage.goToURL(urls.visitReports, false);
+  2834 |     await page.waitForLoadState('domcontentloaded');
+  2835 |     expect(page.url()).toContain('visit-reports');
+  2836 | 
+  2837 |     await expect(visitReports.addVisitReportButton).toBeVisible();
+  2838 |     await visitReports.addVisitReportButton.click();
+  2839 |     await expect(visitReports.formContainer).toBeVisible();
+  2840 | 
+  2841 |     await selectYesterdayDate(page);
+  2842 | 
+  2843 |     await visitReports.locationDropdown.click();
+  2844 |     await expect(visitReports.locationOptions.first()).toBeVisible();
+  2845 |     await visitReports.locationOptions.first().click();
+  2846 | 
+  2847 |     const visitReportTitle = `Test Visit Report - ${generateRandomString(8)}`;
+  2848 |     await expect(visitReports.titleField).toBeVisible();
+  2849 |     await visitReports.titleField.fill(visitReportTitle);
+  2850 | 
+  2851 |     await expect(visitReports.addCultivarButton).toBeVisible();
+  2852 |     await visitReports.addCultivarButton.click();
+  2853 | 
+  2854 |     const tabName1 = `Cultivar Tab 1 ${generateRandomString(10)}`;
+  2855 |     await expect(visitReports.cultivarTabNameInput).toBeVisible();
+  2856 |     await visitReports.cultivarTabNameInput.fill(tabName1);
+  2857 |     await expect(visitReports.cultivarTabNameSaveButton).toBeVisible();
+  2858 |     await visitReports.cultivarTabNameSaveButton.click();
+  2859 | 
+  2860 |     await expect(visitReports.cultivarTab(tabName1)).toBeVisible();
+  2861 | 
+  2862 |     await visitReports.addScoutableButton.click();
+  2863 |     await expect(visitReports.scoutableDropdown).toBeVisible();
+  2864 |     await visitReports.scoutableDropdown.click();
+  2865 |     await expect(visitReports.scoutableOptions.first()).toBeVisible();
+  2866 |     await visitReports.scoutableOptions.first().click();
+  2867 | 
+  2868 |     const scoutableNoteField = visitReports.scoutableNoteField;
+  2869 |     await expect(scoutableNoteField).toBeVisible();
+  2870 |     await scoutableNoteField.fill('Test scoutable note for tab 1');
+  2871 | 
+  2872 |     await visitReports.addCultivarButton.click();
+  2873 |     const tabName2 = `Cultivar Tab 2 ${generateRandomString(10)}`;
+  2874 |     await expect(visitReports.cultivarTabNameInput).toBeVisible();
+  2875 |     await visitReports.cultivarTabNameInput.fill(tabName2);
+  2876 |     await expect(visitReports.cultivarTabNameSaveButton).toBeVisible();
+  2877 |     await visitReports.cultivarTabNameSaveButton.click();
+```

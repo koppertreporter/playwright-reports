@@ -1,0 +1,289 @@
+# Instructions
+
+- Following Playwright test failed.
+- Explain why, be concise, respect Playwright best practices.
+- Provide a snippet of code with the fix, if possible.
+
+# Test info
+
+- Name: planner_4.spec.ts >> Planner - Add Product Modal >> TC:18405 - [Browser's native leave guard] Check leave guard when leaving Planner with unsaved changes
+- Location: playwright/specs/planner_4.spec.ts:1577:7
+
+# Error details
+
+```
+Error: Expected to find an input with existing order
+
+expect(received).toBeTruthy()
+
+Received: ""
+```
+
+# Page snapshot
+
+```yaml
+- generic [active] [ref=e1]:
+  - generic [ref=e3]:
+    - generic [ref=e4]: You're on DEVELOPMENT OR STAGE
+    - generic [ref=e6]:
+      - img [ref=e7] [cursor=pointer]
+      - generic [ref=e14]:
+        - generic [ref=e15]: Plkw P. van Geest Maasland B.V.
+        - generic [ref=e16] [cursor=pointer]:
+          - img "user" [ref=e17]:
+            - img [ref=e18]
+          - text: Playwright DudewvEqzFi
+    - generic [ref=e21]:
+      - generic [ref=e22]:
+        - heading "Hi, Playwright DudewvEqzFi!" [level=1] [ref=e23]
+        - strong [ref=e25]: Welcome to Koppert One
+        - generic [ref=e26]:
+          - heading "Need help ?" [level=5] [ref=e27]
+          - separator [ref=e28]
+          - generic [ref=e29]:
+            - img [ref=e31]
+            - generic [ref=e32]:
+              - heading "Koppert One support" [level=5] [ref=e33]
+              - link "mail support@koppert.one" [ref=e35] [cursor=pointer]:
+                - /url: mailto:support@koppert.one
+                - img "mail" [ref=e36]:
+                  - img [ref=e37]
+                - text: support@koppert.one
+                - img [ref=e39]
+              - link "phone +31 1 051 405 17" [ref=e43] [cursor=pointer]:
+                - /url: tel:+31105140517
+                - img "phone" [ref=e44]:
+                  - img [ref=e45]
+                - text: +31 1 051 405 17
+                - img [ref=e47]
+      - generic [ref=e51]:
+        - generic [ref=e52] [cursor=pointer]:
+          - img [ref=e54]
+          - generic [ref=e57]: Order
+          - generic [ref=e59]: View, place and manage orders
+          - img [ref=e61]
+        - generic [ref=e63] [cursor=pointer]:
+          - img [ref=e65]
+          - generic [ref=e69]: Knowledge
+          - generic [ref=e71]: Explore chemical compatibility with Koppert's natural enemies and bumblebees
+          - img [ref=e73]
+        - generic [ref=e75] [cursor=pointer]:
+          - img [ref=e77]
+          - generic [ref=e79]: Scout
+          - generic [ref=e81]: Discover trends in pest development and beneficial insect counts to know when to act
+          - img [ref=e83]
+        - generic [ref=e85] [cursor=pointer]:
+          - img [ref=e87]
+          - generic [ref=e89]: Organization
+          - generic [ref=e91]: Manage team members and their access to locations
+          - img [ref=e93]
+  - button "Feedback" [ref=e95] [cursor=pointer]:
+    - generic [ref=e97]: Feedback
+```
+
+# Test source
+
+```ts
+  1615 |     await page.keyboard.press('Tab');
+  1616 | 
+  1617 |     await expect(planner.orderButton).toBeVisible({ timeout: 30000 });
+  1618 |     await expect(planner.orderButton).toBeEnabled({ timeout: 30000 });
+  1619 |     await expect(planner.discardChangesButton).toBeVisible({ timeout: 30000 });
+  1620 | 
+  1621 |     await page.goto(urls.orderPlanner);
+  1622 |     await expect(planner.discardChangesButton).toBeHidden({ timeout: 30000 });
+  1623 |     // Product rows added through the modal are client-side only, so a navigation empties the
+  1624 |     // matrix again; re-seed it before looking for cells.
+  1625 |     await plannerPage.ensureMatrixHasOrderableProducts(page);
+  1626 |     await expect(planner.weekHeaders.first()).toBeVisible({ timeout: 30000 });
+  1627 | 
+  1628 |     await expectCellNotPersisted(page, emptyInputTestId, 'Changes should not be saved after navigating to new URL');
+  1629 | 
+  1630 |     const emptyInputTestIdAfterNav = await findEmptyOrderableCellTestId(page);
+  1631 |     expect(emptyInputTestIdAfterNav, 'Expected to find empty input after navigation').toBeTruthy();
+  1632 | 
+  1633 |     const emptyInputAfterNav = page.locator(`[data-testid="${emptyInputTestIdAfterNav}"]`);
+  1634 |     await emptyInputAfterNav.scrollIntoViewIfNeeded();
+  1635 |     await expect(emptyInputAfterNav).toBeEditable({ timeout: 10000 });
+  1636 |     await emptyInputAfterNav.click();
+  1637 |     await emptyInputAfterNav.fill('12');
+  1638 |     await page.keyboard.press('Tab');
+  1639 | 
+  1640 |     await expect(planner.orderButton).toBeEnabled({ timeout: 30000 });
+  1641 |     await expect(planner.discardChangesButton).toBeVisible({ timeout: 30000 });
+  1642 | 
+  1643 |     await page.reload();
+  1644 |     await expect(planner.discardChangesButton).toBeHidden({ timeout: 30000 });
+  1645 |     await plannerPage.ensureMatrixHasOrderableProducts(page);
+  1646 |     await expect(planner.weekHeaders.first()).toBeVisible({ timeout: 30000 });
+  1647 | 
+  1648 |     await expectCellNotPersisted(page, emptyInputTestIdAfterNav, 'Changes should not be saved after page refresh');
+  1649 | 
+  1650 |     let testIdForOrderCreation = '';
+  1651 |     const allInputsForCreation = planner.orderableInputs;
+  1652 |     const inputCountForCreation = await allInputsForCreation.count();
+  1653 |     for (let i = 0; i < inputCountForCreation; i++) {
+  1654 |       const input = allInputsForCreation.nth(i);
+  1655 |       const isReadonly = await input.getAttribute('readonly');
+  1656 |       if (isReadonly !== null) continue;
+  1657 | 
+  1658 |       const isEditable = await input.isEditable().catch(() => false);
+  1659 |       if (!isEditable) continue;
+  1660 | 
+  1661 |       const value = await input.inputValue();
+  1662 |       if (!value || value === '' || value === '0') {
+  1663 |         testIdForOrderCreation = (await input.getAttribute('data-testid')) || '';
+  1664 |         break;
+  1665 |       }
+  1666 |     }
+  1667 | 
+  1668 |     expect(testIdForOrderCreation, 'Expected to find empty input to create an order').toBeTruthy();
+  1669 | 
+  1670 |     const inputForOrderCreation = page.locator(`[data-testid="${testIdForOrderCreation}"]`);
+  1671 |     await inputForOrderCreation.scrollIntoViewIfNeeded();
+  1672 |     await expect(inputForOrderCreation).toBeEditable({ timeout: 10000 });
+  1673 |     await inputForOrderCreation.click();
+  1674 |     await inputForOrderCreation.fill('15');
+  1675 |     await page.keyboard.press('Tab');
+  1676 | 
+  1677 |     await expect(planner.orderButton).toBeEnabled({ timeout: 30000 });
+  1678 |     await plannerPage.clickOrderButton(page);
+  1679 | 
+  1680 |     await expect(planner.orderConfirmationModal).toBeVisible({ timeout: 30000 });
+  1681 |     await planner.orderConfirmationModalConfirmButton.click();
+  1682 | 
+  1683 |     await expect(planner.successModal).toBeVisible({ timeout: 40000 });
+  1684 |     const closeButtonExists = await planner.successModalCloseButton.isVisible({ timeout: 5000 }).catch(() => false);
+  1685 |     if (closeButtonExists) {
+  1686 |       await planner.successModalCloseButton.click();
+  1687 |     } else {
+  1688 |       await planner.successModalCloseIcon.click();
+  1689 |     }
+  1690 |     await expect(planner.successModal).toBeHidden({ timeout: 30000 });
+  1691 | 
+  1692 |     await page.reload();
+  1693 |     await expect(planner.weekHeaders.first()).toBeVisible({ timeout: 30000 });
+  1694 | 
+  1695 |     let testIdForOrderEditing = '';
+  1696 |     let originalValue = '';
+  1697 |     const allInputsForEdit = planner.orderableInputs;
+  1698 |     const inputCountForEdit = await allInputsForEdit.count();
+  1699 |     for (let i = 0; i < inputCountForEdit; i++) {
+  1700 |       const input = allInputsForEdit.nth(i);
+  1701 |       const isReadonly = await input.getAttribute('readonly');
+  1702 |       if (isReadonly !== null) continue;
+  1703 | 
+  1704 |       const isEditable = await input.isEditable().catch(() => false);
+  1705 |       if (!isEditable) continue;
+  1706 | 
+  1707 |       const value = await input.inputValue();
+  1708 |       if (value && value !== '' && value !== '0') {
+  1709 |         testIdForOrderEditing = (await input.getAttribute('data-testid')) || '';
+  1710 |         originalValue = value;
+  1711 |         break;
+  1712 |       }
+  1713 |     }
+  1714 | 
+> 1715 |     expect(testIdForOrderEditing, 'Expected to find an input with existing order').toBeTruthy();
+       |                                                                                    ^ Error: Expected to find an input with existing order
+  1716 | 
+  1717 |     const inputForOrderEditing = page.locator(`[data-testid="${testIdForOrderEditing}"]`);
+  1718 |     await inputForOrderEditing.scrollIntoViewIfNeeded();
+  1719 |     await expect(inputForOrderEditing).toBeEditable({ timeout: 10000 });
+  1720 |     await inputForOrderEditing.click();
+  1721 |     await inputForOrderEditing!.fill(String(Number(originalValue) + 5));
+  1722 |     await page.keyboard.press('Tab');
+  1723 | 
+  1724 |     await expect(planner.orderButton).toBeVisible({ timeout: 30000 });
+  1725 |     await expect(planner.discardChangesButton).toBeVisible({ timeout: 30000 });
+  1726 | 
+  1727 |     await page.reload();
+  1728 |     await expect(planner.weekHeaders.first()).toBeVisible({ timeout: 30000 });
+  1729 | 
+  1730 |     const sameInputAfterEditReload = page.locator(`input[data-testid="${testIdForOrderEditing}"]`);
+  1731 |     await expect(sameInputAfterEditReload).toBeVisible({ timeout: 30000 });
+  1732 |     const valueAfterEditReload = await sameInputAfterEditReload.inputValue();
+  1733 |     expect(valueAfterEditReload, 'Edited order should revert to original value after refresh').toBe(originalValue);
+  1734 | 
+  1735 |     await sameInputAfterEditReload.click();
+  1736 |     await sameInputAfterEditReload.fill(String(Number(originalValue) + 7));
+  1737 |     await page.keyboard.press('Tab');
+  1738 | 
+  1739 |     await expect(planner.orderButton).toBeVisible({ timeout: 30000 });
+  1740 |     await expect(planner.discardChangesButton).toBeVisible({ timeout: 30000 });
+  1741 | 
+  1742 |     await page.goto(urls.orderPlanner);
+  1743 |     await expect(planner.weekHeaders.first()).toBeVisible({ timeout: 30000 });
+  1744 | 
+  1745 |     const sameInputAfterEditNav = page.locator(`input[data-testid="${testIdForOrderEditing}"]`);
+  1746 |     await expect(sameInputAfterEditNav).toBeVisible({ timeout: 30000 });
+  1747 |     const valueAfterEditNav = await sameInputAfterEditNav.inputValue();
+  1748 |     expect(valueAfterEditNav, 'Edited order should revert to original value after navigation').toBe(originalValue);
+  1749 | 
+  1750 |     let testIdForRemoval = '';
+  1751 |     const allInputsForRemoval = planner.orderableInputs;
+  1752 |     const inputCountForRemoval = await allInputsForRemoval.count();
+  1753 |     for (let i = 0; i < inputCountForRemoval; i++) {
+  1754 |       const input = allInputsForRemoval.nth(i);
+  1755 |       const isReadonly = await input.getAttribute('readonly');
+  1756 |       if (isReadonly !== null) continue;
+  1757 | 
+  1758 |       const isEditable = await input.isEditable().catch(() => false);
+  1759 |       if (!isEditable) continue;
+  1760 | 
+  1761 |       const value = await input.inputValue();
+  1762 |       if (value && value !== '' && value !== '0') {
+  1763 |         testIdForRemoval = (await input.getAttribute('data-testid')) || '';
+  1764 |         break;
+  1765 |       }
+  1766 |     }
+  1767 | 
+  1768 |     expect(testIdForRemoval, 'Expected to find an input with existing order for removal test').toBeTruthy();
+  1769 | 
+  1770 |     const inputForRemoval = page.locator(`[data-testid="${testIdForRemoval}"]`);
+  1771 |     const originalValueForRemoval = await inputForRemoval.inputValue();
+  1772 | 
+  1773 |     await inputForRemoval.scrollIntoViewIfNeeded();
+  1774 |     await expect(inputForRemoval).toBeEditable({ timeout: 10000 });
+  1775 |     await inputForRemoval.click();
+  1776 |     await inputForRemoval.clear();
+  1777 |     await page.keyboard.press('Tab');
+  1778 | 
+  1779 |     await expect(planner.orderButton).toBeVisible({ timeout: 30000 });
+  1780 |     await expect(planner.discardChangesButton).toBeVisible({ timeout: 30000 });
+  1781 | 
+  1782 |     await page.reload();
+  1783 |     await expect(planner.weekHeaders.first()).toBeVisible({ timeout: 30000 });
+  1784 | 
+  1785 |     const sameInputAfterRemovalReload = page.locator(`input[data-testid="${testIdForRemoval}"]`);
+  1786 |     await expect(sameInputAfterRemovalReload).toBeVisible({ timeout: 30000 });
+  1787 |     const valueAfterRemovalReload = await sameInputAfterRemovalReload.inputValue();
+  1788 |     expect(valueAfterRemovalReload, 'Removed quantity should be restored after refresh').toBe(originalValueForRemoval);
+  1789 | 
+  1790 |     await sameInputAfterRemovalReload.click();
+  1791 |     await sameInputAfterRemovalReload.clear();
+  1792 |     await page.keyboard.press('Tab');
+  1793 | 
+  1794 |     await expect(planner.orderButton).toBeVisible({ timeout: 30000 });
+  1795 |     await expect(planner.discardChangesButton).toBeVisible({ timeout: 30000 });
+  1796 | 
+  1797 |     await page.goto(urls.orderPlanner);
+  1798 |     await expect(planner.weekHeaders.first()).toBeVisible({ timeout: 30000 });
+  1799 | 
+  1800 |     const sameInputAfterRemovalNav = page.locator(`input[data-testid="${testIdForRemoval}"]`);
+  1801 |     await expect(sameInputAfterRemovalNav).toBeVisible({ timeout: 30000 });
+  1802 |     const valueAfterRemovalNav = await sameInputAfterRemovalNav.inputValue();
+  1803 |     expect(valueAfterRemovalNav, 'Removed quantity should be restored after navigation').toBe(originalValueForRemoval);
+  1804 |   });
+  1805 | 
+  1806 |   test(`TC:18588 - [Preserved order details] Check if order details draft is preserved in Order Reference`, async ({
+  1807 |     page,
+  1808 |   }) => {
+  1809 |     const orders = ordersSelectors(page);
+  1810 |     const user = await ordersPage.setupOrdererUserWithEnterpriseAccess(page, corpnav, ENTERPRISE_WITH_DATA_ID);
+  1811 |     userIdsToDelete.push(user.userId);
+  1812 | 
+  1813 |     const uniqueOrderReference = `TEST-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
+  1814 | 
+  1815 |     // A freshly-created user is bounced from the planner to Home after placing their first order
+```

@@ -1,0 +1,285 @@
+# Instructions
+
+- Following Playwright test failed.
+- Explain why, be concise, respect Playwright best practices.
+- Provide a snippet of code with the fix, if possible.
+
+# Test info
+
+- Name: planner_orderbox_colors.spec.ts >> Planner - Order Box Colors >> TC:21421 - [Orderbox] Order mode OFF: only days with orders render boxes, consistently across grouping options
+- Location: playwright/specs/planner_orderbox_colors.spec.ts:213:7
+
+# Error details
+
+```
+Error: Failed to fetch products from /api/v1/ordering/products/enterprise: {"id":"f1361a9d-b246-4a00-9e6b-f9a160a07a17","message":"Token has been revoked","statusCode":401,"metadata":[{"defaultMessage":"Token has been revoked","translationCode":"backend.exceptions.auth.tokenRevoked","code":"TOKEN_REVOKED"}]}
+```
+
+# Page snapshot
+
+```yaml
+- generic [active] [ref=e1]:
+  - generic [ref=e3]:
+    - generic [ref=e4]: You're on DEVELOPMENT OR STAGE
+    - generic [ref=e6]:
+      - img [ref=e7] [cursor=pointer]
+      - generic [ref=e14]:
+        - generic [ref=e15]: Plkw P. van Geest Maasland B.V.
+        - generic [ref=e16] [cursor=pointer]:
+          - img "user" [ref=e17]:
+            - img [ref=e18]
+          - text: Playwright DudenLhUKKv
+    - generic [ref=e21]:
+      - generic [ref=e22]:
+        - heading "Hi, Playwright DudenLhUKKv!" [level=1] [ref=e23]
+        - strong [ref=e25]: Welcome to Koppert One
+        - generic [ref=e26]:
+          - heading "Need help ?" [level=5] [ref=e27]
+          - separator [ref=e28]
+          - generic [ref=e29]:
+            - img [ref=e31]
+            - generic [ref=e32]:
+              - heading "Koppert One support" [level=5] [ref=e33]
+              - link "mail support@koppert.one" [ref=e35] [cursor=pointer]:
+                - /url: mailto:support@koppert.one
+                - img "mail" [ref=e36]:
+                  - img [ref=e37]
+                - text: support@koppert.one
+                - img [ref=e39]
+              - link "phone +31 1 051 405 17" [ref=e43] [cursor=pointer]:
+                - /url: tel:+31105140517
+                - img "phone" [ref=e44]:
+                  - img [ref=e45]
+                - text: +31 1 051 405 17
+                - img [ref=e47]
+      - generic [ref=e51]:
+        - generic [ref=e52] [cursor=pointer]:
+          - img [ref=e54]
+          - generic [ref=e57]: Order
+          - generic [ref=e59]: View, place and manage orders
+          - img [ref=e61]
+        - generic [ref=e63] [cursor=pointer]:
+          - img [ref=e65]
+          - generic [ref=e69]: Knowledge
+          - generic [ref=e71]: Explore chemical compatibility with Koppert's natural enemies and bumblebees
+          - img [ref=e73]
+        - generic [ref=e75] [cursor=pointer]:
+          - img [ref=e77]
+          - generic [ref=e79]: Scout
+          - generic [ref=e81]: Discover trends in pest development and beneficial insect counts to know when to act
+          - img [ref=e83]
+        - generic [ref=e85] [cursor=pointer]:
+          - img [ref=e87]
+          - generic [ref=e89]: Organization
+          - generic [ref=e91]: Manage team members and their access to locations
+          - img [ref=e93]
+  - button "Feedback" [ref=e95] [cursor=pointer]:
+    - generic [ref=e97]: Feedback
+```
+
+# Test source
+
+```ts
+  197 |   location: OrderLocation,
+  198 |   token?: string,
+  199 | ): Promise<string[]> {
+  200 |   // /api/v1/ordering/products returns a demo/test catalog (10 items) that the backend rejects
+  201 |   // with FORBIDDEN_PRODUCTS on upsert. The Planner UI uses /api/v1/ordering/products/enterprise,
+  202 |   // which returns the actual orderable catalog for the enterprise (~1600 items, ~500 active).
+  203 |   const products = await fetchProducts('/api/v1/ordering/products/enterprise', {}, enterpriseId, token);
+  204 |   return collectOrderableProductIds(products);
+  205 | }
+  206 | 
+  207 | /**
+  208 |  * Whether the order form lets a product be ordered for a delivery date - the portal's own rule
+  209 |  * (web order/features/ordering/utils/leadtimes.ts, applied by OrderForm's checkIfProductBlocked).
+  210 |  *
+  211 |  * The Add product modal offers every product regardless of the order's date, and one that cannot be
+  212 |  * delivered by then is still added - as a line whose quantity is readonly, with Save disabled and no
+  213 |  * explanation. A product is blocked when it is inactive or hidden, or when today is already past its
+  214 |  * last order day: the delivery date minus its lead time for that weekday. `leadTimeDays` is indexed
+  215 |  * Monday = 0 .. Sunday = 6, a single entry applies to every day, and null or 0 means no lead time.
+  216 |  */
+  217 | export function isProductOrderableOn(product: OrderProduct, deliveryDate: string): boolean {
+  218 |   if (product?.isActive === false || product?.isVisible === false) return false;
+  219 | 
+  220 |   const leadTimeDays: number[] | null | undefined = product?.leadTimeDays;
+  221 |   if (!leadTimeDays?.length) return true;
+  222 | 
+  223 |   const delivery = moment.tz(deliveryDate, 'YYYY-MM-DD', APP_TIMEZONE);
+  224 |   const leadTime = leadTimeDays.length === 1 ? leadTimeDays[0] : leadTimeDays[delivery.isoWeekday() - 1];
+  225 |   if (!leadTime) return true;
+  226 | 
+  227 |   const lastOrderDay = delivery.clone().subtract(leadTime, 'days');
+  228 |   const daysPastLastOrderDay = Math.floor(moment.tz(APP_TIMEZONE).diff(lastOrderDay, 'hours') / 24);
+  229 |   return daysPastLastOrderDay < 0;
+  230 | }
+  231 | 
+  232 | /** Ids of the enterprise's products that the order form accepts for this delivery date. */
+  233 | export async function getProductIdsOrderableOn(
+  234 |   enterpriseId: string,
+  235 |   deliveryDate: string,
+  236 |   token?: string,
+  237 | ): Promise<string[]> {
+  238 |   const products = await fetchProducts('/api/v1/ordering/products/enterprise', {}, enterpriseId, token);
+  239 |   return products.filter((product) => isProductOrderableOn(product, deliveryDate)).map((product) => String(product.id));
+  240 | }
+  241 | 
+  242 | export interface ProductOrderConstraints {
+  243 |   minimumQuantity: number | null;
+  244 |   quantityStep: number | null;
+  245 | }
+  246 | 
+  247 | /**
+  248 |  * Per-product order quantity rules, keyed by product id.
+  249 |  *
+  250 |  * Products carry a minimum and a step size ("Acadian LSC Conventional/bottle" is 180/180), and a
+  251 |  * quantity that breaks either is rejected by the create-order form: the field turns red, the submit
+  252 |  * button stays enabled and clicking it does nothing at all. A fixed quantity therefore only works
+  253 |  * until the form happens to pick a product with a coarser step.
+  254 |  */
+  255 | export async function getProductOrderConstraints(
+  256 |   enterpriseId: string,
+  257 |   token?: string,
+  258 | ): Promise<Map<string, ProductOrderConstraints>> {
+  259 |   const products = await fetchProducts('/api/v1/ordering/products/enterprise', {}, enterpriseId, token);
+  260 | 
+  261 |   const constraints = new Map<string, ProductOrderConstraints>();
+  262 |   for (const product of products) {
+  263 |     const id = product?.id ?? product?.productId;
+  264 |     if (!id) continue;
+  265 |     constraints.set(String(id), {
+  266 |       minimumQuantity: product?.minimumQuantity ?? null,
+  267 |       quantityStep: product?.quantityStep ?? null,
+  268 |     });
+  269 |   }
+  270 |   return constraints;
+  271 | }
+  272 | 
+  273 | /** The smallest quantity a product accepts: at least its minimum, and a whole number of steps. */
+  274 | export function smallestValidQuantity(constraints?: ProductOrderConstraints): number {
+  275 |   const step = constraints?.quantityStep && constraints.quantityStep > 0 ? constraints.quantityStep : 1;
+  276 |   const minimum = constraints?.minimumQuantity && constraints.minimumQuantity > 0 ? constraints.minimumQuantity : step;
+  277 |   return Math.ceil(minimum / step) * step;
+  278 | }
+  279 | 
+  280 | async function fetchProducts(
+  281 |   path: string,
+  282 |   params: Record<string, any>,
+  283 |   enterpriseId: string,
+  284 |   token?: string,
+  285 | ): Promise<OrderProduct[]> {
+  286 |   const response = await (
+  287 |     await api(token)
+  288 |   ).get(`${process.env.apiURL}${path}`, {
+  289 |     params,
+  290 |     headers: {
+  291 |       'x-enterprise-id': enterpriseId,
+  292 |     },
+  293 |   });
+  294 | 
+  295 |   if (!response.ok()) {
+  296 |     const errorText = await response.text();
+> 297 |     throw new Error(`Failed to fetch products from ${path}: ${errorText}`);
+      |           ^ Error: Failed to fetch products from /api/v1/ordering/products/enterprise: {"id":"f1361a9d-b246-4a00-9e6b-f9a160a07a17","message":"Token has been revoked","statusCode":401,"metadata":[{"defaultMessage":"Token has been revoked","translationCode":"backend.exceptions.auth.tokenRevoked","code":"TOKEN_REVOKED"}]}
+  298 |   }
+  299 | 
+  300 |   const data = await response.json();
+  301 |   return extractItems(data);
+  302 | }
+  303 | 
+  304 | function extractItems(payload: any): OrderProduct[] {
+  305 |   if (!payload) return [];
+  306 |   if (Array.isArray(payload)) return payload;
+  307 |   if (Array.isArray(payload.items)) return payload.items;
+  308 |   if (Array.isArray(payload.data)) return payload.data;
+  309 |   if (Array.isArray(payload.products)) return payload.products;
+  310 |   if (Array.isArray(payload.result?.items)) return payload.result.items;
+  311 |   return [];
+  312 | }
+  313 | 
+  314 | function collectOrderableProductIds(items: OrderProduct[]): string[] {
+  315 |   if (!items.length) return [];
+  316 |   const filtered = items.filter((item) => {
+  317 |     const orderable =
+  318 |       item?.orderable ??
+  319 |       item?.isOrderable ??
+  320 |       item?.available ??
+  321 |       item?.isAvailable ??
+  322 |       item?.isActive ??
+  323 |       item?.active ??
+  324 |       item?.allowed ??
+  325 |       item?.isAllowed ??
+  326 |       item?.canOrder ??
+  327 |       item?.isOrderableForLocation ??
+  328 |       item?.isOrderableForEnterprise;
+  329 |     return orderable === undefined || orderable === true;
+  330 |   });
+  331 |   const candidates = filtered.length ? filtered : items;
+  332 | 
+  333 |   const results: string[] = [];
+  334 |   for (const item of candidates) {
+  335 |     const id = item?.productId || item?.productCode || item?.code || item?.sku || item?.id || item?.erpKey;
+  336 |     if (id) results.push(String(id));
+  337 |   }
+  338 |   return results;
+  339 | }
+  340 | 
+  341 | async function submitOrder(
+  342 |   orderData: OrderData[],
+  343 |   enterpriseId: string,
+  344 |   token?: string,
+  345 |   returnMeta = false,
+  346 | ): Promise<any> {
+  347 |   const response = await (
+  348 |     await api(token)
+  349 |   ).post(`${urls.api.orders}/upsert`, {
+  350 |     data: {
+  351 |       data: orderData,
+  352 |     },
+  353 |     headers: {
+  354 |       'x-enterprise-id': enterpriseId,
+  355 |     },
+  356 |   });
+  357 | 
+  358 |   if (!returnMeta) {
+  359 |     if (!response.ok()) {
+  360 |       const errorText = await response.text();
+  361 |       console.error(`CREATE ORDER FAILED with status ${response.status()}`);
+  362 |       console.error(`Response: ${errorText}`);
+  363 |       throw new Error(`Failed to create order: ${errorText}`);
+  364 |     }
+  365 |     return await response.json();
+  366 |   }
+  367 | 
+  368 |   if (response.ok()) {
+  369 |     return { ok: true, body: await response.json() };
+  370 |   }
+  371 | 
+  372 |   const errorText = await response.text();
+  373 |   console.error(`CREATE ORDER FAILED with status ${response.status()}`);
+  374 |   console.error(`Response: ${errorText}`);
+  375 |   return { ok: false, errorText };
+  376 | }
+  377 | 
+  378 | // Errors that say "not this product" rather than "ordering is broken": the caller should move on to the
+  379 | // next candidate product instead of failing the test. INVALID_ORDER_QUANTITY belongs here because
+  380 | // products carry per-product minimums and step sizes, so the seed quantity is not valid for all of them.
+  381 | const RETRYABLE_PRODUCT_ERROR_CODES = ['FORBIDDEN_PRODUCTS', 'INVALID_ORDER_QUANTITY'];
+  382 | 
+  383 | function isRetryableProductError(errorText: string): boolean {
+  384 |   try {
+  385 |     const parsed = JSON.parse(errorText);
+  386 |     return parsed?.metadata?.some?.((meta: any) => RETRYABLE_PRODUCT_ERROR_CODES.includes(meta?.code));
+  387 |   } catch {
+  388 |     return false;
+  389 |   }
+  390 | }
+  391 | // is getting triggered automatically once you create first order in UI.
+  392 | // It doesn't set order's status to done.
+  393 | // It just sets firstOrderDone flag to true in user metadata.
+  394 | export async function addFirstOrderDoneFlagToUsersMetadata(token?: string) {
+  395 |   const response = await (
+  396 |     await api(token)
+  397 |   ).patch(urls.api.me, {
+```

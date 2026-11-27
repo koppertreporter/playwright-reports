@@ -1,0 +1,290 @@
+# Instructions
+
+- Following Playwright test failed.
+- Explain why, be concise, respect Playwright best practices.
+- Provide a snippet of code with the fix, if possible.
+
+# Test info
+
+- Name: planner.spec.ts >> Planner >> TC:14671 - [Double orders popup] Check Double orders popup and navigation to Order details for Double order
+- Location: playwright/specs/planner.spec.ts:308:7
+
+# Error details
+
+```
+Error: The popup must offer an Open action for each of the two seeded orders
+
+expect(received).toBeGreaterThanOrEqual(expected)
+
+Expected: >= 2
+Received:    0
+```
+
+# Page snapshot
+
+```yaml
+- generic [active] [ref=e1]:
+  - generic [ref=e3]:
+    - generic [ref=e4]: You're on DEVELOPMENT OR STAGE
+    - generic [ref=e6]:
+      - img [ref=e7] [cursor=pointer]
+      - generic [ref=e14]:
+        - generic [ref=e15]: Plkw P. van Geest Maasland B.V.
+        - generic [ref=e16] [cursor=pointer]:
+          - img "user" [ref=e17]:
+            - img [ref=e18]
+          - text: Playwright DudejAKNHzM
+    - generic [ref=e21]:
+      - generic [ref=e22]:
+        - heading "Hi, Playwright DudejAKNHzM!" [level=1] [ref=e23]
+        - strong [ref=e25]: Welcome to Koppert One
+        - generic [ref=e26]:
+          - heading "Need help ?" [level=5] [ref=e27]
+          - separator [ref=e28]
+          - generic [ref=e29]:
+            - img [ref=e31]
+            - generic [ref=e32]:
+              - heading "Koppert One support" [level=5] [ref=e33]
+              - link "mail support@koppert.one" [ref=e35] [cursor=pointer]:
+                - /url: mailto:support@koppert.one
+                - img "mail" [ref=e36]:
+                  - img [ref=e37]
+                - text: support@koppert.one
+                - img [ref=e39]
+              - link "phone +31 1 051 405 17" [ref=e43] [cursor=pointer]:
+                - /url: tel:+31105140517
+                - img "phone" [ref=e44]:
+                  - img [ref=e45]
+                - text: +31 1 051 405 17
+                - img [ref=e47]
+      - generic [ref=e51]:
+        - generic [ref=e52] [cursor=pointer]:
+          - img [ref=e54]
+          - generic [ref=e57]: Order
+          - generic [ref=e59]: View, place and manage orders
+          - img [ref=e61]
+        - generic [ref=e63] [cursor=pointer]:
+          - img [ref=e65]
+          - generic [ref=e69]: Knowledge
+          - generic [ref=e71]: Explore chemical compatibility with Koppert's natural enemies and bumblebees
+          - img [ref=e73]
+        - generic [ref=e75] [cursor=pointer]:
+          - img [ref=e77]
+          - generic [ref=e79]: Scout
+          - generic [ref=e81]: Discover trends in pest development and beneficial insect counts to know when to act
+          - img [ref=e83]
+        - generic [ref=e85] [cursor=pointer]:
+          - img [ref=e87]
+          - generic [ref=e89]: Organization
+          - generic [ref=e91]: Manage team members and their access to locations
+          - img [ref=e93]
+  - button "Feedback" [ref=e95] [cursor=pointer]:
+    - generic [ref=e97]: Feedback
+```
+
+# Test source
+
+```ts
+  288 |     const searchTerm = productCode.substring(0, 2);
+  289 | 
+  290 |     await plannerPage.searchProducts(page, searchTerm);
+  291 |     await plannerPage.expectSomeProductRowsVisible(page);
+  292 | 
+  293 |     const nonExistentCode = searchTerm + '999';
+  294 | 
+  295 |     await plannerPage.searchProducts(page, nonExistentCode);
+  296 |     await plannerPage.verifyNothingMatches(page);
+  297 | 
+  298 |     await plannerPage.switchOrderMode(page, false);
+  299 |     await plannerPage.expectProductsSearchValue(page, nonExistentCode);
+  300 | 
+  301 |     await plannerPage.switchOrderMode(page, true);
+  302 |     await plannerPage.expectProductsSearchValue(page, nonExistentCode);
+  303 |   });
+  304 | 
+  305 |   // The previous version clicked whichever date header happened to carry an order indicator and
+  306 |   // accepted the single-order details modal, so the double-order popup - the whole subject of the
+  307 |   // TC - was never exercised. Two orders are now seeded on the same delivery day up front.
+  308 |   test(`TC:14671 - [Double orders popup] Check Double orders popup and navigation to Order details for Double order`, async ({
+  309 |     page,
+  310 |   }) => {
+  311 |     test.slow();
+  312 | 
+  313 |     const user = await ordersPage.setupOrdererUserWithEnterpriseAccess(page, corpnav, ENTERPRISE_WITH_DATA_ID);
+  314 |     userIdsToDelete.push(user.userId);
+  315 | 
+  316 |     // Passing the page (and no explicit token) lets the helper refresh between orders - placing an
+  317 |     // order revokes the caller's access token. minLeadDays keeps the pair off the nearest advertised
+  318 |     // date, which is already inside its leadtime and books as a Non-Standard Order.
+  319 |     const { orderNumbers, deliveryDate } = await createMultipleOrdersOnSameDay(
+  320 |       ENTERPRISE_WITH_DATA_ID,
+  321 |       undefined,
+  322 |       2,
+  323 |       undefined,
+  324 |       page,
+  325 |       { minLeadDays: 14 },
+  326 |     );
+  327 |     expect(orderNumbers.length, 'Two orders on the same day are required for the double-order popup').toBe(2);
+  328 | 
+  329 |     // The popup only offers "Open" for orders F&O has numbered; a just-placed order carries a
+  330 |     // temporary #NSO- id for a few seconds. Wait for both before reading the popup.
+  331 |     await authRefresh(page);
+  332 |     const numberedOrders = await waitForNumberedOrdersOnDate(ENTERPRISE_WITH_DATA_ID, deliveryDate, 2);
+  333 | 
+  334 |     await setEnterpriseSelectorInLocalStorage(page, ENTERPRISE_WITH_DATA_ID);
+  335 |     await page.goto(urls.orderPlanner ?? '/apps/order/planner');
+  336 |     await plannerPage.switchOrderMode(page, true);
+  337 | 
+  338 |     const dateKey = `${deliveryDate.substring(8, 10)}-${deliveryDate.substring(5, 7)}`;
+  339 |     const dateHeader = planner.dateHeaderByKey(dateKey);
+  340 |     await expect(dateHeader, `Expected a planner column for the seeded delivery date ${dateKey}`).toBeVisible({
+  341 |       timeout: 30000,
+  342 |     });
+  343 | 
+  344 |     // Clicking the cube toggles the popup, so each thing this TC checks gets its own fresh opening
+  345 |     // rather than re-clicking to "make sure" it is still there.
+  346 |     const openPopup = async () => {
+  347 |       const cube = planner.dateHeaderByKey(dateKey).locator('svg[viewBox="0 0 48 48"]').first();
+  348 |       await expect(cube, `No order cube on the seeded delivery date ${dateKey}`).toBeVisible({ timeout: 30000 });
+  349 |       await plannerPage.clickOrderCube(cube);
+  350 |       return await planner.dateHeaderPopup
+  351 |         .waitFor({ state: 'visible', timeout: 10000 })
+  352 |         .then(() => true)
+  353 |         .catch(() => false);
+  354 |     };
+  355 | 
+  356 |     expect(await openPopup(), 'The multi-order popup must open for a day with two orders').toBe(true);
+  357 | 
+  358 |     const orderUrl = /\/apps\/order\/(order-list|orders)\/[A-Z0-9]+-SO\d+/i;
+  359 |     const navigated = page.waitForURL(orderUrl, { timeout: 20000 }).then(
+  360 |       () => true,
+  361 |       () => false,
+  362 |     );
+  363 |     await planner.dateHeaderPopupOpenButtons.first().click({ timeout: 10000 });
+  364 |     expect(await navigated, 'Open in the multi-order popup must lead to the order details page').toBe(true);
+  365 | 
+  366 |     // The route carries the order number, which is a firmer check than reading it off the page - the
+  367 |     // details view fills that field in asynchronously and can still be showing the placeholder.
+  368 |     const orders = ordersSelectors(page);
+  369 |     await expect(orders.orderDetailsPageTitle).toBeVisible({ timeout: 30000 });
+  370 |     expect(page.url()).toMatch(orderUrl);
+  371 | 
+  372 |     // Back on the planner, reopen the day to assert what the popup lists.
+  373 |     await page.goto(urls.orderPlanner ?? '/apps/order/planner');
+  374 |     await plannerPage.switchOrderMode(page, true);
+  375 |     expect(await openPopup(), 'The multi-order popup must reopen for the seeded day').toBe(true);
+  376 |     await expect(planner.dateHeaderPopup).toContainText(/There are multiple orders on this day/i);
+  377 | 
+  378 |     // Seeding returns the pre-F&O identifier (#NSO-...) and F&O swaps in the real one, so the seeded
+  379 |     // day is identified by the numbers the order list ended up holding. The day can also carry older
+  380 |     // orders, so both seeded ones must be listed - not exactly two rows.
+  381 |     const popupText = (await planner.dateHeaderPopup.innerText()) || '';
+  382 |     for (const orderNumber of numberedOrders) {
+  383 |       expect(popupText, `The popup must list the seeded order ${orderNumber}`).toContain(orderNumber);
+  384 |     }
+  385 |     expect(
+  386 |       await planner.dateHeaderPopupOpenButtons.count(),
+  387 |       'The popup must offer an Open action for each of the two seeded orders',
+> 388 |     ).toBeGreaterThanOrEqual(orderNumbers.length);
+      |       ^ Error: The popup must offer an Open action for each of the two seeded orders
+  389 |   });
+  390 | 
+  391 |   test(`TC:15204 - [Product redirection] product pop-up and More info link works`, async ({ page }) => {
+  392 |     const user = await ordersPage.setupUserWithEnterpriseAccess(page, corpnav);
+  393 |     userIdsToDelete.push(user.userId);
+  394 | 
+  395 |     await page.goto(urls.orderPlanner ?? '/apps/order/planner');
+  396 |     await plannerPage.switchOrderMode(page, true);
+  397 | 
+  398 |     await plannerPage.clickFirstProductInfoTooltip(page);
+  399 | 
+  400 |     await plannerPage.expectProductTooltipVisible(page);
+  401 | 
+  402 |     await expect(planner.productTooltipProductNumberValue).toBeVisible({ timeout: 10000 });
+  403 | 
+  404 |     await plannerPage.closeProductTooltip(page);
+  405 |   });
+  406 | 
+  407 |   // The shipping method renders as a dropdown only when the enterprise whitelists 2+ methods.
+  408 |   // ENTERPRISE_WITH_DATA_ID whitelists a single one (see TC:16271), so this TC needs the
+  409 |   // multi-method enterprise instead.
+  410 |   test(`TC:16267 - [Shipping method selection] user can select shipping method when creating order on Planner`, async ({
+  411 |     page,
+  412 |   }) => {
+  413 |     const user = await ordersPage.setupOrdererUserWithEnterpriseAccess(page, corpnav, ENTERPRISE_WITH_SHIPPING_METHODS);
+  414 |     userIdsToDelete.push(user.userId);
+  415 |     await setEnterpriseSelectorInLocalStorage(page, ENTERPRISE_WITH_SHIPPING_METHODS);
+  416 | 
+  417 |     await page.goto(urls.orderPlanner ?? '/apps/order/planner');
+  418 |     await plannerPage.switchOrderMode(page, true);
+  419 |     await plannerPage.ensureMatrixHasProducts(page);
+  420 | 
+  421 |     const { testId } = await plannerPage.createOrderFromPlannerBySettingAnyQty(page, '5');
+  422 | 
+  423 |     const dateMatch = testId.match(/(\d{4}-\d{2}-\d{2})/);
+  424 |     if (!dateMatch) {
+  425 |       throw new Error(`Could not extract date from testId: ${testId}`);
+  426 |     }
+  427 |     const dateStr = dateMatch[0];
+  428 |     const dateKey = `${dateStr.substring(8, 10)}-${dateStr.substring(5, 7)}`;
+  429 | 
+  430 |     await plannerPage.openExistingOrderDetailsFromPlannerByDate(page, dateKey);
+  431 | 
+  432 |     await plannerPage.expectShippingMethodDropdownVisible(page);
+  433 |     await plannerPage.expectShippingMethodDropdownEnabled(page);
+  434 |   });
+  435 | 
+  436 |   test(`TC:16271 - [Shipping method selection] shipping method dropdown not visible when no whitelisted methods`, async ({
+  437 |     page,
+  438 |   }) => {
+  439 |     const user = await ordersPage.setupOrdererUserWithEnterpriseAccess(page, corpnav, ENTERPRISE_WITH_DATA_ID);
+  440 |     userIdsToDelete.push(user.userId);
+  441 | 
+  442 |     await plannerPage.seedReadViewOrder(page, ENTERPRISE_WITH_DATA_ID);
+  443 | 
+  444 |     await page.goto(urls.orderPlanner ?? '/apps/order/planner');
+  445 |     await plannerPage.switchOrderMode(page, true);
+  446 | 
+  447 |     await plannerPage.openExistingOrderDetailsFromPlannerByDate(page);
+  448 | 
+  449 |     // Enterprise cfc0f4d4 currently whitelists a single shipping method, so the order details
+  450 |     // shows it as static text with no dropdown. (TC intent: dropdown NOT shown when <2 methods.)
+  451 |     await plannerPage.expectShippingMethodDropdownNotVisible(page);
+  452 |   });
+  453 | 
+  454 |   // The dropdown only renders where the enterprise whitelists 2+ methods, so this cannot run on
+  455 |   // ENTERPRISE_WITH_DATA_ID (one method - see TC:16271). The TC quotes "NL-00019" as an example of the
+  456 |   // code F&O assigns; the code itself is subsidiary-specific, so what is asserted is the property the TC
+  457 |   // actually describes - F&O fills in a method that is not one of the whitelisted options, and once a
+  458 |   // whitelisted one is saved that F&O default disappears from the list.
+  459 |   // Still skipped for the environmental reason documented on TC:16273 (planner_3.spec.ts): no order box
+  460 |   // renders on the planner for a freshly placed order, so there is no cube to open the details from.
+  461 |   // Confirmed here on a second enterprise and with a UI-placed (not API-seeded) order.
+  462 |   test.skip(`TC:16275 - [Shipping method selection] FO assigns default shipping method after refresh if none selected`, async ({
+  463 |     page,
+  464 |   }) => {
+  465 |     test.slow();
+  466 | 
+  467 |     const user = await ordersPage.setupOrdererUserWithEnterpriseAccess(page, corpnav, ENTERPRISE_WITH_SHIPPING_METHODS);
+  468 |     userIdsToDelete.push(user.userId);
+  469 |     await setEnterpriseSelectorInLocalStorage(page, ENTERPRISE_WITH_SHIPPING_METHODS);
+  470 | 
+  471 |     await page.goto(urls.orderPlanner ?? '/apps/order/planner');
+  472 |     await plannerPage.switchOrderMode(page, true);
+  473 |     await plannerPage.ensureMatrixHasProducts(page);
+  474 | 
+  475 |     const deliveryDate = await plannerPage.getFirstEditableOrderableDate(page);
+  476 |     await plannerPage.createOrderFromPlannerWithoutSelectingShippingMethod(page, deliveryDate);
+  477 | 
+  478 |     await plannerPage.refreshAndWaitForOrderDetails(page);
+  479 | 
+  480 |     const orders = ordersSelectors(page);
+  481 | 
+  482 |     await expect(
+  483 |       orders.shippingMethodSelectedValue,
+  484 |       'F&O should have assigned a default shipping method after the refresh',
+  485 |     ).toHaveText(/\S/, { timeout: 60000 });
+  486 |     const foDefault = ((await orders.shippingMethodSelectedValue.textContent()) || '').trim();
+  487 |     expect(foDefault, 'F&O default shipping method should not be blank').toBeTruthy();
+  488 | 
+```

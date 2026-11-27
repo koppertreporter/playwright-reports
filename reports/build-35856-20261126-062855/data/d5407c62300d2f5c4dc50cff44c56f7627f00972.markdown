@@ -1,0 +1,319 @@
+# Instructions
+
+- Following Playwright test failed.
+- Explain why, be concise, respect Playwright best practices.
+- Provide a snippet of code with the fix, if possible.
+
+# Test info
+
+- Name: permissions_matrix.spec.ts >> Permission Matrix - Price Visibility, Invoices, Create Location >> TC:16885 - Invoices Visibility Fallback (Price Visibility) >> Step 3: Sub=No, Ent=Yes => Invoices visible
+- Location: playwright/specs/permissions_matrix.spec.ts:506:9
+
+# Error details
+
+```
+Error: page.goto: net::ERR_NAME_NOT_RESOLVED at https://stage.koppert.one/
+Call log:
+  - navigating to "https://stage.koppert.one/", waiting until "load"
+
+```
+
+# Page snapshot
+
+```yaml
+- generic [ref=e1]:
+  - generic [ref=e3]:
+    - generic [ref=e4]: You're on DEVELOPMENT OR STAGE
+    - generic [ref=e6]:
+      - generic [ref=e10]:
+        - img [ref=e11]
+        - heading [level=4]
+      - generic [ref=e20]:
+        - generic [ref=e21]:
+          - strong [ref=e23]: Login
+          - generic [ref=e25]:
+            - generic "Email" [ref=e27]
+            - textbox "Email" [ref=e31]
+          - generic [ref=e32]:
+            - img "info-circle" [ref=e33]:
+              - img [ref=e34]
+            - generic [ref=e37]:
+              - text: SSO login is temporarily unavailable.
+              - link "Set your password here" [ref=e38] [cursor=pointer]:
+                - /url: /forgot-password
+              - text: to log in using your email address and password.
+          - generic [ref=e40]:
+            - generic "Password" [ref=e42]
+            - generic [ref=e46]:
+              - textbox "Password" [ref=e47]
+              - img "eye-invisible" [ref=e49] [cursor=pointer]:
+                - img [ref=e50]
+          - generic [ref=e58]:
+            - button "Login" [ref=e59] [cursor=pointer]:
+              - generic [ref=e60]: Login
+            - link "Forgot password" [ref=e61] [cursor=pointer]:
+              - /url: /forgot-password
+        - separator [ref=e62]
+        - generic [ref=e63]: Don't have an account yet?Create an account
+        - separator [ref=e64]
+        - generic [ref=e65]:
+          - text: New to Koppert One?
+          - link "More info" [ref=e66] [cursor=pointer]:
+            - /url: https://www.koppert.com/koppert-one/
+            - text: More info
+            - img [ref=e67]
+        - separator [ref=e70]
+        - generic [ref=e71]:
+          - generic [ref=e72]: All rights reserved. © Koppert 2026
+          - generic [ref=e73]:
+            - link "Privacy statement" [ref=e74] [cursor=pointer]:
+              - /url: https://stage.koppert.one/assets/statements/privacy-statement.pdf
+            - text: "|"
+            - link "Terms of Use" [ref=e75] [cursor=pointer]:
+              - /url: https://stage.koppert.one/assets/statements/terms-of-use.pdf
+  - generic [active]:
+    - generic:
+      - generic:
+        - button "Open Privacy Settings" [ref=e76] [cursor=pointer]:
+          - img [ref=e78]
+        - dialog "Privacy Settings" [ref=e83]:
+          - generic [ref=e87]:
+            - generic [ref=e89]:
+              - img [ref=e92]
+              - heading "Privacy Settings" [level=1] [ref=e95]
+              - generic [ref=e98]: This site uses third-party website tracking technologies to provide and continually improve our services, and to display advertisements according to users' interests. I agree and may revoke or change my consent at any time with effect for the future.
+              - generic [ref=e99]:
+                - generic [ref=e100]:
+                  - link "Privacy Policy" [ref=e101] [cursor=pointer]:
+                    - /url: https://www.koppert.com/privacy-statement/
+                  - link "Cookie Statement" [ref=e102] [cursor=pointer]:
+                    - /url: https://www.koppert.com/cookie-statement/
+                - button "More Information" [ref=e104] [cursor=pointer]:
+                  - generic [ref=e105]: More Information
+            - generic [ref=e107]:
+              - generic [ref=e110]:
+                - generic [ref=e111] [cursor=pointer]: Marketing
+                - switch "Marketing" [ref=e112] [cursor=pointer]:
+                  - img [ref=e113]
+              - generic [ref=e122]:
+                - generic [ref=e123] [cursor=pointer]: Functional
+                - switch "Functional" [ref=e124] [cursor=pointer]:
+                  - img [ref=e125]
+              - generic [ref=e134]:
+                - generic [ref=e135] [cursor=pointer]: Essential
+                - switch "Essential" [checked] [disabled] [ref=e136] [cursor=pointer]:
+                  - img [ref=e137]
+          - generic [ref=e145]:
+            - generic [ref=e147]:
+              - button "Save Settings" [ref=e148] [cursor=pointer]
+              - button "Accept All" [ref=e149] [cursor=pointer]
+            - link "Powered by Usercentrics Consent Management" [ref=e151] [cursor=pointer]:
+              - /url: https://usercentrics.com/consent-management-platform-powered-by-usercentrics/?utm_source=banner_uc&utm_medium=referral&utm_content=v2
+```
+
+# Test source
+
+```ts
+  113 |         console.log('Page did not reach DOMContentLoaded within 5s, proceeding anyway');
+  114 |       });
+  115 |     }
+  116 | 
+  117 |     // Wait for network to be idle to ensure page is fully stable before setting tokens
+  118 |     // This prevents race conditions where localStorage operations might fail
+  119 |     await page.waitForLoadState('networkidle', { timeout: 3000 }).catch(() => {
+  120 |       console.log('Network not idle after 3s, proceeding anyway');
+  121 |     });
+  122 | 
+  123 |     // Set tokens in localStorage directly
+  124 |     let retries = 3;
+  125 |     while (retries > 0) {
+  126 |       try {
+  127 |         await page.evaluate(
+  128 |           (authData) => {
+  129 |             localStorage.setItem(
+  130 |               'stores-portal/auth',
+  131 |               JSON.stringify({
+  132 |                 state: {
+  133 |                   auth: {
+  134 |                     accessToken: authData.accessToken,
+  135 |                     refreshToken: authData.refreshToken,
+  136 |                     expiresIn: authData.expiresIn,
+  137 |                   },
+  138 |                 },
+  139 |                 version: 3,
+  140 |               }),
+  141 |             );
+  142 |           },
+  143 |           {
+  144 |             accessToken: loginData.accessToken,
+  145 |             refreshToken: loginData.refreshToken,
+  146 |             expiresIn: loginData.expiresIn,
+  147 |           },
+  148 |         );
+  149 |         break; // Success, exit retry loop
+  150 |       } catch (error) {
+  151 |         retries--;
+  152 |         if (retries === 0) {
+  153 |           console.error('Failed to set tokens in localStorage after 3 attempts:', error.message);
+  154 |           throw error;
+  155 |         }
+  156 |         console.log(`localStorage set failed, retrying... (${retries} attempts left)`);
+  157 |         await page.waitForTimeout(500);
+  158 |       }
+  159 |     }
+  160 | 
+  161 |     // If user object is provided and has enterprises, automatically set enterprise selector
+  162 |     if (user?.enterprises && user.enterprises.length > 0) {
+  163 |       const enterpriseId = user.enterprises[0].id;
+  164 |       await setEnterpriseSelectorInLocalStorage(page, enterpriseId);
+  165 |     }
+  166 | 
+  167 |     // After setting tokens in localStorage, React needs time to read them and initialize auth state
+  168 |     // React does this synchronously during its next render/effect cycle, which happens quickly
+  169 |     // A short wait (1s) is sufficient and more reliable than trying to detect React's internal state
+  170 |     // This is a pragmatic solution that balances speed with reliability
+  171 |     await page.waitForTimeout(1000);
+  172 |   }
+  173 | 
+  174 |   return loginData;
+  175 | }
+  176 | 
+  177 | export async function acceptCookiesUI(page: Page): Promise<void> {
+  178 |   const general = generalSelectors(page);
+  179 |   await test.step('Accept cookies', async () => {
+  180 |     try {
+  181 |       await general.acceptCookiesBtn.waitFor({ state: 'visible', timeout: 5000 });
+  182 |       await general.acceptCookiesBtn.click();
+  183 |       await general.acceptCookiesBtn.waitFor({ state: 'hidden', timeout: 5000 });
+  184 |     } catch (e) {
+  185 |       console.log('Accept cookies button not found or not visible, ignoring.');
+  186 |     }
+  187 |   });
+  188 | }
+  189 | 
+  190 | export function getRefreshToken() {
+  191 |   if (!refreshToken) {
+  192 |     throw new Error('refreshToken token is not initialized. Please perform login first');
+  193 |   }
+  194 |   return refreshToken;
+  195 | }
+  196 | 
+  197 | export function getAccessToken(): string {
+  198 |   if (!accessToken) {
+  199 |     throw new Error('accessToken is not initialized. Please perform login first');
+  200 |   }
+  201 |   return accessToken;
+  202 | }
+  203 | 
+  204 | export function setAccessToken(token: string): void {
+  205 |   accessToken = token;
+  206 | }
+  207 | 
+  208 | export function setRefreshToken(token: string): void {
+  209 |   refreshToken = token;
+  210 | }
+  211 | 
+  212 | export async function gotoHomepageAndAcceptCookies(page: Page) {
+> 213 |   await page.goto(urls.homepage);
+      |              ^ Error: page.goto: net::ERR_NAME_NOT_RESOLVED at https://stage.koppert.one/
+  214 |   await acceptCookiesUI(page);
+  215 | }
+  216 | 
+  217 | /**
+  218 |  * Syncs global tokens from the browser's localStorage
+  219 |  * Useful when the UI triggers its own auth refresh and we need to sync our global state
+  220 |  */
+  221 | export async function syncTokensFromLocalStorage(page: Page): Promise<void> {
+  222 |   await page.waitForLoadState('load').catch(() => {
+  223 |     console.log('Page not fully loaded, proceeding with sync anyway');
+  224 |   });
+  225 | 
+  226 |   let retries = 3;
+  227 |   let tokensFromStorage = null;
+  228 | 
+  229 |   while (retries > 0) {
+  230 |     try {
+  231 |       tokensFromStorage = await page.evaluate(() => {
+  232 |         const authData = localStorage.getItem('stores-portal/auth');
+  233 |         if (authData) {
+  234 |           const parsed = JSON.parse(authData);
+  235 |           return parsed.state?.auth;
+  236 |         }
+  237 |         return null;
+  238 |       });
+  239 |       break; // Success, exit retry loop
+  240 |     } catch (error) {
+  241 |       retries--;
+  242 |       if (retries === 0) {
+  243 |         console.error('Failed to read tokens from localStorage after 3 attempts:', error.message);
+  244 |         throw error;
+  245 |       }
+  246 |       console.log(`localStorage read failed, retrying... (${retries} attempts left)`);
+  247 |       await page.waitForTimeout(500);
+  248 |     }
+  249 |   }
+  250 | 
+  251 |   if (tokensFromStorage && tokensFromStorage.accessToken) {
+  252 |     accessToken = tokensFromStorage.accessToken;
+  253 |     refreshToken = tokensFromStorage.refreshToken;
+  254 |   } else {
+  255 |     console.warn('No tokens found in localStorage to sync');
+  256 |   }
+  257 | }
+  258 | 
+  259 | export async function restoreSession(
+  260 |   page: Page,
+  261 |   currentRefreshToken: string = getRefreshToken(),
+  262 | ): Promise<AuthResponse> {
+  263 |   await gotoHomepageAndAcceptCookies(page);
+  264 |   const response = await (
+  265 |     await api()
+  266 |   ).post(urls.api.authRefresh, {
+  267 |     data: {
+  268 |       refreshToken: currentRefreshToken,
+  269 |     },
+  270 |   });
+  271 |   if (!response.ok()) {
+  272 |     const errorText = await response.text();
+  273 |     console.error(`restoreSession failed: ${response.status()} ${errorText}`);
+  274 |     throw new Error(`restoreSession failed: ${response.status()} ${response.statusText()}`);
+  275 |   }
+  276 |   const json = await response.json();
+  277 | 
+  278 |   accessToken = json.accessToken;
+  279 |   refreshToken = json.refreshToken;
+  280 | 
+  281 |   await page.waitForLoadState('domcontentloaded');
+  282 | 
+  283 |   try {
+  284 |     await page.evaluate(
+  285 |       (authData) => {
+  286 |         localStorage.setItem(
+  287 |           'stores-portal/auth',
+  288 |           JSON.stringify({
+  289 |             state: {
+  290 |               auth: {
+  291 |                 accessToken: authData.accessToken,
+  292 |                 refreshToken: authData.refreshToken,
+  293 |                 expiresIn: authData.expiresIn,
+  294 |               },
+  295 |             },
+  296 |             version: 3,
+  297 |           }),
+  298 |         );
+  299 |       },
+  300 |       {
+  301 |         accessToken: json.accessToken,
+  302 |         refreshToken: json.refreshToken,
+  303 |         expiresIn: json.expiresIn,
+  304 |       },
+  305 |     );
+  306 |   } catch (error) {
+  307 |     // If page.evaluate fails (e.g., due to navigation), log the error
+  308 |     // The next navigation will use the global tokens which are already updated
+  309 |     console.warn('Failed to set refreshed tokens in localStorage:', error.message);
+  310 |   }
+  311 | 
+  312 |   // After setting tokens in localStorage, React needs time to read them and initialize auth state
+  313 |   // React does this synchronously during its next render/effect cycle, which happens quickly
+```

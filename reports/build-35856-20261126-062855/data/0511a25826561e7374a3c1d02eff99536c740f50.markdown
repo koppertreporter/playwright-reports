@@ -1,0 +1,290 @@
+# Instructions
+
+- Following Playwright test failed.
+- Explain why, be concise, respect Playwright best practices.
+- Provide a snippet of code with the fix, if possible.
+
+# Test info
+
+- Name: planner_2.spec.ts >> Planner - Week Navigation >> TC:14137 - [Leave guard + Location drop-down] Check leave guard when unselecting the First Location + unsaved data
+- Location: playwright/specs/planner_2.spec.ts:2393:7
+
+# Error details
+
+```
+Error: Expected value to be displayed in input field after Cancel
+
+expect(received).toBe(expected) // Object.is equality
+
+Expected: "10"
+Received: ""
+```
+
+# Page snapshot
+
+```yaml
+- generic [active] [ref=e1]:
+  - generic [ref=e3]:
+    - generic [ref=e4]: You're on DEVELOPMENT OR STAGE
+    - generic [ref=e6]:
+      - img [ref=e7] [cursor=pointer]
+      - generic [ref=e14]:
+        - generic [ref=e15]: Plkw P. van Geest Maasland B.V.
+        - generic [ref=e16] [cursor=pointer]:
+          - img "user" [ref=e17]:
+            - img [ref=e18]
+          - text: Playwright DudeIjGWnPP
+    - generic [ref=e21]:
+      - generic [ref=e22]:
+        - heading "Hi, Playwright DudeIjGWnPP!" [level=1] [ref=e23]
+        - strong [ref=e25]: Welcome to Koppert One
+        - generic [ref=e26]:
+          - heading "Need help ?" [level=5] [ref=e27]
+          - separator [ref=e28]
+          - generic [ref=e29]:
+            - img [ref=e31]
+            - generic [ref=e32]:
+              - heading "Koppert One support" [level=5] [ref=e33]
+              - link "mail support@koppert.one" [ref=e35] [cursor=pointer]:
+                - /url: mailto:support@koppert.one
+                - img "mail" [ref=e36]:
+                  - img [ref=e37]
+                - text: support@koppert.one
+                - img [ref=e39]
+              - link "phone +31 1 051 405 17" [ref=e43] [cursor=pointer]:
+                - /url: tel:+31105140517
+                - img "phone" [ref=e44]:
+                  - img [ref=e45]
+                - text: +31 1 051 405 17
+                - img [ref=e47]
+      - generic [ref=e51]:
+        - generic [ref=e52] [cursor=pointer]:
+          - img [ref=e54]
+          - generic [ref=e57]: Order
+          - generic [ref=e59]: View, place and manage orders
+          - img [ref=e61]
+        - generic [ref=e63] [cursor=pointer]:
+          - img [ref=e65]
+          - generic [ref=e69]: Knowledge
+          - generic [ref=e71]: Explore chemical compatibility with Koppert's natural enemies and bumblebees
+          - img [ref=e73]
+        - generic [ref=e75] [cursor=pointer]:
+          - img [ref=e77]
+          - generic [ref=e79]: Scout
+          - generic [ref=e81]: Discover trends in pest development and beneficial insect counts to know when to act
+          - img [ref=e83]
+        - generic [ref=e85] [cursor=pointer]:
+          - img [ref=e87]
+          - generic [ref=e89]: Organization
+          - generic [ref=e91]: Manage team members and their access to locations
+          - img [ref=e93]
+  - button "Feedback" [ref=e95] [cursor=pointer]:
+    - generic [ref=e97]: Feedback
+```
+
+# Test source
+
+```ts
+  2401 | 
+  2402 |     await plannerPage.switchOrderMode(page, true);
+  2403 |     // ensureMatrixHasProducts may seed a product whose lead time makes every visible date readonly.
+  2404 |     await plannerPage.ensureMatrixHasOrderableProducts(page);
+  2405 | 
+  2406 |     await expect(planner.weekHeaders.first()).toBeVisible({ timeout: 30000 });
+  2407 | 
+  2408 |     await plannerPage.openLocationsDropdown(page);
+  2409 | 
+  2410 |     const allLocationOptions = planner.locationsOptionsExcludingSelectAll;
+  2411 |     const locationTexts = await allLocationOptions.allTextContents();
+  2412 |     const cleanedLocationNames = locationTexts
+  2413 |       .map((text) => text.replace(/✓/g, '').trim())
+  2414 |       .filter((name) => name && !name.toLowerCase().includes('select all'));
+  2415 | 
+  2416 |     expect(cleanedLocationNames.length, 'Expected at least one location for this enterprise').toBeGreaterThan(0);
+  2417 | 
+  2418 |     const firstLocationName = cleanedLocationNames[0];
+  2419 | 
+  2420 |     const firstLocationCheckbox = planner.locationOptionByName(firstLocationName);
+  2421 |     await expect(firstLocationCheckbox).toBeVisible({ timeout: 10000 });
+  2422 | 
+  2423 |     const isChecked = await isSelectOptionChecked(firstLocationCheckbox);
+  2424 |     expect(isChecked, 'Expected first location to be selected by default').toBeTruthy();
+  2425 | 
+  2426 |     await page.keyboard.press('Escape');
+  2427 |     await expect(planner.locationsDropdownPanel).toBeHidden({ timeout: 10000 });
+  2428 | 
+  2429 |     const allInputs = planner.orderableInputs;
+  2430 |     const inputCount = await allInputs.count();
+  2431 |     let firstInputIndex = -1;
+  2432 | 
+  2433 |     for (let i = 0; i < inputCount; i++) {
+  2434 |       const input = allInputs.nth(i);
+  2435 |       const isReadonly = await input.getAttribute('readonly');
+  2436 |       if (isReadonly !== null) continue;
+  2437 | 
+  2438 |       const isEditable = await input.isEditable().catch(() => false);
+  2439 |       if (!isEditable) continue;
+  2440 | 
+  2441 |       const currentVal = (await input.inputValue()).trim();
+  2442 |       if (currentVal !== '' && currentVal !== '0') continue;
+  2443 | 
+  2444 |       firstInputIndex = i;
+  2445 |       break;
+  2446 |     }
+  2447 | 
+  2448 |     expect(firstInputIndex, 'Expected to find an empty editable input').toBeGreaterThanOrEqual(0);
+  2449 | 
+  2450 |     // Keep the cell by its position: its data-testid carries no location, so with all locations shown it
+  2451 |     // also matches the same product and date in another location.
+  2452 |     const firstOrderableInput = allInputs.nth(firstInputIndex);
+  2453 |     await firstOrderableInput.scrollIntoViewIfNeeded();
+  2454 |     await expect(firstOrderableInput).toBeEditable({ timeout: 10000 });
+  2455 | 
+  2456 |     await firstOrderableInput.click({ force: true });
+  2457 |     await firstOrderableInput.fill('');
+  2458 |     await firstOrderableInput.pressSequentially('10', { delay: 50 });
+  2459 |     await page.keyboard.press('Tab');
+  2460 | 
+  2461 |     await page.waitForTimeout(500);
+  2462 | 
+  2463 |     await plannerPage.expectOrderAndDiscardButtonsVisible(page);
+  2464 | 
+  2465 |     await plannerPage.openLocationsDropdown(page);
+  2466 | 
+  2467 |     const locationCheckbox = planner.locationOptionByName(firstLocationName);
+  2468 |     await expect(locationCheckbox).toBeVisible({ timeout: 10000 });
+  2469 | 
+  2470 |     await locationCheckbox.click({ force: true });
+  2471 | 
+  2472 |     await expect(planner.leaveGuardModal).toBeVisible({ timeout: 10000 });
+  2473 | 
+  2474 |     await expect(planner.leaveGuardModal).toContainText(/Are you sure\?/i);
+  2475 |     await expect(planner.leaveGuardModal).toContainText(
+  2476 |       /You have unsaved data.*continuing will discard any unsaved data/i,
+  2477 |     );
+  2478 | 
+  2479 |     await expect(planner.leaveGuardDiscardButton).toBeVisible({ timeout: 10000 });
+  2480 |     await expect(planner.leaveGuardDiscardButton).toBeEnabled();
+  2481 | 
+  2482 |     await expect(planner.leaveGuardCancelButton).toBeVisible({ timeout: 10000 });
+  2483 |     await expect(planner.leaveGuardCancelButton).toBeEnabled();
+  2484 | 
+  2485 |     await planner.leaveGuardCancelButton.click();
+  2486 | 
+  2487 |     await expect(planner.leaveGuardModal).toBeHidden({ timeout: 10000 });
+  2488 | 
+  2489 |     await plannerPage.openLocationsDropdown(page);
+  2490 | 
+  2491 |     const locationCheckboxAfterCancel = planner.locationOptionByName(firstLocationName);
+  2492 |     await expect(locationCheckboxAfterCancel).toBeVisible({ timeout: 10000 });
+  2493 | 
+  2494 |     const stillChecked = await isSelectOptionChecked(locationCheckboxAfterCancel);
+  2495 |     expect(stillChecked, 'Expected first location to still be selected after clicking Cancel').toBeTruthy();
+  2496 | 
+  2497 |     await page.keyboard.press('Escape');
+  2498 |     await expect(planner.locationsDropdownPanel).toBeHidden({ timeout: 10000 });
+  2499 | 
+  2500 |     const inputValueAfterCancel = await firstOrderableInput.inputValue();
+> 2501 |     expect(inputValueAfterCancel, 'Expected value to be displayed in input field after Cancel').toBe('10');
+       |                                                                                                 ^ Error: Expected value to be displayed in input field after Cancel
+  2502 | 
+  2503 |     await plannerPage.openLocationsDropdown(page);
+  2504 | 
+  2505 |     const locationCheckbox2 = planner.locationOptionByName(firstLocationName);
+  2506 |     await expect(locationCheckbox2).toBeVisible({ timeout: 10000 });
+  2507 | 
+  2508 |     await locationCheckbox2.click({ force: true });
+  2509 | 
+  2510 |     await expect(planner.leaveGuardModal).toBeVisible({ timeout: 10000 });
+  2511 | 
+  2512 |     await expect(planner.leaveGuardModal).toContainText(/Are you sure\?/i);
+  2513 |     await expect(planner.leaveGuardModal).toContainText(
+  2514 |       /You have unsaved data.*continuing will discard any unsaved data/i,
+  2515 |     );
+  2516 | 
+  2517 |     await expect(planner.leaveGuardDiscardButton).toBeVisible({ timeout: 10000 });
+  2518 |     await expect(planner.leaveGuardDiscardButton).toBeEnabled();
+  2519 | 
+  2520 |     await expect(planner.leaveGuardCancelButton).toBeVisible({ timeout: 10000 });
+  2521 |     await expect(planner.leaveGuardCancelButton).toBeEnabled();
+  2522 | 
+  2523 |     await planner.leaveGuardDiscardButton.click();
+  2524 | 
+  2525 |     await expect(planner.leaveGuardModal).toBeHidden({ timeout: 10000 });
+  2526 | 
+  2527 |     await expect(planner.locationsDropdownPanel).toBeHidden({ timeout: 10000 });
+  2528 | 
+  2529 |     await plannerPage.expectLocationCardHidden(page, firstLocationName);
+  2530 | 
+  2531 |     await plannerPage.openLocationsDropdown(page);
+  2532 | 
+  2533 |     const locationCheckboxFinal = planner.locationOptionByName(firstLocationName);
+  2534 |     await expect(locationCheckboxFinal).toBeVisible({ timeout: 10000 });
+  2535 | 
+  2536 |     const finalChecked = await isSelectOptionChecked(locationCheckboxFinal);
+  2537 |     expect(finalChecked, 'Expected first location to be unselected after clicking Discard').toBeFalsy();
+  2538 | 
+  2539 |     await page.keyboard.press('Escape');
+  2540 |     await expect(planner.locationsDropdownPanel).toBeHidden({ timeout: 10000 });
+  2541 | 
+  2542 |     await plannerPage.expectOrderAndDiscardButtonsHidden(page);
+  2543 |   });
+  2544 | 
+  2545 |   test(`TC:14139 - [Leave guard + Location drop-down] Check leave guard when unselecting All Locations + unsaved changes`, async ({
+  2546 |     page,
+  2547 |   }) => {
+  2548 |     const user = await ordersPage.setupOrdererUserWithEnterpriseAccess(page, corpnav, ENTERPRISE_WITH_DATA_ID);
+  2549 |     userIdsToDelete.push(user.userId);
+  2550 | 
+  2551 |     await page.goto(urls.orderPlanner);
+  2552 | 
+  2553 |     await plannerPage.switchOrderMode(page, true);
+  2554 |     await plannerPage.ensureMatrixHasOrderableProducts(page);
+  2555 | 
+  2556 |     await expect(planner.weekHeaders.first()).toBeVisible({ timeout: 30000 });
+  2557 | 
+  2558 |     await plannerPage.openLocationsDropdown(page);
+  2559 | 
+  2560 |     await expect(planner.selectAllOption).toBeVisible({ timeout: 10000 });
+  2561 |     const selectAllChecked = await isSelectOptionChecked(planner.selectAllOption);
+  2562 |     expect(selectAllChecked, 'Expected All locations to be selected by default').toBeTruthy();
+  2563 | 
+  2564 |     await page.keyboard.press('Escape');
+  2565 |     await expect(planner.locationsDropdownPanel).toBeHidden({ timeout: 10000 });
+  2566 | 
+  2567 |     const allOrderableInputs = planner.orderableInputs;
+  2568 |     const inputCount = await allOrderableInputs.count();
+  2569 |     expect(inputCount, 'Expected at least one orderable input').toBeGreaterThan(0);
+  2570 | 
+  2571 |     // Walk from the end to find the last editable input and keep it by position: its data-testid carries
+  2572 |     // no location, so with all locations shown a product ordered in two of them matches two cells.
+  2573 |     let lastEditableIndex = -1;
+  2574 |     for (let i = inputCount - 1; i >= 0; i--) {
+  2575 |       const input = allOrderableInputs.nth(i);
+  2576 |       const isReadonly = await input.getAttribute('readonly').catch(() => null);
+  2577 |       const isDisabled = await input.getAttribute('disabled').catch(() => null);
+  2578 |       if (isReadonly === null && isDisabled === null) {
+  2579 |         lastEditableIndex = i;
+  2580 |         break;
+  2581 |       }
+  2582 |     }
+  2583 |     expect(lastEditableIndex, 'Expected to find an editable orderable input').toBeGreaterThanOrEqual(0);
+  2584 |     const lastEditableInput = allOrderableInputs.nth(lastEditableIndex);
+  2585 | 
+  2586 |     await expect(lastEditableInput).toBeVisible({ timeout: 30000 });
+  2587 |     await lastEditableInput.scrollIntoViewIfNeeded();
+  2588 |     await lastEditableInput.click({ force: true });
+  2589 |     await lastEditableInput.fill('');
+  2590 |     await lastEditableInput.pressSequentially('15', { delay: 50 });
+  2591 |     await page.keyboard.press('Tab');
+  2592 | 
+  2593 |     await page.waitForTimeout(500);
+  2594 | 
+  2595 |     await plannerPage.expectOrderAndDiscardButtonsVisible(page);
+  2596 | 
+  2597 |     await plannerPage.openLocationsDropdown(page);
+  2598 | 
+  2599 |     await expect(planner.selectAllOption).toBeVisible({ timeout: 10000 });
+  2600 | 
+  2601 |     await planner.selectAllCheckbox.click({ force: true });
+```

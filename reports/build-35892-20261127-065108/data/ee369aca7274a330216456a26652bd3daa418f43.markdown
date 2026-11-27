@@ -1,0 +1,290 @@
+# Instructions
+
+- Following Playwright test failed.
+- Explain why, be concise, respect Playwright best practices.
+- Provide a snippet of code with the fix, if possible.
+
+# Test info
+
+- Name: lagBuster.spec.ts >> Planner - Lag Buster >> TC:14329 - Check if 'Your changes were discarded' modal appears after order Deleting for the SAME location
+- Location: playwright/specs/lagBuster.spec.ts:1032:7
+
+# Error details
+
+```
+Error: Cell should have saved value 7 before deletion
+
+expect(received).toBe(expected) // Object.is equality
+
+Expected: "7"
+Received: ""
+```
+
+# Page snapshot
+
+```yaml
+- generic [active] [ref=e1]:
+  - generic [ref=e3]:
+    - generic [ref=e4]: You're on DEVELOPMENT OR STAGE
+    - generic [ref=e6]:
+      - img [ref=e7] [cursor=pointer]
+      - generic [ref=e14]:
+        - generic [ref=e15]: Plkw P. van Geest Maasland B.V.
+        - generic [ref=e16] [cursor=pointer]:
+          - img "user" [ref=e17]:
+            - img [ref=e18]
+          - text: Playwright DudetPkOMoz
+    - generic [ref=e21]:
+      - generic [ref=e22]:
+        - heading "Hi, Playwright DudetPkOMoz!" [level=1] [ref=e23]
+        - strong [ref=e25]: Welcome to Koppert One
+        - generic [ref=e26]:
+          - heading "Need help ?" [level=5] [ref=e27]
+          - separator [ref=e28]
+          - generic [ref=e29]:
+            - img [ref=e31]
+            - generic [ref=e32]:
+              - heading "Koppert One support" [level=5] [ref=e33]
+              - link "mail support@koppert.one" [ref=e35] [cursor=pointer]:
+                - /url: mailto:support@koppert.one
+                - img "mail" [ref=e36]:
+                  - img [ref=e37]
+                - text: support@koppert.one
+                - img [ref=e39]
+              - link "phone +31 1 051 405 17" [ref=e43] [cursor=pointer]:
+                - /url: tel:+31105140517
+                - img "phone" [ref=e44]:
+                  - img [ref=e45]
+                - text: +31 1 051 405 17
+                - img [ref=e47]
+      - generic [ref=e51]:
+        - generic [ref=e52] [cursor=pointer]:
+          - img [ref=e54]
+          - generic [ref=e57]: Order
+          - generic [ref=e59]: View, place and manage orders
+          - img [ref=e61]
+        - generic [ref=e63] [cursor=pointer]:
+          - img [ref=e65]
+          - generic [ref=e69]: Knowledge
+          - generic [ref=e71]: Explore chemical compatibility with Koppert's natural enemies and bumblebees
+          - img [ref=e73]
+        - generic [ref=e75] [cursor=pointer]:
+          - img [ref=e77]
+          - generic [ref=e79]: Scout
+          - generic [ref=e81]: Discover trends in pest development and beneficial insect counts to know when to act
+          - img [ref=e83]
+        - generic [ref=e85] [cursor=pointer]:
+          - img [ref=e87]
+          - generic [ref=e89]: Organization
+          - generic [ref=e91]: Manage team members and their access to locations
+          - img [ref=e93]
+  - button "Feedback" [ref=e95] [cursor=pointer]:
+    - generic [ref=e97]: Feedback
+```
+
+# Test source
+
+```ts
+  1029 |     await context2.close();
+  1030 |   });
+  1031 | 
+  1032 |   test(`TC:14329 - Check if 'Your changes were discarded' modal appears after order Deleting for the SAME location`, async ({
+  1033 |     page,
+  1034 |     browser,
+  1035 |   }) => {
+  1036 |     const user1 = await ordersPage.setupOrdererUserWithEnterpriseAccess(page, corpnav, ENTERPRISE_WITH_DATA_ID);
+  1037 |     userIdsToDelete.push(user1.userId);
+  1038 | 
+  1039 |     await page.goto(urls.orderPlanner);
+  1040 |     await expect(planner.orderModeToggle).toBeVisible({ timeout: 30000 });
+  1041 |     await page.waitForTimeout(3000);
+  1042 | 
+  1043 |     const locationName = await selectSingleLocation(page, planner);
+  1044 | 
+  1045 |     await plannerPage.switchOrderMode(page, true);
+  1046 |     await plannerPage.ensureMatrixHasOrderableProducts(page);
+  1047 |     await expect(planner.weekHeaders.first()).toBeVisible({ timeout: 30000 });
+  1048 |     await page.waitForTimeout(2000);
+  1049 | 
+  1050 |     // Create fresh orders on 2 empty cells for the same product (ensures deletable status)
+  1051 |     const allInputs = planner.orderableInputs;
+  1052 |     const inputCount = await allInputs.count();
+  1053 |     expect(inputCount, 'Expected to have orderable inputs on planner').toBeGreaterThan(0);
+  1054 | 
+  1055 |     let productNameFromTestId = '';
+  1056 |     const createdCells: string[] = [];
+  1057 |     for (let i = 0; i < Math.min(inputCount, 200); i++) {
+  1058 |       const tempInput = allInputs.nth(i);
+  1059 |       const isEditable = await tempInput.isEditable().catch(() => false);
+  1060 |       if (!isEditable) continue;
+  1061 |       const isDisabled = await tempInput.isDisabled().catch(() => true);
+  1062 |       if (isDisabled) continue;
+  1063 |       const value = (await tempInput.inputValue()).trim();
+  1064 |       if (value && value !== '0') continue;
+  1065 |       const testId = (await tempInput.getAttribute('data-testid')) || '';
+  1066 |       if (!testId) continue;
+  1067 |       const productMatch = testId.match(/orderable-cell:([^:]+):/);
+  1068 |       if (!productMatch) continue;
+  1069 |       if (!productNameFromTestId) productNameFromTestId = productMatch[1];
+  1070 |       if (!testId.includes(productNameFromTestId)) continue;
+  1071 | 
+  1072 |       // Dismiss any leftover modal (success / congratulations / first-order tutorial) that may
+  1073 |       // have been triggered by the previous interaction — these intercept clicks on planner cells.
+  1074 |       const visibleModal = page.locator('.ant-modal-wrap:visible').first();
+  1075 |       if (await visibleModal.isVisible({ timeout: 500 }).catch(() => false)) {
+  1076 |         const closeBtn = visibleModal
+  1077 |           .locator('button.ant-btn-circle, button.ant-modal-close, button:has-text("Close")')
+  1078 |           .first();
+  1079 |         await closeBtn.click({ timeout: 2000 }).catch(() => {});
+  1080 |         await visibleModal.waitFor({ state: 'hidden', timeout: 5000 }).catch(() => {});
+  1081 |       }
+  1082 | 
+  1083 |       const inp = page.locator(`input[data-testid="${testId}"]`);
+  1084 |       await inp.scrollIntoViewIfNeeded();
+  1085 |       await inp.click();
+  1086 |       await inp.fill(String(createdCells.length === 0 ? 7 : 9));
+  1087 |       await inp.press('Tab');
+  1088 |       await page.waitForTimeout(500);
+  1089 |       createdCells.push(testId);
+  1090 |       if (createdCells.length >= 2) break;
+  1091 |     }
+  1092 |     expect(createdCells.length, 'Expected at least 2 empty cells for same product').toBeGreaterThanOrEqual(2);
+  1093 | 
+  1094 |     await plannerPage.clickOrderButton(page);
+  1095 |     await page.waitForTimeout(1000);
+  1096 |     await expect(planner.orderConfirmationModal).toBeVisible({ timeout: 10000 });
+  1097 |     await planner.orderConfirmationModalConfirmButton.click();
+  1098 |     await expect(planner.orderConfirmationModal).not.toBeVisible({ timeout: 10000 });
+  1099 |     await page.waitForTimeout(3000);
+  1100 |     await plannerPage.closeFirstOrderCongratulationsModalIfVisible(page);
+  1101 |     await page.waitForTimeout(2000);
+  1102 | 
+  1103 |     const targetTestId = createdCells[0];
+  1104 |     const targetTestId2 = createdCells[1];
+  1105 | 
+  1106 |     const { context2, page2, planner2 } = await setupClient2(browser, user1, locationName);
+  1107 | 
+  1108 |     // Scroll Client 2 planner to show both target date cells (may be in future weeks)
+  1109 |     const scrollRight = page2.locator('[data-testid^="scroll-right"]').first();
+  1110 |     for (let scrollAttempt = 0; scrollAttempt < 15; scrollAttempt++) {
+  1111 |       const cell1 = await page2.locator(`input[data-testid="${targetTestId}"]`).count();
+  1112 |       const cell2 = await page2.locator(`input[data-testid="${targetTestId2}"]`).count();
+  1113 |       if (cell1 > 0 && cell2 > 0) break;
+  1114 |       const arrowVisible = await scrollRight
+  1115 |         .waitFor({ state: 'visible', timeout: 3000 })
+  1116 |         .then(() => true)
+  1117 |         .catch(() => false);
+  1118 |       if (!arrowVisible) break;
+  1119 |       await scrollRight.click({ timeout: 5000 }).catch(() => {});
+  1120 |       await page2.waitForTimeout(1000);
+  1121 |     }
+  1122 | 
+  1123 |     // Step 3: Client 1 deletes the first cell by setting qty to 0
+  1124 |     await scrollPlannerToCells(page, [targetTestId, targetTestId2]);
+  1125 |     const targetInput = page.locator(`input[data-testid="${targetTestId}"]`);
+  1126 |     await targetInput.scrollIntoViewIfNeeded();
+  1127 |     await targetInput.click();
+  1128 |     const savedVal = (await targetInput.inputValue()).trim();
+> 1129 |     expect(savedVal, 'Cell should have saved value 7 before deletion').toBe('7');
+       |                                                                        ^ Error: Cell should have saved value 7 before deletion
+  1130 |     await targetInput.fill('0');
+  1131 |     await targetInput.press('Tab');
+  1132 |     await page.waitForTimeout(2000);
+  1133 | 
+  1134 |     const deletingModal = planner.deletingQuantitiesModal;
+  1135 |     let deletionModalAppeared = false;
+  1136 |     try {
+  1137 |       await expect(deletingModal).toBeVisible({ timeout: 5000 });
+  1138 |       deletionModalAppeared = true;
+  1139 |     } catch {
+  1140 |       // Modal may appear after clicking Order instead
+  1141 |     }
+  1142 | 
+  1143 |     if (deletionModalAppeared) {
+  1144 |       await planner.deletingQuantitiesModalConfirmButton.click();
+  1145 |       await expect(deletingModal).not.toBeVisible({ timeout: 10000 });
+  1146 |       await page.waitForTimeout(2000);
+  1147 |     } else {
+  1148 |       await plannerPage.clickOrderButton(page);
+  1149 |       await page.waitForTimeout(1000);
+  1150 |       try {
+  1151 |         await expect(deletingModal).toBeVisible({ timeout: 5000 });
+  1152 |         await planner.deletingQuantitiesModalConfirmButton.click();
+  1153 |         await expect(deletingModal).not.toBeVisible({ timeout: 10000 });
+  1154 |         await page.waitForTimeout(1000);
+  1155 |       } catch {
+  1156 |         // No deletion modal after Order click either
+  1157 |       }
+  1158 |       const confirmModal = planner.orderConfirmationModal;
+  1159 |       try {
+  1160 |         await expect(confirmModal).toBeVisible({ timeout: 5000 });
+  1161 |         await planner.orderConfirmationModalConfirmButton.click();
+  1162 |         await expect(confirmModal).not.toBeVisible({ timeout: 10000 });
+  1163 |       } catch {
+  1164 |         // No confirmation modal
+  1165 |       }
+  1166 |       await plannerPage.closeFirstOrderCongratulationsModalIfVisible(page);
+  1167 |       await page.waitForTimeout(2000);
+  1168 |     }
+  1169 | 
+  1170 |     // Wait for client 2 to sync the deletion
+  1171 |     const syncCell = page2.locator(`input[data-testid="${targetTestId}"]`);
+  1172 |     await expect(syncCell).not.toHaveValue('7', { timeout: 30000 });
+  1173 |     const modalVisibleAfterStep3 = await planner2.changesDiscardedModal.isVisible({ timeout: 5000 }).catch(() => false);
+  1174 |     expect(modalVisibleAfterStep3, 'Step 3: Modal should NOT appear when Client 2 has no changes').toBe(false);
+  1175 | 
+  1176 |     // Step 5: Client 2 edits the second cell (unsaved), Client 1 deletes same cell
+  1177 |     const targetInputClient2 = page2.locator(`input[data-testid="${targetTestId2}"]`);
+  1178 |     await targetInputClient2.scrollIntoViewIfNeeded();
+  1179 |     await targetInputClient2.click();
+  1180 |     await targetInputClient2.fill('5');
+  1181 |     await page2.waitForTimeout(1000);
+  1182 | 
+  1183 |     const targetInput2Client1 = page.locator(`input[data-testid="${targetTestId2}"]`);
+  1184 |     await page.waitForTimeout(2000);
+  1185 |     await scrollPlannerToCells(page, [targetTestId2]);
+  1186 |     await targetInput2Client1.scrollIntoViewIfNeeded();
+  1187 |     await targetInput2Client1.click({ force: true });
+  1188 |     await targetInput2Client1.fill('0', { force: true });
+  1189 |     await targetInput2Client1.press('Tab');
+  1190 |     await page.waitForTimeout(2000);
+  1191 | 
+  1192 |     const deletingModal2 = planner.deletingQuantitiesModal;
+  1193 |     let deletion2ModalAppeared = false;
+  1194 |     try {
+  1195 |       await expect(deletingModal2).toBeVisible({ timeout: 5000 });
+  1196 |       deletion2ModalAppeared = true;
+  1197 |     } catch {
+  1198 |       // Modal may appear after clicking Order
+  1199 |     }
+  1200 | 
+  1201 |     if (deletion2ModalAppeared) {
+  1202 |       await planner.deletingQuantitiesModalConfirmButton.click();
+  1203 |       await expect(deletingModal2).not.toBeVisible({ timeout: 10000 });
+  1204 |       await page.waitForTimeout(2000);
+  1205 |     } else {
+  1206 |       await plannerPage.clickOrderButton(page);
+  1207 |       await page.waitForTimeout(1000);
+  1208 |       try {
+  1209 |         await expect(deletingModal2).toBeVisible({ timeout: 5000 });
+  1210 |         await planner.deletingQuantitiesModalConfirmButton.click();
+  1211 |         await expect(deletingModal2).not.toBeVisible({ timeout: 10000 });
+  1212 |         await page.waitForTimeout(1000);
+  1213 |       } catch {
+  1214 |         // No deletion modal
+  1215 |       }
+  1216 |       const confirmModal2 = planner.orderConfirmationModal;
+  1217 |       try {
+  1218 |         await expect(confirmModal2).toBeVisible({ timeout: 5000 });
+  1219 |         await planner.orderConfirmationModalConfirmButton.click();
+  1220 |         await expect(confirmModal2).not.toBeVisible({ timeout: 10000 });
+  1221 |       } catch {
+  1222 |         // No confirmation modal
+  1223 |       }
+  1224 |       await plannerPage.closeFirstOrderCongratulationsModalIfVisible(page);
+  1225 |       await page.waitForTimeout(2000);
+  1226 |     }
+  1227 | 
+  1228 |     await verifyDiscardedModal(page2, planner2, locationName);
+  1229 | 
+```

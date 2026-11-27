@@ -1,0 +1,247 @@
+# Instructions
+
+- Following Playwright test failed.
+- Explain why, be concise, respect Playwright best practices.
+- Provide a snippet of code with the fix, if possible.
+
+# Test info
+
+- Name: visitReports.spec.ts >> Visit Reports >> TC:15993 - Check leave guard when leaving Visit Report editing without unsaved changes
+- Location: playwright/specs/visitReports.spec.ts:525:7
+
+# Error details
+
+```
+Error: expect(locator).not.toBeVisible() failed
+
+Locator:  locator('.ant-modal').filter({ hasText: /Are you sure|unsaved data/i })
+Expected: not visible
+Received: visible
+Timeout:  2000ms
+
+Call log:
+  - Expect "not toBeVisible" with timeout 2000ms
+  - waiting for locator('.ant-modal').filter({ hasText: /Are you sure|unsaved data/i })
+    - locator resolved to <div role="dialog" aria-modal="true" class="ant-modal sc-dtBdUo iCAbTO ant-zoom-appear ant-zoom-appear-start ant-zoom">…</div>
+    4 × unexpected value "visible"
+      - locator resolved to <div role="dialog" aria-modal="true" class="ant-modal sc-dtBdUo iCAbTO ant-zoom-appear ant-zoom-appear-active ant-zoom">…</div>
+    16 × unexpected value "visible"
+       - locator resolved to <div role="dialog" aria-modal="true" class="ant-modal sc-dtBdUo iCAbTO">…</div>
+    - unexpected value "visible"
+
+```
+
+```yaml
+- dialog:
+  - text: Are you sure? You have unsaved data, continuing will discard any unsaved data.
+  - separator
+  - button "Discard"
+  - button "Cancel"
+```
+
+# Test source
+
+```ts
+  454 |     await visitReports.scoutableOptions.first().click();
+  455 | 
+  456 |     await corpnav.admin.click();
+  457 |     await expect(visitReports.leaveGuardModal.modal).toBeVisible();
+  458 |     await visitReports.leaveGuardModal.cancelButton.click();
+  459 | 
+  460 |     const scoutableTextVisible = await visitReports.scoutableTextField.isVisible().catch(() => false);
+  461 |     if (scoutableTextVisible) {
+  462 |       await visitReports.scoutableTextField.fill('Scoutable observation text');
+  463 | 
+  464 |       await corpnav.admin.click();
+  465 |       await expect(visitReports.leaveGuardModal.modal).toBeVisible();
+  466 |       await visitReports.leaveGuardModal.cancelButton.click();
+  467 |     }
+  468 | 
+  469 |     const scoutableAttachmentVisible = await visitReports.scoutableAttachmentButton.isVisible().catch(() => false);
+  470 |     if (scoutableAttachmentVisible) {
+  471 |       await visitReports.scoutableAttachmentButton.click();
+  472 |       const scoutableFileVisible = await visitReports.lastFileInput.isVisible().catch(() => false);
+  473 |       if (scoutableFileVisible) {
+  474 |         await visitReports.lastFileInput.setInputFiles(testFilePath);
+  475 | 
+  476 |         await corpnav.admin.click();
+  477 |         await expect(visitReports.leaveGuardModal.modal).toBeVisible();
+  478 |         await visitReports.leaveGuardModal.cancelButton.click();
+  479 |       }
+  480 |     }
+  481 | 
+  482 |     if (scoutableTextVisible) {
+  483 |       await visitReports.scoutableTextField.clear();
+  484 | 
+  485 |       await corpnav.admin.click();
+  486 |       await expect(visitReports.leaveGuardModal.modal).toBeVisible();
+  487 |       await visitReports.leaveGuardModal.cancelButton.click();
+  488 |     }
+  489 | 
+  490 |     await corpnav.admin.click();
+  491 |     await expect(visitReports.leaveGuardModal.modal).toBeVisible();
+  492 |     await visitReports.leaveGuardModal.discardButton.click();
+  493 |   });
+  494 | 
+  495 |   test(`TC:15992 - Check leave guard when leaving Visit Report creation without unsaved changes`, async ({
+  496 |     loginPage,
+  497 |     page,
+  498 |   }) => {
+  499 |     const user = await createUser({ page, roles: ['Advisor', 'Admin'] });
+  500 |     const additionalEnterpriseId = 'a96a7ac5-2a21-4008-9795-647ff4b39834';
+  501 |     userIdsToDelete.push(user.userId);
+  502 | 
+  503 |     await addUserToEnterprise(additionalEnterpriseId, user.userId);
+  504 |     await restoreSession(page, user.refreshToken);
+  505 | 
+  506 |     await loginPage.goToURL(urls.visitReports, false);
+  507 |     await page.waitForLoadState('domcontentloaded');
+  508 |     expect(page.url()).toContain('visit-reports');
+  509 | 
+  510 |     await expect(visitReports.addVisitReportButton).toBeVisible();
+  511 |     await visitReports.addVisitReportButton.click();
+  512 |     const formVisible = await visitReports.formContainer.isVisible();
+  513 |     expect(formVisible).toBeTruthy();
+  514 | 
+  515 |     // Leaving the freshly opened creation form without making any changes must not trigger the leave guard.
+  516 |     // NOTE: TC:15992 step 3 additionally expects that selecting only a location/date does not trigger the guard,
+  517 |     // but the shipped app DOES show the leave guard after a location is selected during creation
+  518 |     // (asserted by the passing TC:16302). That divergence is a spec-vs-app discrepancy to be confirmed with the
+  519 |     // product team and is intentionally not encoded here.
+  520 |     await corpnav.admin.click();
+  521 |     await expect(visitReports.leaveGuardModal.modal).not.toBeVisible({ timeout: 10000 });
+  522 |     expect(page.url()).not.toContain('visit-reports/new');
+  523 |   });
+  524 | 
+  525 |   test(`TC:15993 - Check leave guard when leaving Visit Report editing without unsaved changes`, async ({
+  526 |     loginPage,
+  527 |     page,
+  528 |   }) => {
+  529 |     const user = await createUser({ page, roles: ['Admin'] });
+  530 |     const additionalEnterpriseId = 'a96a7ac5-2a21-4008-9795-647ff4b39834';
+  531 |     userIdsToDelete.push(user.userId);
+  532 | 
+  533 |     await addUserToEnterprise(additionalEnterpriseId, user.userId);
+  534 |     await restoreSession(page, user.refreshToken);
+  535 | 
+  536 |     const visitReportId = await createVisitReportThroughUI(page, 'Edit Test - ' + generateRandomString(8));
+  537 | 
+  538 |     await loginPage.goToURL(`${urls.visitReports}/${visitReportId}`, false);
+  539 |     await page.waitForLoadState('domcontentloaded');
+  540 | 
+  541 |     await expect(visitReports.editButton).toBeVisible();
+  542 |     await visitReports.editButton.click();
+  543 | 
+  544 |     const currentUrl = page.url();
+  545 |     expect(currentUrl).toContain(visitReportId);
+  546 | 
+  547 |     await selectYesterdayDate(page);
+  548 | 
+  549 |     await visitReports.locationDropdown.click();
+  550 |     await expect(visitReports.locationOptions.first()).toBeVisible();
+  551 |     await visitReports.locationOptions.first().click();
+  552 | 
+  553 |     await corpnav.admin.click();
+> 554 |     await expect(visitReports.leaveGuardModal.modal).not.toBeVisible({ timeout: 2000 });
+      |                                                          ^ Error: expect(locator).not.toBeVisible() failed
+  555 |     expect(page.url()).not.toContain(visitReportId);
+  556 |   });
+  557 | 
+  558 |   // Scoped to the core assertion: the leave guard fires when the location is changed while an unsaved
+  559 |   // cultivar tab exists. The original tail (delete the tab, re-change location, expect no guard) is left
+  560 |   // out because the cultivar tab has no automatable delete gesture - see the note on TC:16869.
+  561 |   // Azure DevOps re-created this case under id TC:19778 with identical
+  562 |   // steps. Each id needs its own reported result, so they share one scenario body.
+  563 |   const scenarioTC17919 = async ({ loginPage, page }) => {
+  564 |     const user = await createUser({ page, roles: ['Advisor', 'Admin'] });
+  565 |     const additionalEnterpriseId = 'a96a7ac5-2a21-4008-9795-647ff4b39834';
+  566 |     userIdsToDelete.push(user.userId);
+  567 | 
+  568 |     await addUserToEnterprise(additionalEnterpriseId, user.userId);
+  569 |     await restoreSession(page, user.refreshToken);
+  570 | 
+  571 |     await loginPage.goToURL(urls.visitReports, false);
+  572 |     await page.waitForLoadState('domcontentloaded');
+  573 |     expect(page.url()).toContain('visit-reports');
+  574 | 
+  575 |     await expect(visitReports.addVisitReportButton).toBeVisible();
+  576 |     await visitReports.addVisitReportButton.click();
+  577 |     const formVisible = await visitReports.formContainer.isVisible();
+  578 |     expect(formVisible).toBeTruthy();
+  579 | 
+  580 |     await selectYesterdayDate(page);
+  581 | 
+  582 |     await visitReports.locationDropdown.click();
+  583 |     await expect(visitReports.locationOptions.first()).toBeVisible();
+  584 |     await visitReports.locationOptions.first().click();
+  585 | 
+  586 |     const scoutablesResponsePromise = page
+  587 |       .waitForResponse((response) => response.url().includes('/scoutables') || response.url().includes('/items'), {
+  588 |         timeout: 10000,
+  589 |       })
+  590 |       .catch(() => null);
+  591 | 
+  592 |     await scoutablesResponsePromise;
+  593 | 
+  594 |     await visitReports.addCultivarButton.scrollIntoViewIfNeeded();
+  595 |     await expect(visitReports.addCultivarButton).toBeVisible();
+  596 |     await visitReports.addCultivarButton.click();
+  597 | 
+  598 |     await expect(visitReports.cultivarTabNameInput).toBeVisible();
+  599 |     const cultivarName = 'Test' + generateRandomString(6);
+  600 |     await visitReports.cultivarTabNameInput.fill(cultivarName);
+  601 | 
+  602 |     await expect(visitReports.cultivarTabNameSaveButton).toBeVisible();
+  603 |     await visitReports.cultivarTabNameSaveButton.click();
+  604 | 
+  605 |     await expect(visitReports.cultivarTabNameInput).not.toBeVisible();
+  606 | 
+  607 |     await expect(visitReports.cultivarTab(cultivarName)).toBeVisible();
+  608 | 
+  609 |     // The guard fires on SELECTING a different location, not on merely opening the dropdown.
+  610 |     await visitReports.locationDropdown.click();
+  611 |     await expect(visitReports.locationOptions.nth(1)).toBeVisible();
+  612 |     await visitReports.locationOptions.nth(1).click();
+  613 | 
+  614 |     await expect(visitReports.leaveGuardModal.modal).toBeVisible();
+  615 |     await expect(visitReports.leaveGuardModal.title).toBeVisible();
+  616 |     await expect(visitReports.leaveGuardModal.locationChangeMessage).toBeVisible();
+  617 |     await expect(visitReports.leaveGuardModal.discardButton).toBeVisible();
+  618 |     await expect(visitReports.leaveGuardModal.cancelButton).toBeVisible();
+  619 | 
+  620 |     await visitReports.leaveGuardModal.cancelButton.click();
+  621 |     await expect(visitReports.leaveGuardModal.modal).not.toBeVisible();
+  622 | 
+  623 |     await expect(visitReports.cultivarTab(cultivarName)).toBeVisible();
+  624 |   };
+  625 | 
+  626 |   test(`TC:17919 - Check that leave guard appears when adding a cultivar and changing location after`, scenarioTC17919);
+  627 |   test(`TC:19778 - Check that leave guard appears when adding a cultivar and changing location after`, scenarioTC17919);
+  628 | 
+  629 |   test(`TC:12471 - Edit Visit report and save applied changes`, async ({ loginPage, page }) => {
+  630 |     const user = await createUser({ page, roles: ['Advisor', 'Admin'] });
+  631 |     const additionalEnterpriseId = 'a96a7ac5-2a21-4008-9795-647ff4b39834';
+  632 |     userIdsToDelete.push(user.userId);
+  633 | 
+  634 |     await addUserToEnterprise(additionalEnterpriseId, user.userId);
+  635 |     await restoreSession(page, user.refreshToken);
+  636 |     await setEnterpriseSelectorInLocalStorage(page, additionalEnterpriseId);
+  637 | 
+  638 |     const visitReportTitle = 'Edit Save Test - ' + generateRandomString(8);
+  639 |     const visitReportId = await createVisitReportThroughUI(page, visitReportTitle);
+  640 | 
+  641 |     await loginPage.goToURL(urls.visitReports, false);
+  642 |     await page.waitForLoadState('domcontentloaded');
+  643 |     expect(page.url()).toContain('visit-reports');
+  644 | 
+  645 |     await loginPage.goToURL(`${urls.visitReports}/${visitReportId}`, false);
+  646 |     await page.waitForLoadState('domcontentloaded');
+  647 | 
+  648 |     await expect(visitReports.editButton).toBeVisible();
+  649 |     await visitReports.editButton.click();
+  650 | 
+  651 |     await expect(visitReports.cancelButton).toBeVisible();
+  652 |     await expect(visitReports.saveButton).toBeVisible();
+  653 |     await expect(visitReports.saveButton).toBeDisabled();
+  654 | 
+```

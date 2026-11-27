@@ -1,0 +1,299 @@
+# Instructions
+
+- Following Playwright test failed.
+- Explain why, be concise, respect Playwright best practices.
+- Provide a snippet of code with the fix, if possible.
+
+# Test info
+
+- Name: userProfileChanges.spec.ts >> User Profile Management >> TC:13666 - User can opt out from ordering emails via My Profile
+- Location: playwright/specs/userProfileChanges.spec.ts:109:7
+
+# Error details
+
+```
+Error: expect(received).toContain(expected) // indexOf
+
+Matcher error: received value must not be null nor undefined
+
+Received has value: null
+```
+
+# Page snapshot
+
+```yaml
+- generic [active] [ref=e1]:
+  - generic [ref=e3]:
+    - generic [ref=e4]: You're on DEVELOPMENT OR STAGE
+    - generic [ref=e6]:
+      - img [ref=e7] [cursor=pointer]
+      - generic [ref=e14]:
+        - generic [ref=e15]: BIOTEC WATER SOLUTIONS SAPI DE CV
+        - generic [ref=e16] [cursor=pointer]:
+          - img "user" [ref=e17]:
+            - img [ref=e18]
+          - text: Playwright DudeJFhumjb
+    - generic [ref=e21]:
+      - generic [ref=e22]:
+        - heading "Hi, Playwright DudeJFhumjb!" [level=1] [ref=e23]
+        - strong [ref=e25]: Welcome to Koppert One
+        - generic [ref=e26]:
+          - heading "Need help ?" [level=5] [ref=e27]
+          - separator [ref=e28]
+          - generic [ref=e29]:
+            - img [ref=e31]
+            - generic [ref=e32]:
+              - heading "Koppert One support" [level=5] [ref=e33]
+              - link "mail support@koppert.one" [ref=e35] [cursor=pointer]:
+                - /url: mailto:support@koppert.one
+                - img "mail" [ref=e36]:
+                  - img [ref=e37]
+                - text: support@koppert.one
+                - img [ref=e39]
+              - link "phone +31 1 051 405 17" [ref=e43] [cursor=pointer]:
+                - /url: tel:+31105140517
+                - img "phone" [ref=e44]:
+                  - img [ref=e45]
+                - text: +31 1 051 405 17
+                - img [ref=e47]
+      - generic [ref=e51]:
+        - generic [ref=e52] [cursor=pointer]:
+          - img [ref=e54]
+          - generic [ref=e56]: Overview
+          - generic [ref=e58]: Spot trends and access your advisor's insights
+          - img [ref=e60]
+        - generic [ref=e62] [cursor=pointer]:
+          - img [ref=e64]
+          - generic [ref=e67]: Order
+          - generic [ref=e69]: View, place and manage orders
+          - img [ref=e71]
+        - generic [ref=e73] [cursor=pointer]:
+          - img [ref=e75]
+          - generic [ref=e79]: Knowledge
+          - generic [ref=e81]: Explore chemical compatibility with Koppert's natural enemies and bumblebees
+          - img [ref=e83]
+        - generic [ref=e85] [cursor=pointer]:
+          - img [ref=e87]
+          - generic [ref=e89]: Scout
+          - generic [ref=e91]: Discover trends in pest development and beneficial insect counts to know when to act
+          - img [ref=e93]
+        - generic [ref=e95] [cursor=pointer]:
+          - img [ref=e97]
+          - generic [ref=e99]: Organization
+          - generic [ref=e101]: Manage team members and their access to locations
+          - img [ref=e103]
+        - generic [ref=e105] [cursor=pointer]:
+          - img [ref=e107]
+          - generic [ref=e112]: Admin
+          - generic [ref=e114]: Manage user access, settings and Koppert One configurations
+          - img [ref=e116]
+  - button "Feedback" [ref=e118] [cursor=pointer]:
+    - generic [ref=e120]: Feedback
+```
+
+# Test source
+
+```ts
+  29  | import { visitReportsSelectors } from '../selectors/visitReports.selectors';
+  30  | import { createVisitReport } from '../helpers/api/visitReports';
+  31  | import { ordersSelectors } from 'selectors/orders.selectors';
+  32  | import { DEFAULT_TEST_ENTERPRISE_ID } from 'fixtures/enterprise_ids';
+  33  | import { emailPreferencesPage } from '../pages/emailPreferences.page';
+  34  | 
+  35  | test.describe('User Profile Management', () => {
+  36  |   let loginPageSelectors;
+  37  |   let registerPageSelectors, sideEffects;
+  38  |   let corpnav, general, userPreferences, orders;
+  39  |   let visitReports;
+  40  |   const userIdsToDelete = [];
+  41  | 
+  42  |   test.beforeEach(async ({ page, context }, testInfo) => {
+  43  |     visitReports = visitReportsSelectors(page);
+  44  |     loginPageSelectors = loginSelectors(page);
+  45  |     registerPageSelectors = registerSelectors(page);
+  46  |     general = generalSelectors(page);
+  47  |     corpnav = corpnavSelectors(page);
+  48  |     userPreferences = userProfileSelectors(page);
+  49  |     sideEffects = sideEffectsSelectors(page);
+  50  |     orders = ordersSelectors(page);
+  51  |   });
+  52  | 
+  53  |   test.afterEach(async ({ page }) => {
+  54  |     await cleanupUsers(page, userIdsToDelete);
+  55  |   });
+  56  | 
+  57  |   test('TC:10152 - Verify My Profile displays correctly for user with linked enterprise', async ({ page }) => {
+  58  |     const user = await createUser({ page });
+  59  |     userIdsToDelete.push(user.userId);
+  60  |     await addUserToEnterprise(DEFAULT_TEST_ENTERPRISE_ID, user.userId);
+  61  |     const userRoles = user.roles.map((role) => role.name);
+  62  |     const supportedLanguages = ['English', 'Nederlands', 'Español', 'Français', 'Deutsch', 'Italiano', 'Polski'];
+  63  | 
+  64  |     await login({ page, acceptCookies: true, email: user.email, password: user.password });
+  65  |     await authRefresh(page);
+  66  |     await page.reload();
+  67  |     await expect(corpnav.userIcon).toBeVisible({ timeout: 20000 });
+  68  | 
+  69  |     await corpnav.userIcon.click();
+  70  |     await expect(corpnav.myProfile).toBeVisible();
+  71  |     await corpnav.myProfile.click();
+  72  | 
+  73  |     await expect(page).toHaveURL(/.*apps\/my-profile.*/);
+  74  |     await expect(userPreferences.info.tab).toBeVisible();
+  75  |     await expect(userPreferences.info.nameField).toContainText(user.name);
+  76  |     await expect(userPreferences.info.emailField).toContainText(user.email);
+  77  | 
+  78  |     for (const role of userRoles) {
+  79  |       await expect(userPreferences.info.roleField).toContainText(role);
+  80  |     }
+  81  | 
+  82  |     await expect(userPreferences.info.languageDropdown).toBeVisible();
+  83  |     await expect(userPreferences.info.countryDropdown).toBeVisible();
+  84  |     for (const language of supportedLanguages) {
+  85  |       await userPreferences.info.languageDropdown.click();
+  86  |       await userPreferences.info.languageDropdownContainer.waitFor({ state: 'visible' });
+  87  |       await userPreferences.info.languageDropdownOption(language).click();
+  88  |       await page.waitForTimeout(3000);
+  89  |       await expect(userPreferences.info.languageDropdown).toContainText(language);
+  90  |     }
+  91  |   });
+  92  | 
+  93  |   test('TC:10153 - Verify My Profile shows empty state for user without linked enterprise', async ({
+  94  |     loginPage,
+  95  |     page,
+  96  |   }) => {
+  97  |     const user = await createUser({ page });
+  98  |     userIdsToDelete.push(user.userId);
+  99  | 
+  100 |     await restoreSession(page, user.refreshToken);
+  101 |     await loginPage.goToURL(urls.homepage);
+  102 |     await corpnav.userIcon.click();
+  103 |     await expect(corpnav.myProfile).toBeVisible();
+  104 |     await expect(corpnav.logoutBtn).toBeVisible();
+  105 |     await corpnav.myProfile.click();
+  106 |     await expect(userPreferences.enterprises.tab).not.toBeVisible();
+  107 |   });
+  108 | 
+  109 |   test('TC:13666 - User can opt out from ordering emails via My Profile', async ({ loginPage, page }) => {
+  110 |     const user = await createUser({ page, roles: ['Orderer', 'Admin', 'Grower'] });
+  111 |     const enterpriseId = '00e3a55f-2911-4f64-8a4d-c663d30cb3c0';
+  112 |     await addUserToEnterprise(enterpriseId, user.userId);
+  113 |     const orderUpdateSubject = '';
+  114 |     const expectedOrderUpdateText = 'have been updated';
+  115 |     userIdsToDelete.push(user.userId);
+  116 | 
+  117 |     await login({ page, acceptCookies: true });
+  118 |     await removeAllUsersFromEnterpriseExceptGiven(enterpriseId, [user.userId]);
+  119 |     await login({ page, acceptCookies: true, email: user.email, password: user.password });
+  120 | 
+  121 |     await acceptOrdersTermsAndConditions();
+  122 |     await authRefresh(page);
+  123 |     await createOrder(undefined, enterpriseId);
+  124 |     await authRefresh(page);
+  125 |     await addFirstOrderDoneFlagToUsersMetadata();
+  126 |     await authRefresh(page);
+  127 | 
+  128 |     const initialOrderEmail = await emailHelper.getLetter(user.email, '');
+> 129 |     expect(initialOrderEmail).toContain(expectedOrderUpdateText);
+      |                               ^ Error: expect(received).toContain(expected) // indexOf
+  130 | 
+  131 |     await navigateToEmailPreferences(loginPage, page, corpnav, userPreferences);
+  132 |     await emailPreferencesPage.setOrderUpdatesSubscribed(page, userPreferences, false);
+  133 | 
+  134 |     await createOrder(undefined, enterpriseId);
+  135 |     await page.waitForTimeout(60000);
+  136 | 
+  137 |     const emailCountAfterOptOut = await emailHelper.getEmailCountBySubject(user.email, orderUpdateSubject);
+  138 |     expect(emailCountAfterOptOut).toBe(1);
+  139 |   });
+  140 | 
+  141 |   test('TC:13667 - User can unsubscribe from ordering emails when logged in', async ({ loginPage, page }) => {
+  142 |     const user = await createUser({ page, roles: ['Orderer', 'Admin', 'Grower'] });
+  143 |     await addUserToEnterprise(DEFAULT_TEST_ENTERPRISE_ID, user.userId);
+  144 |     const orderUpdateSubject = '';
+  145 |     const expectedOrderUpdateText = 'have been updated';
+  146 |     userIdsToDelete.push(user.userId);
+  147 | 
+  148 |     await removeAllUsersFromEnterpriseExceptGiven(DEFAULT_TEST_ENTERPRISE_ID, [user.userId]);
+  149 |     await login({ page, acceptCookies: false, email: user.email, password: user.password });
+  150 | 
+  151 |     await acceptOrdersTermsAndConditions();
+  152 |     await authRefresh(page);
+  153 |     await createOrder(undefined, DEFAULT_TEST_ENTERPRISE_ID);
+  154 |     await authRefresh(page);
+  155 |     await addFirstOrderDoneFlagToUsersMetadata();
+  156 |     await authRefresh(page);
+  157 | 
+  158 |     const firstOrderEmail = await emailHelper.getLetter(user.email, orderUpdateSubject);
+  159 |     expect(firstOrderEmail).toContain(expectedOrderUpdateText);
+  160 | 
+  161 |     const unsubscribeLink = emailHelper.getUnsubscribeLink(firstOrderEmail);
+  162 |     expect(unsubscribeLink).not.toBeNull();
+  163 | 
+  164 |     await restoreSession(page, getRefreshToken());
+  165 | 
+  166 |     await page.goto(unsubscribeLink);
+  167 |     await page.waitForLoadState('domcontentloaded');
+  168 |     await expect(page).toHaveURL(/.*apps\/my-profile.*/);
+  169 |     await expect(userPreferences.emailPreferences.tab).toBeVisible();
+  170 |     await userPreferences.emailPreferences.tab.click();
+  171 |     await expect(userPreferences.emailPreferences.orderUpdatesControl).toBeVisible();
+  172 | 
+  173 |     await emailPreferencesPage.setOrderUpdatesSubscribed(page, userPreferences, false);
+  174 | 
+  175 |     await createOrder(undefined, DEFAULT_TEST_ENTERPRISE_ID);
+  176 |     await page.waitForTimeout(60000);
+  177 | 
+  178 |     const finalEmailCount = await emailHelper.getEmailCountBySubject(user.email, orderUpdateSubject);
+  179 |     expect(finalEmailCount).toBe(1);
+  180 |   });
+  181 | 
+  182 |   // The visit-report preference is NOT auto-saved: the checkbox click only stages the change and the
+  183 |   // Save button is what PATCHes /users/me. setVisitReportSubscribed does both, which is what makes the
+  184 |   // opt-out survive a re-navigation.
+  185 |   //
+  186 |   // Blocked by VISIT-REPORT-MAIL: POST /visit-reports/:id/send-notification answers 200 but no mail is
+  187 |   // delivered, so both the opt-out and the opt-in halves read 0 emails. Reproduced in isolation on
+  188 |   // 2026-09-04 against 443c71b5 and ab1cc8bd, to the report's own author and to an explicitly addressed
+  189 |   // second user, polled for 3 minutes each time - nothing arrives, while an order-update mail to the same
+  190 |   // mailbox lands in about 20s. Unskip once VR mail is sent again.
+  191 |   test.skip('TC:16807 - User can opt out from visit report email notifications via My Profile', async ({
+  192 |     loginPage,
+  193 |     page,
+  194 |   }) => {
+  195 |     const user = await createUser({ page, roles: ['Admin'] });
+  196 |     const enterpriseId = 'ab1cc8bd-32d1-4047-bf24-8faebe9643ee';
+  197 |     const visitReportEmailSubject = '';
+  198 | 
+  199 |     userIdsToDelete.push(user.userId);
+  200 | 
+  201 |     await addUserToEnterprise(enterpriseId, user.userId);
+  202 | 
+  203 |     await login({ page, acceptCookies: true, email: user.email, password: user.password });
+  204 | 
+  205 |     await navigateToEmailPreferences(loginPage, page, corpnav, userPreferences);
+  206 |     await expect(userPreferences.emailPreferences.visitReportCheckbox).toBeChecked();
+  207 | 
+  208 |     await emailPreferencesPage.setVisitReportSubscribed(page, userPreferences, false);
+  209 | 
+  210 |     await authRefresh(page);
+  211 |     await navigateToEmailPreferences(loginPage, page, corpnav, userPreferences);
+  212 |     await expect(userPreferences.emailPreferences.visitReportCheckbox).not.toBeChecked();
+  213 | 
+  214 |     const firstVisitReport = await createVisitReport({
+  215 |       enterpriseId,
+  216 |       title: 'Test Visit Report - ' + generateRandomString(8),
+  217 |     });
+  218 |     expect(firstVisitReport).toBeTruthy();
+  219 |     expect(firstVisitReport.id).toBeTruthy();
+  220 | 
+  221 |     await page.waitForTimeout(30000);
+  222 |     const emailCountAfterOptOut = await emailHelper.getEmailCountBySubject(user.email, visitReportEmailSubject);
+  223 |     expect(emailCountAfterOptOut).toBe(0);
+  224 | 
+  225 |     await navigateToEmailPreferences(loginPage, page, corpnav, userPreferences);
+  226 |     await expect(userPreferences.emailPreferences.visitReportCheckbox).not.toBeChecked();
+  227 | 
+  228 |     await emailPreferencesPage.setVisitReportSubscribed(page, userPreferences, true);
+  229 | 
+```

@@ -1,0 +1,324 @@
+# Instructions
+
+- Following Playwright test failed.
+- Explain why, be concise, respect Playwright best practices.
+- Provide a snippet of code with the fix, if possible.
+
+# Test info
+
+- Name: deletedAccount.spec.ts >> Deleted Account >> TC:19211 - Check that deleted user is automatically logged out from active web session
+- Location: playwright/specs/deletedAccount.spec.ts:50:7
+
+# Error details
+
+```
+Error: User 2 should be redirected to login page
+
+expect(locator).toBeVisible() failed
+
+Locator: locator('#login-form_email')
+Expected: visible
+Timeout: 30000ms
+Error: element(s) not found
+
+Call log:
+  - User 2 should be redirected to login page with timeout 30000ms
+  - waiting for locator('#login-form_email')
+
+```
+
+```yaml
+- text: You're on DEVELOPMENT OR STAGE
+- img
+- menu:
+  - menuitem "Order":
+    - link "Order":
+      - /url: /apps/order
+  - menuitem "Knowledge":
+    - link "Knowledge":
+      - /url: /apps/protect
+  - menuitem "Scout":
+    - link "Scout":
+      - /url: https://www.natutecscout.com/apps/scout
+  - menuitem "Organization":
+    - link "Organization":
+      - /url: /apps/organization
+- text: AGROCENTRO ABONOS VELEZ S.L.
+- img "user"
+- text: Playwright DudeuYgniXB
+- complementary:
+  - menu:
+    - menuitem "Planner":
+      - img
+      - link "Planner":
+        - /url: /apps/order/planner
+    - menuitem "Order list":
+      - img
+      - link "Order list":
+        - /url: /apps/order/order-list
+    - menuitem "file-text Invoices":
+      - img "file-text"
+      - link "Invoices":
+        - /url: /apps/order/invoices
+  - img "left"
+- main:
+  - heading "Planner" [level=2]
+  - separator
+  - text: Locations AGROCENTRO ABONOS VELEZ EL MORCHE - MENSAJERIA
+  - combobox
+  - switch [checked]
+  - text: Order mode
+  - textbox "Search..."
+  - img
+  - text: "Week selection:"
+  - textbox "week 42 - 2026":
+    - /placeholder: Start week
+  - img "calendar"
+  - text: "-"
+  - textbox "week 53 - 2026":
+    - /placeholder: End week
+  - img "calendar"
+  - img
+  - text: AGROCENTRO ABONOS VELEZ EL MORCHE - MENSAJERIA week 53 Mon 28-12 Tue 29-12 Wed 30-12 Thu 31-12 Fri 01-01 week 52 Mon 21-12 Tue 22-12 Wed 23-12 Thu 24-12 Fri 25-12 week 51 Mon 14-12 Tue 15-12 Wed 16-12 Thu 17-12 Fri 18-12 week 50 Mon 07-12
+  - img
+  - text: Tue 08-12 Wed 09-12 Thu 10-12 Fri 11-12 week 49 Mon 30-11 Tue 01-12 Wed 02-12 Thu 03-12 Fri 04-12 week 48 Fri 27-11 week 47 week 46 week 45 week 44 week 43 week 42
+  - img
+  - text: Bandeja 104 Celosia Plumosa + Add product
+  - textbox: "5"
+  - textbox
+  - textbox
+  - textbox
+  - textbox
+  - textbox
+  - textbox
+  - textbox
+  - textbox
+  - textbox
+  - textbox
+  - text: — — — — — —
+  - button "Calculate total"
+  - button "Discard changes"
+  - button "Order"
+  - text: 1 location has unsaved changes
+  - button "Order all"
+  - text: All rights reserved. © Koppert 2026
+  - button "Digital Assistant":
+    - img
+    - text: Digital Assistant
+- dialog:
+  - img "warning"
+  - text: Order confirmation
+  - button:
+    - img
+  - text: To prevent you from accidentally ordering, please confirm you want to place the orders for all the new data you put into the Planner.
+  - separator
+  - button "Cancel"
+  - button "Confirm"
+```
+
+# Test source
+
+```ts
+  31  | async function selectLocationWithoutOrders(page: Page): Promise<string> {
+  32  |   // Location blocks render lazily as they scroll into view.
+  33  |   for (let i = 0; i < 15; i++) {
+  34  |     await page.mouse.wheel(0, 1000);
+  35  |     await page.waitForTimeout(300);
+  36  |   }
+  37  |   const emptyBlock = page.locator('section > div').filter({ hasText: /No order data/i }).first();
+  38  |   await expect(emptyBlock, 'Expected a location without orders').toBeVisible({ timeout: 10000 });
+  39  |   const locationName = await emptyBlock.locator('[title]').first().getAttribute('title');
+  40  |   expect(locationName, 'Expected the empty location to show its name').toBeTruthy();
+  41  |   await page.evaluate(() => window.scrollTo(0, 0));
+  42  | 
+  43  |   await plannerPage.setLocations(page, [locationName!], true);
+  44  |   await page.keyboard.press('Escape').catch(() => {});
+  45  |   await page.waitForTimeout(2000);
+  46  |   return locationName!;
+  47  | }
+  48  | 
+  49  | test.describe('Deleted Account', () => {
+  50  |   test('TC:19211 - Check that deleted user is automatically logged out from active web session', async ({
+  51  |     page,
+  52  |     browser,
+  53  |   }) => {
+  54  |     const corpnav = corpnavSelectors(page);
+  55  |     const user2 = await ordersPage.setupOrdererUserWithEnterpriseAccess(page, corpnav, DEFAULT_TEST_ENTERPRISE_ID);
+  56  | 
+  57  |     const planner = plannerSelectors(page);
+  58  | 
+  59  |     await page.goto(urls.orderPlanner);
+  60  |     await expect(planner.weekHeaders.first()).toBeVisible({ timeout: 30000 });
+  61  |     await page.waitForTimeout(3000);
+  62  | 
+  63  |     await plannerPage.switchOrderMode(page, true);
+  64  |     await expect(planner.weekHeaders.first()).toBeVisible({ timeout: 30000 });
+  65  |     await selectLocationWithoutOrders(page);
+  66  |     await plannerPage.ensureMatrixHasOrderableProducts(page);
+  67  | 
+  68  |     // Read-only cells (passed order deadline) keep the orderable-cell test id, and on an enterprise
+  69  |     // with many products they fill the first dozens of matches - filter them out in the selector
+  70  |     // instead of probing a capped slice of all cells.
+  71  |     const allInputs = planner.editableOrderableInputs;
+  72  |     const inputCount = await allInputs.count();
+  73  |     expect(inputCount, 'Expected to have orderable inputs on planner').toBeGreaterThan(0);
+  74  | 
+  75  |     let targetInput = null;
+  76  |     for (let i = 0; i < inputCount; i++) {
+  77  |       const input = allInputs.nth(i);
+  78  |       const value = await input.inputValue();
+  79  |       if (!value || value === '' || value === '0') {
+  80  |         targetInput = input;
+  81  |         break;
+  82  |       }
+  83  |     }
+  84  | 
+  85  |     expect(targetInput, 'Expected to find an editable input cell').not.toBeNull();
+  86  | 
+  87  |     await targetInput.scrollIntoViewIfNeeded();
+  88  |     await targetInput.click();
+  89  |     await targetInput.fill('5');
+  90  |     await targetInput.press('Enter');
+  91  | 
+  92  |     await plannerPage.waitForOrderProcessingToComplete(page);
+  93  | 
+  94  |     const orderButton = planner.orderButton;
+  95  |     await expect(orderButton, 'Order button should be enabled').toBeEnabled({ timeout: 10000 });
+  96  | 
+  97  |     // AGROCENTRO requires an order reference: without one, Order only opens "Order references are
+  98  |     // mandatory" and sends nothing, so the deleted session would never be put to the test. Fill the
+  99  |     // reference while the user still exists, and back out of the confirmation if it opens instead.
+  100 |     await orderButton.click();
+  101 |     if (!(await plannerPage.handleOrderReferencesMandatoryIfNeeded(page))) {
+  102 |       if (await planner.orderConfirmationModal.isVisible({ timeout: 5000 }).catch(() => false)) {
+  103 |         await planner.orderConfirmationModalCancelButton.click();
+  104 |         await expect(planner.orderConfirmationModal).toBeHidden({ timeout: 10000 });
+  105 |       }
+  106 |     }
+  107 |     await expect(orderButton, 'Order button should be enabled').toBeEnabled({ timeout: 10000 });
+  108 | 
+  109 |     const adminContext = await browser.newContext();
+  110 |     const adminPage = await adminContext.newPage();
+  111 |     await login({ page: adminPage, acceptCookies: false });
+  112 |     await ordersPage.deleteUserById(user2.userId);
+  113 |     await adminContext.close();
+  114 | 
+  115 |     await page.waitForTimeout(2000);
+  116 | 
+  117 |     // Deleting the account can bounce the session before the click lands - that is the behaviour under
+  118 |     // test, so a vanished Order button is a pass, not a failure. Only submit the order if it is still
+  119 |     // there, and let the redirect assertion below decide the outcome either way.
+  120 |     if (await orderButton.isVisible({ timeout: 5000 }).catch(() => false)) {
+  121 |       await orderButton.click().catch(() => {});
+  122 | 
+  123 |       const orderConfirmButton = planner.orderConfirmationModalConfirmButton;
+  124 |       const isConfirmModalVisible = await orderConfirmButton.isVisible({ timeout: 5000 }).catch(() => false);
+  125 |       if (isConfirmModalVisible) {
+  126 |         await orderConfirmButton.click();
+  127 |       }
+  128 |     }
+  129 | 
+  130 |     const loginPage = loginSelectors(page);
+> 131 |     await expect(loginPage.emailField, 'User 2 should be redirected to login page').toBeVisible({ timeout: 30000 });
+      |                                                                                     ^ Error: User 2 should be redirected to login page
+  132 |     await acceptCookiesUI(page);
+  133 | 
+  134 |     await loginPage.emailField.fill(user2.email);
+  135 |     await loginPage.passwordField.fill(user2.password);
+  136 |     await loginPage.loginBtn.click();
+  137 | 
+  138 |     await expect(loginPage.invalidCredentialsAlert, 'User 2 should not be able to login').toBeVisible({
+  139 |       timeout: 10000,
+  140 |     });
+  141 |   });
+  142 | 
+  143 |   test('TC:19212 - Check that deleted user is redirected to Login page after opening confirmation link from Email', async ({
+  144 |     page,
+  145 |     browser,
+  146 |   }) => {
+  147 |     const corpnav = corpnavSelectors(page);
+  148 |     const user2 = await ordersPage.setupOrdererUserWithEnterpriseAccess(page, corpnav, DEFAULT_TEST_ENTERPRISE_ID);
+  149 | 
+  150 |     const adminContext = await browser.newContext();
+  151 |     const adminPage = await adminContext.newPage();
+  152 |     await login({ page: adminPage, acceptCookies: false });
+  153 |     await ordersPage.deleteUserById(user2.userId);
+  154 |     await adminContext.close();
+  155 | 
+  156 |     await page.waitForTimeout(2000);
+  157 | 
+  158 |     // The order-confirmation and visit-report links in the notification e-mails are deep links into
+  159 |     // these two pages, so opening them as a deleted user is what steps 6-7 of the TC describe.
+  160 |     await expectLoggedOutAndOnLoginPage(page, urls.orderList, 'Order confirmation deep link');
+  161 |     await expectLoggedOutAndOnLoginPage(page, urls.visitReports, 'Visit report deep link');
+  162 |   });
+  163 | 
+  164 |   test('TC:19213 - Check that active user can successfully log in after deleted user attempted to log in', async ({
+  165 |     page,
+  166 |     browser,
+  167 |   }) => {
+  168 |     const corpnav = corpnavSelectors(page);
+  169 |     const user1 = await ordersPage.setupOrdererUserWithEnterpriseAccess(page, corpnav, DEFAULT_TEST_ENTERPRISE_ID);
+  170 | 
+  171 |     const user2Context = await browser.newContext();
+  172 |     const user2Page = await user2Context.newPage();
+  173 |     const user2Corpnav = corpnavSelectors(user2Page);
+  174 |     const user2 = await ordersPage.setupOrdererUserWithEnterpriseAccess(
+  175 |       user2Page,
+  176 |       user2Corpnav,
+  177 |       DEFAULT_TEST_ENTERPRISE_ID,
+  178 |     );
+  179 | 
+  180 |     const adminContext = await browser.newContext();
+  181 |     const adminPage = await adminContext.newPage();
+  182 |     await login({ page: adminPage, acceptCookies: false });
+  183 |     await ordersPage.deleteUserById(user1.userId);
+  184 |     await adminContext.close();
+  185 | 
+  186 |     await expectLoggedOutAndOnLoginPage(page, urls.orderList, 'Deleted user 1');
+  187 | 
+  188 |     const loginPage = loginSelectors(page);
+  189 |     await loginPage.emailField.fill(user1.email);
+  190 |     await loginPage.passwordField.fill(user1.password);
+  191 |     await loginPage.loginBtn.click();
+  192 | 
+  193 |     await expect(loginPage.invalidCredentialsAlert, 'Deleted user 1 should not be able to login').toBeVisible({
+  194 |       timeout: 10000,
+  195 |     });
+  196 | 
+  197 |     await page.waitForTimeout(1000);
+  198 | 
+  199 |     await loginPage.emailField.fill(user2.email);
+  200 |     await loginPage.passwordField.fill(user2.password);
+  201 |     await loginPage.loginBtn.click();
+  202 | 
+  203 |     await expect(corpnav.userIcon, 'Active user 2 should be able to login successfully').toBeVisible({
+  204 |       timeout: 20000,
+  205 |     });
+  206 | 
+  207 |     const currentUrl = page.url();
+  208 |     expect(currentUrl, 'User 2 should be logged in to the app').not.toContain('/login');
+  209 | 
+  210 |     await user2Context.close();
+  211 |   });
+  212 | 
+  213 |   test('TC:19214 - Check that deleted user is redirected to Login page after opening direct URLs to the Web app', async ({
+  214 |     page,
+  215 |     browser,
+  216 |   }) => {
+  217 |     const corpnav = corpnavSelectors(page);
+  218 |     const user2 = await ordersPage.setupOrdererUserWithEnterpriseAccess(page, corpnav, DEFAULT_TEST_ENTERPRISE_ID);
+  219 | 
+  220 |     const adminContext = await browser.newContext();
+  221 |     const adminPage = await adminContext.newPage();
+  222 |     await login({ page: adminPage, acceptCookies: false });
+  223 |     await ordersPage.deleteUserById(user2.userId);
+  224 |     await adminContext.close();
+  225 | 
+  226 |     await page.waitForTimeout(2000);
+  227 | 
+  228 |     await expectLoggedOutAndOnLoginPage(page, urls.orderList, 'Direct URL to Orders');
+  229 |     await expectLoggedOutAndOnLoginPage(page, urls.team, 'Direct URL to Team');
+  230 |   });
+  231 | });
+```

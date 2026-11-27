@@ -1,0 +1,290 @@
+# Instructions
+
+- Following Playwright test failed.
+- Explain why, be concise, respect Playwright best practices.
+- Provide a snippet of code with the fix, if possible.
+
+# Test info
+
+- Name: planner_2.spec.ts >> Planner - Week Navigation >> TC:13405 - [Search + mode ON/OFF] Check the Search for Numbers in product name on two locations
+- Location: playwright/specs/planner_2.spec.ts:1711:7
+
+# Error details
+
+```
+Error: Expected products with 1 to still be displayed after selecting locations
+
+expect(received).toBeGreaterThan(expected)
+
+Expected: > 0
+Received:   0
+```
+
+# Page snapshot
+
+```yaml
+- generic [active] [ref=e1]:
+  - generic [ref=e3]:
+    - generic [ref=e4]: You're on DEVELOPMENT OR STAGE
+    - generic [ref=e6]:
+      - img [ref=e7] [cursor=pointer]
+      - generic [ref=e14]:
+        - generic [ref=e15]: Plkw P. van Geest Maasland B.V.
+        - generic [ref=e16] [cursor=pointer]:
+          - img "user" [ref=e17]:
+            - img [ref=e18]
+          - text: Playwright DudeoAFnhPd
+    - generic [ref=e21]:
+      - generic [ref=e22]:
+        - heading "Hi, Playwright DudeoAFnhPd!" [level=1] [ref=e23]
+        - strong [ref=e25]: Welcome to Koppert One
+        - generic [ref=e26]:
+          - heading "Need help ?" [level=5] [ref=e27]
+          - separator [ref=e28]
+          - generic [ref=e29]:
+            - img [ref=e31]
+            - generic [ref=e32]:
+              - heading "Koppert One support" [level=5] [ref=e33]
+              - link "mail support@koppert.one" [ref=e35] [cursor=pointer]:
+                - /url: mailto:support@koppert.one
+                - img "mail" [ref=e36]:
+                  - img [ref=e37]
+                - text: support@koppert.one
+                - img [ref=e39]
+              - link "phone +31 1 051 405 17" [ref=e43] [cursor=pointer]:
+                - /url: tel:+31105140517
+                - img "phone" [ref=e44]:
+                  - img [ref=e45]
+                - text: +31 1 051 405 17
+                - img [ref=e47]
+      - generic [ref=e51]:
+        - generic [ref=e52] [cursor=pointer]:
+          - img [ref=e54]
+          - generic [ref=e57]: Order
+          - generic [ref=e59]: View, place and manage orders
+          - img [ref=e61]
+        - generic [ref=e63] [cursor=pointer]:
+          - img [ref=e65]
+          - generic [ref=e69]: Knowledge
+          - generic [ref=e71]: Explore chemical compatibility with Koppert's natural enemies and bumblebees
+          - img [ref=e73]
+        - generic [ref=e75] [cursor=pointer]:
+          - img [ref=e77]
+          - generic [ref=e79]: Scout
+          - generic [ref=e81]: Discover trends in pest development and beneficial insect counts to know when to act
+          - img [ref=e83]
+        - generic [ref=e85] [cursor=pointer]:
+          - img [ref=e87]
+          - generic [ref=e89]: Organization
+          - generic [ref=e91]: Manage team members and their access to locations
+          - img [ref=e93]
+  - button "Feedback" [ref=e95] [cursor=pointer]:
+    - generic [ref=e97]: Feedback
+```
+
+# Test source
+
+```ts
+  1675 |     await page.keyboard.press('Escape');
+  1676 |     await expect(planner.locationsDropdownPanel).toBeHidden({ timeout: 10000 });
+  1677 | 
+  1678 |     await expect(planner.selectLocationMessage).toBeVisible({ timeout: 10000 });
+  1679 | 
+  1680 |     const searchValueAfterUncheck = await planner.productsSearchInput.inputValue();
+  1681 |     expect(searchValueAfterUncheck, 'Expected XYZNONEXISTENTPRODUCT123 to still be in search').toBe(
+  1682 |       'XYZNONEXISTENTPRODUCT123',
+  1683 |     );
+  1684 | 
+  1685 |     await planner.productsSearchInput.fill(searchLetter);
+  1686 | 
+  1687 |     await plannerPage.switchOrderMode(page, true);
+  1688 | 
+  1689 |     await plannerPage.openLocationsDropdown(page);
+  1690 |     await plannerPage.setLocations(page, [location1, location2], true);
+  1691 |     await page.keyboard.press('Escape');
+  1692 |     await expect(planner.locationsDropdownPanel).toBeHidden({ timeout: 10000 });
+  1693 | 
+  1694 |     await planner.productsSearchInput.fill(searchLetter);
+  1695 | 
+  1696 |     await expect(planner.highlightedMatches.first()).toBeVisible({ timeout: 10000 });
+  1697 | 
+  1698 |     const highlightedAfterModeSwitch = await planner.highlightedMatches.count();
+  1699 |     expect(
+  1700 |       highlightedAfterModeSwitch,
+  1701 |       `Expected ${searchLetter} to be highlighted after switching back to Order mode ON`,
+  1702 |     ).toBeGreaterThan(0);
+  1703 | 
+  1704 |     const productRowsFinal = await productRows.count();
+  1705 |     expect(
+  1706 |       productRowsFinal,
+  1707 |       `Expected products with ${searchLetter} for final verification after mode switch`,
+  1708 |     ).toBeGreaterThan(0);
+  1709 |   });
+  1710 | 
+  1711 |   test(`TC:13405 - [Search + mode ON/OFF] Check the Search for Numbers in product name on two locations`, async ({
+  1712 |     page,
+  1713 |   }) => {
+  1714 |     const user = await ordersPage.setupOrdererUserWithEnterpriseAccess(page, corpnav, ENTERPRISE_WITH_DATA_ID);
+  1715 |     userIdsToDelete.push(user.userId);
+  1716 | 
+  1717 |     await page.goto(urls.orderPlanner);
+  1718 |     await plannerPage.switchOrderMode(page, true);
+  1719 |     await plannerPage.ensureMatrixHasOrderableProducts(page);
+  1720 |     await expect(planner.weekHeaders.first()).toBeVisible({ timeout: 30000 });
+  1721 | 
+  1722 |     await plannerPage.openLocationsDropdown(page);
+  1723 | 
+  1724 |     const allLocationOptions = planner.locationsOptionsExcludingSelectAll;
+  1725 |     const locationTexts = await allLocationOptions.allTextContents();
+  1726 |     const cleanedLocationNames = locationTexts
+  1727 |       .map((text) => text.replace(/✓/g, '').trim())
+  1728 |       .filter((name) => name && !name.toLowerCase().includes('select all'));
+  1729 | 
+  1730 |     expect(cleanedLocationNames.length, 'Expected at least 2 locations for this enterprise').toBeGreaterThanOrEqual(2);
+  1731 | 
+  1732 |     const location1 = cleanedLocationNames[0];
+  1733 |     const location2 = cleanedLocationNames[1];
+  1734 |     const location3 = cleanedLocationNames.length > 2 ? cleanedLocationNames[2] : null;
+  1735 | 
+  1736 |     await page.keyboard.press('Escape');
+  1737 |     await expect(planner.locationsDropdownPanel).toBeHidden({ timeout: 10000 });
+  1738 |     // The search is narrowed to location1 and location2 below, so the product to search for must be in location1:
+  1739 |     // products elsewhere in the matrix would leave the narrowed planner with nothing to match.
+  1740 |     await plannerPage.ensureLocationHasOrderableProducts(page, location1);
+  1741 | 
+  1742 |     const productRows = planner.productRows;
+  1743 |     const initialProductCount = await productRows.count();
+  1744 |     expect(initialProductCount, 'Expected at least one product to be available').toBeGreaterThan(0);
+  1745 | 
+  1746 |     // Take the digits from the product names themselves, so the search is guaranteed to match at
+  1747 |     // least the product it came from. Row text also carries cell quantities, which are not searchable.
+  1748 |     const productNames = await getProductNamesFromRows(
+  1749 |       20,
+  1750 |       plannerPage.locationBlock(page, location1).locator('[data-testid^="row:"]'),
+  1751 |     );
+  1752 |     const numbersInNames = productNames.flatMap((name) => name.match(/\d+/g) || []);
+  1753 |     const numberSequence =
+  1754 |       numbersInNames.find((match) => match.length >= 4) || numbersInNames.sort((a, b) => b.length - a.length)[0] || '';
+  1755 |     expect(numberSequence, 'Expected a product name containing a digit to search for').toBeTruthy();
+  1756 | 
+  1757 |     const singleDigit = numberSequence.charAt(0);
+  1758 |     await planner.productsSearchInput.fill(singleDigit);
+  1759 | 
+  1760 |     const productRowsWithSingleDigit = await productRows.count();
+  1761 |     expect(
+  1762 |       productRowsWithSingleDigit,
+  1763 |       `Expected products with ${singleDigit} to be displayed in the list`,
+  1764 |     ).toBeGreaterThan(0);
+  1765 | 
+  1766 |     await plannerPage.openLocationsDropdown(page);
+  1767 |     await plannerPage.setLocations(page, [location1, location2], true);
+  1768 |     await page.keyboard.press('Escape');
+  1769 |     await expect(planner.locationsDropdownPanel).toBeHidden({ timeout: 10000 });
+  1770 | 
+  1771 |     const productRowsAfterLocations = await productRows.count();
+  1772 |     expect(
+  1773 |       productRowsAfterLocations,
+  1774 |       `Expected products with ${singleDigit} to still be displayed after selecting locations`,
+> 1775 |     ).toBeGreaterThan(0);
+       |       ^ Error: Expected products with 1 to still be displayed after selecting locations
+  1776 | 
+  1777 |     if (numberSequence.length >= 3) {
+  1778 |       const threeDigits = numberSequence.substring(0, 3);
+  1779 |       await planner.productsSearchInput.fill(threeDigits);
+  1780 | 
+  1781 |       const productRowsWith3Digits = await productRows.count();
+  1782 |       expect(productRowsWith3Digits, `Expected products matching ${threeDigits}`).toBeGreaterThanOrEqual(0);
+  1783 |     }
+  1784 | 
+  1785 |     if (numberSequence.length >= 4) {
+  1786 |       const fourDigits = numberSequence.substring(0, 4);
+  1787 |       await planner.productsSearchInput.fill(fourDigits);
+  1788 | 
+  1789 |       const productRowsWith4Digits = await productRows.count();
+  1790 |       expect(productRowsWith4Digits, `Expected products matching ${fourDigits}`).toBeGreaterThanOrEqual(0);
+  1791 |     }
+  1792 | 
+  1793 |     await planner.productsSearchInput.fill('99999999');
+  1794 |     await expect(planner.nothingMatchesMessage).toBeVisible({ timeout: 10000 });
+  1795 | 
+  1796 |     const searchValue = await planner.productsSearchInput.inputValue();
+  1797 |     expect(searchValue, 'Expected 99999999 to still be displayed in search input').toBe('99999999');
+  1798 | 
+  1799 |     await plannerPage.switchOrderMode(page, false, { acceptTermsIfModal: false, assertFinalState: true });
+  1800 | 
+  1801 |     await plannerPage.openLocationsDropdown(page);
+  1802 |     await plannerPage.setLocations(page, [location1, location2], false);
+  1803 |     await page.keyboard.press('Escape');
+  1804 |     await expect(planner.locationsDropdownPanel).toBeHidden({ timeout: 10000 });
+  1805 | 
+  1806 |     await expect(planner.selectLocationMessage).toBeVisible({ timeout: 10000 });
+  1807 | 
+  1808 |     const searchValueAfterUncheck = await planner.productsSearchInput.inputValue();
+  1809 |     expect(searchValueAfterUncheck, 'Expected 99999999 to still be in search').toBe('99999999');
+  1810 | 
+  1811 |     if (location3) {
+  1812 |       await plannerPage.openLocationsDropdown(page);
+  1813 |       await plannerPage.setLocations(page, [location3], true);
+  1814 |       await page.keyboard.press('Escape');
+  1815 |       await expect(planner.locationsDropdownPanel).toBeHidden({ timeout: 10000 });
+  1816 |     }
+  1817 | 
+  1818 |     await plannerPage.switchOrderMode(page, true);
+  1819 | 
+  1820 |     await plannerPage.openLocationsDropdown(page);
+  1821 |     await plannerPage.setLocations(page, [location1, location2], true);
+  1822 |     await page.keyboard.press('Escape');
+  1823 |     await expect(planner.locationsDropdownPanel).toBeHidden({ timeout: 10000 });
+  1824 | 
+  1825 |     await planner.productsSearchInput.clear();
+  1826 |     await expect(productRows.first()).toBeVisible({ timeout: 10000 });
+  1827 | 
+  1828 |     const productRowsBeforeFinalSearch = await productRows.count();
+  1829 |     expect(productRowsBeforeFinalSearch, 'Expected products to be displayed after clearing search').toBeGreaterThan(0);
+  1830 | 
+  1831 |     await planner.productsSearchInput.fill(singleDigit);
+  1832 | 
+  1833 |     const productRowsFinal = await productRows.count();
+  1834 |     if (productRowsFinal === 0) {
+  1835 |       await expect(planner.nothingMatchesMessage).toBeVisible({ timeout: 10000 });
+  1836 |     } else {
+  1837 |       expect(
+  1838 |         productRowsFinal,
+  1839 |         `Expected products with ${singleDigit} for final verification after mode switch`,
+  1840 |       ).toBeGreaterThan(0);
+  1841 |     }
+  1842 |   });
+  1843 | 
+  1844 |   test(`TC:13406 - [Search + mode ON/OFF] Check the Search for Special characters`, async ({ page }) => {
+  1845 |     const user = await ordersPage.setupOrdererUserWithEnterpriseAccess(page, corpnav, ENTERPRISE_WITH_DATA_ID);
+  1846 |     userIdsToDelete.push(user.userId);
+  1847 | 
+  1848 |     await page.goto(urls.orderPlanner);
+  1849 |     await plannerPage.switchOrderMode(page, true);
+  1850 |     await plannerPage.ensureMatrixHasProducts(page);
+  1851 |     await expect(planner.weekHeaders.first()).toBeVisible({ timeout: 30000 });
+  1852 | 
+  1853 |     const productRows = planner.productRows;
+  1854 |     const initialProductCount = await productRows.count();
+  1855 |     expect(initialProductCount, 'Expected at least one product to be available').toBeGreaterThan(0);
+  1856 | 
+  1857 |     const specialCharsToFind = ['-', '+', '(', ')', '®', '™', '°', '/', '.', ',', '&', '%'];
+  1858 |     // Read the characters off the product names; row text also contains cell values, which the
+  1859 |     // search does not look at.
+  1860 |     const productNames = await getProductNamesFromRows(30);
+  1861 |     const specialCharacter = specialCharsToFind.find((char) => productNames.some((name) => name.includes(char))) || '';
+  1862 | 
+  1863 |     if (specialCharacter) {
+  1864 |       await planner.productsSearchInput.fill(specialCharacter);
+  1865 | 
+  1866 |       const productRowsWithSpecialChar = await productRows.count();
+  1867 |       expect(
+  1868 |         productRowsWithSpecialChar,
+  1869 |         `Expected products with special character "${specialCharacter}" to be displayed in the list`,
+  1870 |       ).toBeGreaterThan(0);
+  1871 | 
+  1872 |       await planner.productsSearchInput.clear();
+  1873 |     }
+  1874 | 
+  1875 |     await planner.productsSearchInput.fill('!@#$%^&*()_+<>?:"{}=][;\'\\.');
+```

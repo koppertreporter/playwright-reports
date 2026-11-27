@@ -1,0 +1,319 @@
+# Instructions
+
+- Following Playwright test failed.
+- Explain why, be concise, respect Playwright best practices.
+- Provide a snippet of code with the fix, if possible.
+
+# Test info
+
+- Name: searchInSelectors.spec.ts >> Search in Selectors >> TC:19687 - Check the Search behaviour when starting typing in the Search field
+- Location: playwright/specs/searchInSelectors.spec.ts:164:7
+
+# Error details
+
+```
+Error: page.goto: net::ERR_NAME_NOT_RESOLVED at https://stage.koppert.one/
+Call log:
+  - navigating to "https://stage.koppert.one/", waiting until "load"
+
+```
+
+# Page snapshot
+
+```yaml
+- generic [ref=e1]:
+  - generic [ref=e3]:
+    - generic [ref=e4]: You're on DEVELOPMENT OR STAGE
+    - generic [ref=e6]:
+      - generic [ref=e10]:
+        - img [ref=e11]
+        - heading [level=4]
+      - generic [ref=e20]:
+        - generic [ref=e21]:
+          - strong [ref=e23]: Login
+          - generic [ref=e25]:
+            - generic "Email" [ref=e27]
+            - textbox "Email" [ref=e31]
+          - generic [ref=e32]:
+            - img "info-circle" [ref=e33]:
+              - img [ref=e34]
+            - generic [ref=e37]:
+              - text: SSO login is temporarily unavailable.
+              - link "Set your password here" [ref=e38] [cursor=pointer]:
+                - /url: /forgot-password
+              - text: to log in using your email address and password.
+          - generic [ref=e40]:
+            - generic "Password" [ref=e42]
+            - generic [ref=e46]:
+              - textbox "Password" [ref=e47]
+              - img "eye-invisible" [ref=e49] [cursor=pointer]:
+                - img [ref=e50]
+          - generic [ref=e58]:
+            - button "Login" [ref=e59] [cursor=pointer]:
+              - generic [ref=e60]: Login
+            - link "Forgot password" [ref=e61] [cursor=pointer]:
+              - /url: /forgot-password
+        - separator [ref=e62]
+        - generic [ref=e63]: Don't have an account yet?Create an account
+        - separator [ref=e64]
+        - generic [ref=e65]:
+          - text: New to Koppert One?
+          - link "More info" [ref=e66] [cursor=pointer]:
+            - /url: https://www.koppert.com/koppert-one/
+            - text: More info
+            - img [ref=e67]
+        - separator [ref=e70]
+        - generic [ref=e71]:
+          - generic [ref=e72]: All rights reserved. © Koppert 2026
+          - generic [ref=e73]:
+            - link "Privacy statement" [ref=e74] [cursor=pointer]:
+              - /url: https://stage.koppert.one/assets/statements/privacy-statement.pdf
+            - text: "|"
+            - link "Terms of Use" [ref=e75] [cursor=pointer]:
+              - /url: https://stage.koppert.one/assets/statements/terms-of-use.pdf
+  - generic [active]:
+    - generic:
+      - generic:
+        - button "Open Privacy Settings" [ref=e76] [cursor=pointer]:
+          - img [ref=e78]
+        - dialog "Privacy Settings" [ref=e83]:
+          - generic [ref=e87]:
+            - generic [ref=e89]:
+              - img [ref=e92]
+              - heading "Privacy Settings" [level=1] [ref=e95]
+              - generic [ref=e98]: This site uses third-party website tracking technologies to provide and continually improve our services, and to display advertisements according to users' interests. I agree and may revoke or change my consent at any time with effect for the future.
+              - generic [ref=e99]:
+                - generic [ref=e100]:
+                  - link "Privacy Policy" [ref=e101] [cursor=pointer]:
+                    - /url: https://www.koppert.com/privacy-statement/
+                  - link "Cookie Statement" [ref=e102] [cursor=pointer]:
+                    - /url: https://www.koppert.com/cookie-statement/
+                - button "More Information" [ref=e104] [cursor=pointer]:
+                  - generic [ref=e105]: More Information
+            - generic [ref=e107]:
+              - generic [ref=e110]:
+                - generic [ref=e111] [cursor=pointer]: Marketing
+                - switch "Marketing" [ref=e112] [cursor=pointer]:
+                  - img [ref=e113]
+              - generic [ref=e122]:
+                - generic [ref=e123] [cursor=pointer]: Functional
+                - switch "Functional" [ref=e124] [cursor=pointer]:
+                  - img [ref=e125]
+              - generic [ref=e134]:
+                - generic [ref=e135] [cursor=pointer]: Essential
+                - switch "Essential" [checked] [disabled] [ref=e136] [cursor=pointer]:
+                  - img [ref=e137]
+          - generic [ref=e145]:
+            - generic [ref=e147]:
+              - button "Save Settings" [ref=e148] [cursor=pointer]
+              - button "Accept All" [ref=e149] [cursor=pointer]
+            - link "Powered by Usercentrics Consent Management" [ref=e151] [cursor=pointer]:
+              - /url: https://usercentrics.com/consent-management-platform-powered-by-usercentrics/?utm_source=banner_uc&utm_medium=referral&utm_content=v2
+```
+
+# Test source
+
+```ts
+  11  |   accessToken: string;
+  12  |   refreshToken: string;
+  13  |   expiresIn: number;
+  14  |   expires: string;
+  15  | }
+  16  | // If you see blank screen after login, it is likely due to incorrect roles set. Look at createUser()
+  17  | export async function login({
+  18  |   page,
+  19  |   acceptCookies = true,
+  20  |   email,
+  21  |   password,
+  22  |   user,
+  23  |   skipUI = false,
+  24  | }: {
+  25  |   page: Page;
+  26  |   acceptCookies?: boolean;
+  27  |   email?: string;
+  28  |   password?: string;
+  29  |   user?: { email: string; password: string; userId?: string; enterprises?: Array<{ id: string }> };
+  30  |   skipUI?: boolean;
+  31  | }): Promise<{
+  32  |   accessToken: string;
+  33  |   refreshToken: string;
+  34  | }> {
+  35  |   // If user object is provided, use it; otherwise use email/password (backward compatible)
+  36  |   const loginEmail = user?.email || email || process.env.SUPERUSER_EMAIL;
+  37  |   const loginPassword = user?.password || password || process.env.SUPERUSER_PASSWORD;
+  38  |   const signInUrl = process.env.apiURL + urls.api.signIn;
+  39  | 
+  40  |   // Temporary workaround for bug where login fails with 401 immediately after activation
+  41  |   // but succeeds after a few seconds: https://dev.azure.com/projectdisco/Digital-Services/_workitems/edit/19092
+  42  |   let signInResponse;
+  43  |   const maxRetries = 20; // 20 retries * 3 seconds = 60 seconds timeout
+  44  |   // Sign-in regularly stalls for minutes at a time on stage (bug 24425). The default 30s action
+  45  |   // timeout turned every such stall into a hard failure in whichever setup helper happened to be
+  46  |   // logging in, so give the request its own budget and treat a stall the same way a 401 is treated -
+  47  |   // retry it. This is a workaround for the latency, not a fix.
+  48  |   // https://dev.azure.com/projectdisco/Digital-Services/_workitems/edit/24425/
+  49  |   const signInTimeout = 60_000;
+  50  | 
+  51  |   for (let loginRetries = 0; loginRetries <= maxRetries; loginRetries++) {
+  52  |     try {
+  53  |       signInResponse = await page.request.post(signInUrl, {
+  54  |         headers: {
+  55  |           'Content-Type': 'application/json',
+  56  |           Accept: 'application/json',
+  57  |           Origin: process.env.baseURL,
+  58  |           Referer: process.env.baseURL + '/',
+  59  |         },
+  60  |         data: {
+  61  |           email: loginEmail,
+  62  |           password: loginPassword,
+  63  |         },
+  64  |         timeout: signInTimeout,
+  65  |       });
+  66  |     } catch (error) {
+  67  |       if (loginRetries < maxRetries) {
+  68  |         console.log(
+  69  |           `Login request failed (${error.message.split('\n')[0]}), retry ${loginRetries + 1}/${maxRetries}...`,
+  70  |         );
+  71  |         await page.waitForTimeout(3000);
+  72  |         continue;
+  73  |       }
+  74  |       throw error;
+  75  |     }
+  76  | 
+  77  |     if (signInResponse.status() === 401 && loginRetries < maxRetries) {
+  78  |       console.log(`Login returned 401, waiting 3 seconds before retry ${loginRetries + 1}/${maxRetries}...`);
+  79  |       await page.waitForTimeout(3000);
+  80  |       continue;
+  81  |     }
+  82  | 
+  83  |     if (signInResponse.status() === 401) {
+  84  |       throw new Error(
+  85  |         `Login failed: Received 401 Unauthorized after ${loginRetries + 1} attempts over ${(loginRetries + 1) * 3} seconds. Email: ${loginEmail}`,
+  86  |       );
+  87  |     }
+  88  | 
+  89  |     break;
+  90  |   }
+  91  | 
+  92  |   const loginData = await signInResponse.json();
+  93  | 
+  94  |   if (!loginData.accessToken) {
+  95  |     throw new Error(
+  96  |       `Login failed: No access token received. Status: ${signInResponse.status()} Response: ${JSON.stringify(loginData)}`,
+  97  |     );
+  98  |   }
+  99  | 
+  100 |   accessToken = loginData.accessToken;
+  101 |   refreshToken = loginData.refreshToken;
+  102 | 
+  103 |   if (!skipUI) {
+  104 |     // Navigate first - ALWAYS navigate to ensure we have a page context
+  105 |     if (acceptCookies) {
+  106 |       await gotoHomepageAndAcceptCookies(page);
+  107 |       // await page.goto(urls.homepage + '?cookies=accept', { waitUntil: 'load' });
+  108 |       // const general = generalSelectors(page); // ensure selector is available
+  109 |       // await expect(general.acceptCookiesBtn).not.toBeVisible();
+  110 |     } else {
+> 111 |       await page.goto(urls.homepage, { waitUntil: 'load' });
+      |                  ^ Error: page.goto: net::ERR_NAME_NOT_RESOLVED at https://stage.koppert.one/
+  112 |       await page.waitForLoadState('domcontentloaded', { timeout: 5000 }).catch(() => {
+  113 |         console.log('Page did not reach DOMContentLoaded within 5s, proceeding anyway');
+  114 |       });
+  115 |     }
+  116 | 
+  117 |     // Wait for network to be idle to ensure page is fully stable before setting tokens
+  118 |     // This prevents race conditions where localStorage operations might fail
+  119 |     await page.waitForLoadState('networkidle', { timeout: 3000 }).catch(() => {
+  120 |       console.log('Network not idle after 3s, proceeding anyway');
+  121 |     });
+  122 | 
+  123 |     // Set tokens in localStorage directly
+  124 |     let retries = 3;
+  125 |     while (retries > 0) {
+  126 |       try {
+  127 |         await page.evaluate(
+  128 |           (authData) => {
+  129 |             localStorage.setItem(
+  130 |               'stores-portal/auth',
+  131 |               JSON.stringify({
+  132 |                 state: {
+  133 |                   auth: {
+  134 |                     accessToken: authData.accessToken,
+  135 |                     refreshToken: authData.refreshToken,
+  136 |                     expiresIn: authData.expiresIn,
+  137 |                   },
+  138 |                 },
+  139 |                 version: 3,
+  140 |               }),
+  141 |             );
+  142 |           },
+  143 |           {
+  144 |             accessToken: loginData.accessToken,
+  145 |             refreshToken: loginData.refreshToken,
+  146 |             expiresIn: loginData.expiresIn,
+  147 |           },
+  148 |         );
+  149 |         break; // Success, exit retry loop
+  150 |       } catch (error) {
+  151 |         retries--;
+  152 |         if (retries === 0) {
+  153 |           console.error('Failed to set tokens in localStorage after 3 attempts:', error.message);
+  154 |           throw error;
+  155 |         }
+  156 |         console.log(`localStorage set failed, retrying... (${retries} attempts left)`);
+  157 |         await page.waitForTimeout(500);
+  158 |       }
+  159 |     }
+  160 | 
+  161 |     // If user object is provided and has enterprises, automatically set enterprise selector
+  162 |     if (user?.enterprises && user.enterprises.length > 0) {
+  163 |       const enterpriseId = user.enterprises[0].id;
+  164 |       await setEnterpriseSelectorInLocalStorage(page, enterpriseId);
+  165 |     }
+  166 | 
+  167 |     // After setting tokens in localStorage, React needs time to read them and initialize auth state
+  168 |     // React does this synchronously during its next render/effect cycle, which happens quickly
+  169 |     // A short wait (1s) is sufficient and more reliable than trying to detect React's internal state
+  170 |     // This is a pragmatic solution that balances speed with reliability
+  171 |     await page.waitForTimeout(1000);
+  172 |   }
+  173 | 
+  174 |   return loginData;
+  175 | }
+  176 | 
+  177 | export async function acceptCookiesUI(page: Page): Promise<void> {
+  178 |   const general = generalSelectors(page);
+  179 |   await test.step('Accept cookies', async () => {
+  180 |     try {
+  181 |       await general.acceptCookiesBtn.waitFor({ state: 'visible', timeout: 5000 });
+  182 |       await general.acceptCookiesBtn.click();
+  183 |       await general.acceptCookiesBtn.waitFor({ state: 'hidden', timeout: 5000 });
+  184 |     } catch (e) {
+  185 |       console.log('Accept cookies button not found or not visible, ignoring.');
+  186 |     }
+  187 |   });
+  188 | }
+  189 | 
+  190 | export function getRefreshToken() {
+  191 |   if (!refreshToken) {
+  192 |     throw new Error('refreshToken token is not initialized. Please perform login first');
+  193 |   }
+  194 |   return refreshToken;
+  195 | }
+  196 | 
+  197 | export function getAccessToken(): string {
+  198 |   if (!accessToken) {
+  199 |     throw new Error('accessToken is not initialized. Please perform login first');
+  200 |   }
+  201 |   return accessToken;
+  202 | }
+  203 | 
+  204 | export function setAccessToken(token: string): void {
+  205 |   accessToken = token;
+  206 | }
+  207 | 
+  208 | export function setRefreshToken(token: string): void {
+  209 |   refreshToken = token;
+  210 | }
+  211 | 
+```

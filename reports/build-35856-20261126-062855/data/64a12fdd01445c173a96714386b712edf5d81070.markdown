@@ -1,0 +1,311 @@
+# Instructions
+
+- Following Playwright test failed.
+- Explain why, be concise, respect Playwright best practices.
+- Provide a snippet of code with the fix, if possible.
+
+# Test info
+
+- Name: lagBuster.spec.ts >> Planner - Lag Buster >> TC:14342 - Check 'Your changes were discarded' modal after order Creating + Order Details for the DIFFERENT locations
+- Location: playwright/specs/lagBuster.spec.ts:1246:7
+
+# Error details
+
+```
+TimeoutError: locator.click: Timeout 30000ms exceeded.
+Call log:
+  - waiting for locator('[data-testid="locations-multiselect"]').first()
+    - locator resolved to <div data-testid="locations-multiselect" class="rc-select kp-select rc-select-multiple rc-select-show-arrow">…</div>
+  - attempting click action
+    2 × waiting for element to be visible, enabled and stable
+      - element is visible, enabled and stable
+      - scrolling into view if needed
+      - done scrolling
+      - <div tabindex="-1" class="ant-modal-wrap">…</div> from <div>…</div> subtree intercepts pointer events
+    - retrying click action
+    - waiting 20ms
+    2 × waiting for element to be visible, enabled and stable
+      - element is visible, enabled and stable
+      - scrolling into view if needed
+      - done scrolling
+      - <div tabindex="-1" class="ant-modal-wrap">…</div> from <div>…</div> subtree intercepts pointer events
+    - retrying click action
+      - waiting 100ms
+    56 × waiting for element to be visible, enabled and stable
+       - element is visible, enabled and stable
+       - scrolling into view if needed
+       - done scrolling
+       - <div tabindex="-1" class="ant-modal-wrap">…</div> from <div>…</div> subtree intercepts pointer events
+     - retrying click action
+       - waiting 500ms
+
+```
+
+# Page snapshot
+
+```yaml
+- generic [active] [ref=e1]:
+  - generic [ref=e3]:
+    - generic [ref=e4]: You're on DEVELOPMENT OR STAGE
+    - generic [ref=e6]:
+      - img [ref=e7] [cursor=pointer]
+      - generic [ref=e14]:
+        - generic [ref=e15]: Plkw P. van Geest Maasland B.V.
+        - generic [ref=e16] [cursor=pointer]:
+          - img "user" [ref=e17]:
+            - img [ref=e18]
+          - text: Playwright DudecBLjGLa
+    - generic [ref=e21]:
+      - generic [ref=e22]:
+        - heading "Hi, Playwright DudecBLjGLa!" [level=1] [ref=e23]
+        - strong [ref=e25]: Welcome to Koppert One
+        - generic [ref=e26]:
+          - heading "Need help ?" [level=5] [ref=e27]
+          - separator [ref=e28]
+          - generic [ref=e29]:
+            - img [ref=e31]
+            - generic [ref=e32]:
+              - heading "Koppert One support" [level=5] [ref=e33]
+              - link "mail support@koppert.one" [ref=e35] [cursor=pointer]:
+                - /url: mailto:support@koppert.one
+                - img "mail" [ref=e36]:
+                  - img [ref=e37]
+                - text: support@koppert.one
+                - img [ref=e39]
+              - link "phone +31 1 051 405 17" [ref=e43] [cursor=pointer]:
+                - /url: tel:+31105140517
+                - img "phone" [ref=e44]:
+                  - img [ref=e45]
+                - text: +31 1 051 405 17
+                - img [ref=e47]
+      - generic [ref=e51]:
+        - generic [ref=e52] [cursor=pointer]:
+          - img [ref=e54]
+          - generic [ref=e57]: Order
+          - generic [ref=e59]: View, place and manage orders
+          - img [ref=e61]
+        - generic [ref=e63] [cursor=pointer]:
+          - img [ref=e65]
+          - generic [ref=e69]: Knowledge
+          - generic [ref=e71]: Explore chemical compatibility with Koppert's natural enemies and bumblebees
+          - img [ref=e73]
+        - generic [ref=e75] [cursor=pointer]:
+          - img [ref=e77]
+          - generic [ref=e79]: Scout
+          - generic [ref=e81]: Discover trends in pest development and beneficial insect counts to know when to act
+          - img [ref=e83]
+        - generic [ref=e85] [cursor=pointer]:
+          - img [ref=e87]
+          - generic [ref=e89]: Organization
+          - generic [ref=e91]: Manage team members and their access to locations
+          - img [ref=e93]
+  - button "Feedback" [ref=e95] [cursor=pointer]:
+    - generic [ref=e97]: Feedback
+```
+
+# Test source
+
+```ts
+  103 | ) {
+  104 |   const planner = plannerSelectors(page);
+  105 | 
+  106 |   await expect(input).toBeVisible({ timeout: 15000 });
+  107 |   await input.click();
+  108 |   await expect(planner.weekPickerCalendar).toBeVisible({ timeout: 10000 });
+  109 | 
+  110 |   const targetMonth = target.getUTCMonth();
+  111 |   const targetYear = target.getUTCFullYear();
+  112 |   const targetDay = target.getUTCDate();
+  113 | 
+  114 |   for (let attempt = 0; attempt < 36; attempt++) {
+  115 |     const headerText = (await planner.weekPickerCalendarHeaderView.textContent()) || '';
+  116 |     const shownMonth = monthIndexInHeader(headerText);
+  117 |     const shownYear = parseInt(headerText.match(/\d{4}/)?.[0] || '0', 10);
+  118 |     if (shownMonth === targetMonth && shownYear === targetYear) break;
+  119 |     expect(shownMonth, `Could not read a month out of the week picker header "${headerText}"`).toBeGreaterThan(-1);
+  120 | 
+  121 |     const goForward = shownYear < targetYear || (shownYear === targetYear && shownMonth < targetMonth);
+  122 |     await (goForward ? planner.weekPickerCalendarNextMonth : planner.weekPickerCalendarPrevMonth).click();
+  123 |     await expect(planner.weekPickerCalendarHeaderView).not.toHaveText(headerText, { timeout: 10000 });
+  124 |   }
+  125 | 
+  126 |   const headerText = (await planner.weekPickerCalendarHeaderView.textContent()) || '';
+  127 |   expect(
+  128 |     `${monthIndexInHeader(headerText)}/${headerText.match(/\d{4}/)?.[0]}`,
+  129 |     `Week picker never reached ${MONTH_NAMES[targetMonth]} ${targetYear} (header shows "${headerText}")`,
+  130 |   ).toBe(`${targetMonth}/${targetYear}`);
+  131 | 
+  132 |   const cell = planner.weekPickerDayCellInView(targetDay);
+  133 |   await expect(cell, `No ${targetDay} ${MONTH_NAMES[targetMonth]} ${targetYear} cell in the week picker`).toBeVisible({
+  134 |     timeout: 10000,
+  135 |   });
+  136 |   await cell.click();
+  137 | }
+  138 | 
+  139 | async function findLocationOption(planner: ReturnType<typeof plannerSelectors>, page: Page, locationName: string) {
+  140 |   const opt = planner.locationOptionByName(locationName);
+  141 |   const holder = planner.locationsDropdownPanel.locator('.rc-virtual-list-holder');
+  142 | 
+  143 |   // The dropdown is virtualized and preserves scroll position across reopens, so a prior scroll to
+  144 |   // the bottom can leave an alphabetically-early option above the rendered window. Reset to the top,
+  145 |   // then scroll a full viewport at a time until the option renders or the bottom is reached.
+  146 |   await holder.evaluate((el: any) => (el.scrollTop = 0)).catch(() => {});
+  147 |   await page.waitForTimeout(150);
+  148 | 
+  149 |   for (let i = 0; i < 40; i++) {
+  150 |     if (await opt.isVisible().catch(() => false)) return opt;
+  151 | 
+  152 |     const moved = await holder
+  153 |       .evaluate((el: any) => {
+  154 |         const before = el.scrollTop;
+  155 |         el.scrollTop = Math.min(el.scrollTop + el.clientHeight, el.scrollHeight);
+  156 |         return el.scrollTop !== before;
+  157 |       })
+  158 |       .catch(() => false);
+  159 | 
+  160 |     await page.waitForTimeout(150);
+  161 |     if (!moved) break;
+  162 |   }
+  163 | 
+  164 |   const re = new RegExp(locationName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'i');
+  165 |   return planner.locationsOptions.filter({ hasText: re }).first();
+  166 | }
+  167 | 
+  168 | function normalizeOrderNumberFromText(text: string): string {
+  169 |   const m = (text || '').match(/#\s*([A-Z0-9]+-SO\d+)/i);
+  170 |   return m ? `#${m[1]}` : '';
+  171 | }
+  172 | 
+  173 | function normalizeOrderNo(text: string): string {
+  174 |   const m = (text || '').match(/#?\s*([A-Z0-9]+-SO\d+)/i);
+  175 |   return m ? `#${m[1]}` : '';
+  176 | }
+  177 | 
+  178 | async function openDateHeaderPopup(page: Page, dateKey: string) {
+  179 |   const headerBlock = page.locator(`div:has([data-testid="date-header:${dateKey}"])`).first();
+  180 |   await expect(headerBlock).toBeVisible({ timeout: 30000 });
+  181 | 
+  182 |   const cubeIcon = headerBlock.locator('div:has(> svg[viewBox="0 0 48 48"])').first();
+  183 |   await expect(cubeIcon).toBeVisible({ timeout: 30000 });
+  184 |   await cubeIcon.click({ force: true });
+  185 | 
+  186 |   const popup = page
+  187 |     .locator(
+  188 |       '.ant-tooltip-inner[role="tooltip"], .ant-popover-inner[role="tooltip"], .ant-popover-inner, .ant-tooltip-inner',
+  189 |     )
+  190 |     .filter({ has: page.getByRole('button', { name: /^Open$/i }) })
+  191 |     .first();
+  192 | 
+  193 |   await expect(popup).toBeVisible({ timeout: 30000 });
+  194 |   return popup;
+  195 | }
+  196 | 
+  197 | async function ensureLocationsDropdownOpen(planner: ReturnType<typeof plannerSelectors>) {
+  198 |   const isOpen = await planner.locationsDropdown
+  199 |     .evaluate((el) => el.classList.contains('rc-select-open'))
+  200 |     .catch(() => false);
+  201 | 
+  202 |   if (!isOpen) {
+> 203 |     await planner.locationsDropdown.click();
+      |                                     ^ TimeoutError: locator.click: Timeout 30000ms exceeded.
+  204 |   }
+  205 | 
+  206 |   await expect(planner.locationsDropdownPanel).toBeVisible({ timeout: 10000 });
+  207 | }
+  208 | 
+  209 | async function ensureGroupingDropdownOpen(planner: ReturnType<typeof plannerSelectors>) {
+  210 |   if (!(await planner.groupingDropdownPanel?.isVisible().catch(() => false))) {
+  211 |     await planner.groupingDropdown.click();
+  212 |     if (planner.groupingDropdownPanel) {
+  213 |       await expect(planner.groupingDropdownPanel).toBeVisible({ timeout: 10000 });
+  214 |     }
+  215 |   }
+  216 | }
+  217 | 
+  218 | function normalizeText(s: string) {
+  219 |   return s.replace(/\s+/g, ' ').trim();
+  220 | }
+  221 | 
+  222 | async function getVisibleLocationOptionNames(planner: ReturnType<typeof plannerSelectors>) {
+  223 |   const optionLocator = planner.locationsDropdownPanel.locator('.rc-virtual-list-holder-inner .rc-select-item-option');
+  224 | 
+  225 |   const labels = await optionLocator.evaluateAll((els) => {
+  226 |     return els
+  227 |       .map((el) => (el.getAttribute('label') || '').trim())
+  228 |       .filter((t) => t && t.toLowerCase() !== 'select all');
+  229 |   });
+  230 | 
+  231 |   if (labels.length > 0) return labels;
+  232 | 
+  233 |   const texts = await optionLocator.evaluateAll((els) =>
+  234 |     els
+  235 |       .map((el) => (el.textContent || '').replace(/\s+/g, ' ').trim())
+  236 |       .filter((t) => t && t.toLowerCase() !== 'select all')
+  237 |       .map((t) => t.replace(/✓/g, '').trim()),
+  238 |   );
+  239 | 
+  240 |   return texts;
+  241 | }
+  242 | 
+  243 | // The locations dropdown is a virtualized list — only a window of options is rendered at a time.
+  244 | // Scroll top-to-bottom accumulating every rendered option so callers see the full list (in visual
+  245 | // order) rather than a scroll-position-dependent slice.
+  246 | async function getAllLocationOptionNames(planner: ReturnType<typeof plannerSelectors>, page: Page) {
+  247 |   const holder = planner.locationsDropdownPanel.locator('.rc-virtual-list-holder');
+  248 |   const seen = new Set<string>();
+  249 | 
+  250 |   await holder.evaluate((el: any) => (el.scrollTop = 0)).catch(() => {});
+  251 |   await page.waitForTimeout(150);
+  252 | 
+  253 |   for (let i = 0; i < 40; i++) {
+  254 |     (await getVisibleLocationOptionNames(planner)).forEach((n) => seen.add(n));
+  255 | 
+  256 |     const moved = await holder
+  257 |       .evaluate((el: any) => {
+  258 |         const before = el.scrollTop;
+  259 |         el.scrollTop = Math.min(el.scrollTop + el.clientHeight, el.scrollHeight);
+  260 |         return el.scrollTop !== before;
+  261 |       })
+  262 |       .catch(() => false);
+  263 | 
+  264 |     await page.waitForTimeout(150);
+  265 |     if (!moved) break;
+  266 |   }
+  267 | 
+  268 |   (await getVisibleLocationOptionNames(planner)).forEach((n) => seen.add(n));
+  269 |   return [...seen];
+  270 | }
+  271 | 
+  272 | export const plannerPage = {
+  273 |   async openFromLeftNav(page: Page) {
+  274 |     const ordersNav = ordersSelectors(page);
+  275 | 
+  276 |     await Promise.all([
+  277 |       page.waitForURL(/\/apps\/order\/planner/i, { timeout: 20000 }),
+  278 |       ordersNav.plannerMenuItem.click(),
+  279 |     ]);
+  280 | 
+  281 |     await waitForPlannerToLoad(page, 30000);
+  282 |   },
+  283 | 
+  284 |   async setupUserWithEnterpriseAccess(page: Page, corpnav: ReturnType<typeof corpnavSelectors>, enterpriseId: string) {
+  285 |     // Portal v1.19.0 makes ordering an "Order rights" setting of a Grower on an enterprise, granted below. The
+  286 |     // Orderer role stays until stage runs the migrate-orderers-to-order-rights job: it still holds the order
+  287 |     // permissions that the job moves onto Grower.
+  288 |     const user = await createUser({ page, roles: ['Orderer', 'Grower'] });
+  289 |     await addUserToEnterprise(enterpriseId, user.userId);
+  290 |     await grantOrderRights(enterpriseId, user.userId);
+  291 |     await restoreSession(page, user.refreshToken);
+  292 |     await page.reload();
+  293 |     await expect(corpnav.userIcon).toBeVisible({ timeout: 20000 });
+  294 |     return user;
+  295 |   },
+  296 | 
+  297 |   async setupOrdererUserWithEnterpriseAccess(
+  298 |     page: Page,
+  299 |     corpnav: ReturnType<typeof corpnavSelectors>,
+  300 |     enterpriseId: string,
+  301 |   ) {
+  302 |     // Portal v1.19.0 makes ordering an "Order rights" setting of a Grower on an enterprise, granted below. The
+  303 |     // Orderer role stays until stage runs the migrate-orderers-to-order-rights job: it still holds the order
+```

@@ -1,0 +1,239 @@
+# Instructions
+
+- Following Playwright test failed.
+- Explain why, be concise, respect Playwright best practices.
+- Provide a snippet of code with the fix, if possible.
+
+# Test info
+
+- Name: planner.spec.ts >> Planner >> TC:14205 - [Cancellation] Order deleted from Planner when entering 0
+- Location: playwright/specs/planner.spec.ts:554:7
+
+# Error details
+
+```
+Error: expect(locator).toHaveValue(expected) failed
+
+Locator:  locator('input[data-testid="orderable-cell:Halyosan/single bag of 2 traps:2026-12-07"]').first()
+Expected: ""
+Received: "0"
+Timeout:  20000ms
+
+Call log:
+  - Expect "toHaveValue" with timeout 20000ms
+  - waiting for locator('input[data-testid="orderable-cell:Halyosan/single bag of 2 traps:2026-12-07"]').first()
+    44 × locator resolved to <input value="0" type="text" inputmode="numeric" class="sc-ePDLzJ gzJllI" data-testid="orderable-cell:Halyosan/single bag of 2 traps:2026-12-07"/>
+       - unexpected value "0"
+
+```
+
+```yaml
+- textbox: "0"
+```
+
+# Test source
+
+```ts
+  510 | 
+  511 |   test(`TC:16290 - [Product search] Verify unsaved changes`, async ({ page }) => {
+  512 |     const user = await ordersPage.setupOrdererUserWithEnterpriseAccess(page, corpnav, ENTERPRISE_WITH_DATA_ID);
+  513 |     userIdsToDelete.push(user.userId);
+  514 | 
+  515 |     await page.goto(urls.orderPlanner ?? '/apps/order/planner');
+  516 |     await plannerPage.switchOrderMode(page, true);
+  517 | 
+  518 |     const p = plannerSelectors(page);
+  519 | 
+  520 |     const invalid = `__no_such_product_${Date.now()}__`;
+  521 |     await expect(p.productsSearchInput).toBeVisible({ timeout: 15000 });
+  522 |     await p.productsSearchInput.fill(invalid);
+  523 |     await plannerPage.expectProductsSearchValue(page, invalid);
+  524 | 
+  525 |     await plannerPage.switchOrderMode(page, false);
+  526 |     await plannerPage.switchOrderMode(page, true);
+  527 |     await plannerPage.expectProductsSearchValue(page, invalid);
+  528 | 
+  529 |     await p.productsSearchInput.fill('04');
+  530 |     await plannerPage.expectProductsSearchValue(page, '04');
+  531 | 
+  532 |     await plannerPage.switchOrderMode(page, false);
+  533 |     await plannerPage.switchOrderMode(page, true);
+  534 |     await plannerPage.expectProductsSearchValue(page, '04');
+  535 | 
+  536 |     await p.productsSearchInput.fill(invalid);
+  537 |     await plannerPage.expectProductsSearchValue(page, invalid);
+  538 | 
+  539 |     await page.goto(urls.orderList);
+  540 |     await page.waitForLoadState('domcontentloaded');
+  541 |     await plannerPage.openFromLeftNav(page);
+  542 |     const p2 = plannerSelectors(page);
+  543 |     await expect(p2.productsSearchInput).toBeVisible({ timeout: 15000 });
+  544 |     await expect(p2.productsSearchInput).toHaveValue('', { timeout: 15000 });
+  545 | 
+  546 |     await plannerPage.switchOrderMode(page, true);
+  547 |     await p2.productsSearchInput.fill(invalid);
+  548 |     await plannerPage.expectProductsSearchValue(page, invalid);
+  549 | 
+  550 |     await plannerPage.switchEnterpriseByNameIfSupported(page, ENTERPRISE_NO_DATA_NAME).catch(() => {});
+  551 |     await expect(p2.productsSearchInput).toBeVisible({ timeout: 15000 });
+  552 |   });
+  553 | 
+  554 |   test(`TC:14205 - [Cancellation] Order deleted from Planner when entering 0`, async ({ page }) => {
+  555 |     const user = await ordersPage.setupOrdererUserWithEnterpriseAccess(page, corpnav, ENTERPRISE_WITH_DATA_ID);
+  556 |     userIdsToDelete.push(user.userId);
+  557 | 
+  558 |     await page.goto(urls.orderPlanner ?? '/apps/order/planner');
+  559 |     await plannerPage.switchOrderMode(page, true);
+  560 |     await showOnlyFirstLocation(page);
+  561 |     // ensureMatrixHasProducts may seed a product whose lead time makes every visible date readonly.
+  562 |     await plannerPage.ensureMatrixHasOrderableProducts(page);
+  563 | 
+  564 |     // The edits below go into the order just placed: wait until the planner has it from a fresh snapshot,
+  565 |     // or the live-sync push that delivers it discards those edits ("Your changes were discarded").
+  566 |     const orderSync = plannerPage.trackOwnOrderSync(page);
+  567 |     let testId: string;
+  568 |     let orderedValue: string;
+  569 |     try {
+  570 |       ({ testId, orderedValue } = await plannerPage.createOrderFromPlannerBySettingAnyQty(page, '5'));
+  571 |       await orderSync.waitForSync();
+  572 |     } finally {
+  573 |       orderSync.stop();
+  574 |     }
+  575 | 
+  576 |     await page.waitForLoadState('domcontentloaded');
+  577 | 
+  578 |     let input = await plannerPage.getPlannerQtyInputByTestId(page, testId);
+  579 |     await expect(input).toBeVisible({ timeout: 30000 });
+  580 |     await expect(input).toBeEditable({ timeout: 30000 });
+  581 | 
+  582 |     await plannerPage.setPlannerQtyAndCommit(page, input, '0');
+  583 |     await expect(input).toHaveValue('0', { timeout: 20000 });
+  584 |     await plannerPage.expectOrderAndDiscardButtonsVisible(page);
+  585 | 
+  586 |     await plannerPage.discardChangesViaLeaveGuard(page);
+  587 | 
+  588 |     input = await plannerPage.getPlannerQtyInputByTestId(page, testId);
+  589 |     await expect(input).toBeVisible({ timeout: 30000 });
+  590 |     await expect(input).toHaveValue(orderedValue, { timeout: 20000 });
+  591 |     await plannerPage.expectOrderAndDiscardButtonsHidden(page);
+  592 | 
+  593 |     await plannerPage.setPlannerQtyAndCommit(page, input, '0');
+  594 |     await expect(input).toHaveValue('0', { timeout: 20000 });
+  595 |     await plannerPage.expectOrderAndDiscardButtonsVisible(page);
+  596 | 
+  597 |     await plannerPage.cancelDeletingQuantitiesModal(page);
+  598 | 
+  599 |     input = await plannerPage.getPlannerQtyInputByTestId(page, testId);
+  600 |     await expect(input).toBeVisible({ timeout: 30000 });
+  601 |     await expect(input).toHaveValue('0', { timeout: 20000 });
+  602 | 
+  603 |     await plannerPage.triggerDeletingQuantitiesModalByOrdering(page);
+  604 |     await plannerPage.confirmDeletingQuantitiesModal(page);
+  605 | 
+  606 |     // Step 6: the row stays with an empty cell. Stage removes the row instead once the planner has re-read an order
+  607 |     // it already holds (bug 25878), so this fails until that is fixed.
+  608 |     input = await plannerPage.getPlannerQtyInputByTestId(page, testId);
+  609 |     await expect(input).toBeVisible({ timeout: 30000 });
+> 610 |     await expect(input).toHaveValue('', { timeout: 20000 });
+      |                         ^ Error: expect(locator).toHaveValue(expected) failed
+  611 |     await plannerPage.expectOrderAndDiscardButtonsHidden(page);
+  612 |   });
+  613 | 
+  614 |   test(`TC:17364 - [Cancellation] Order deleted from Planner when removing qty (empty)`, async ({ page }) => {
+  615 |     const user = await ordersPage.setupOrdererUserWithEnterpriseAccess(page, corpnav, ENTERPRISE_WITH_DATA_ID);
+  616 |     userIdsToDelete.push(user.userId);
+  617 | 
+  618 |     await page.goto(urls.orderPlanner ?? '/apps/order/planner');
+  619 |     await plannerPage.switchOrderMode(page, true);
+  620 |     await showOnlyFirstLocation(page);
+  621 |     // ensureMatrixHasProducts may seed a product whose lead time makes every visible date readonly.
+  622 |     await plannerPage.ensureMatrixHasOrderableProducts(page);
+  623 |     // This case ends by asserting no Order button is left anywhere, so it has to start from a matrix
+  624 |     // with no pending edits - a draft another location is holding would keep one on screen.
+  625 |     await plannerPage.discardAllPendingPlannerChanges(page);
+  626 | 
+  627 |     await page.waitForLoadState('domcontentloaded');
+  628 | 
+  629 |     const allInputs = page.locator('input[data-testid^="orderable-cell:"]');
+  630 |     await expect(allInputs.first()).toBeVisible({ timeout: 30000 });
+  631 | 
+  632 |     const count = await allInputs.count();
+  633 |     let testId: string | null = null;
+  634 | 
+  635 |     for (let i = 0; i < Math.min(count, 50); i++) {
+  636 |       const tid = await allInputs.nth(i).getAttribute('data-testid');
+  637 |       if (tid && !tid.includes('Ervibank/500')) {
+  638 |         const inp = allInputs.nth(i);
+  639 |         const isVisible = await inp.isVisible().catch(() => false);
+  640 |         if (!isVisible) continue;
+  641 | 
+  642 |         const readonly = await inp.getAttribute('readonly');
+  643 |         if (readonly !== null) continue;
+  644 | 
+  645 |         const isEditable = await inp.isEditable().catch(() => false);
+  646 |         if (!isEditable) continue;
+  647 | 
+  648 |         const currentValue = await inp.inputValue();
+  649 |         if (currentValue === '' || currentValue === '0') {
+  650 |           testId = tid;
+  651 |           break;
+  652 |         }
+  653 |       }
+  654 |     }
+  655 | 
+  656 |     if (!testId) {
+  657 |       throw new Error('Could not find an editable product cell without historical orders');
+  658 |     }
+  659 | 
+  660 |     let input = page.locator(`input[data-testid="${testId}"]`);
+  661 |     await input.scrollIntoViewIfNeeded();
+  662 |     await expect(input).toBeVisible({ timeout: 30000 });
+  663 |     await expect(input).toBeEditable({ timeout: 30000 });
+  664 | 
+  665 |     await plannerPage.setPlannerQtyAndCommit(page, input, '5');
+  666 |     await expect(input).toHaveValue('5', { timeout: 20000 });
+  667 |     await plannerPage.expectOrderAndDiscardButtonsVisible(page);
+  668 | 
+  669 |     // Exact name: portal v1.19.0 (PR 4289) adds an "Order all" button next to the location's Order button.
+  670 |     const orderBtn = page.getByRole('button', { name: /^Order$/i });
+  671 |     await expect(orderBtn).toBeVisible({ timeout: 30000 });
+  672 |     await expect(orderBtn).toBeEnabled({ timeout: 30000 });
+  673 |     await orderBtn.click({ force: true });
+  674 |     await plannerPage.confirmOrderIfModalAppears(page);
+  675 |     await plannerPage.closeFirstOrderCongratulationsModalIfVisible(page);
+  676 |     await plannerPage.expectOrderAndDiscardButtonsHidden(page);
+  677 | 
+  678 |     input = await plannerPage.getPlannerQtyInputByTestId(page, testId);
+  679 |     await expect(input).toBeVisible({ timeout: 30000 });
+  680 |     await expect(input).toBeEditable({ timeout: 30000 });
+  681 | 
+  682 |     await plannerPage.setPlannerQtyAndCommit(page, input, '');
+  683 | 
+  684 |     await page.waitForLoadState('domcontentloaded').catch(() => {});
+  685 | 
+  686 |     input = await plannerPage.getPlannerQtyInputByTestId(page, testId);
+  687 |     await expect(input).toBeVisible({ timeout: 30000 });
+  688 |     await expect(input).toHaveValue('', { timeout: 20000 });
+  689 | 
+  690 |     const buttonsVisible = await plannerPage.areOrderAndDiscardButtonsVisible(page);
+  691 |     if (buttonsVisible) {
+  692 |       await plannerPage.expectOrderAndDiscardButtonsVisible(page);
+  693 |     } else {
+  694 |       await page.waitForLoadState('networkidle', { timeout: 5000 }).catch(() => {});
+  695 |       await plannerPage.expectOrderAndDiscardButtonsVisible(page);
+  696 |     }
+  697 | 
+  698 |     await plannerPage.discardChangesViaLeaveGuard(page);
+  699 | 
+  700 |     input = await plannerPage.getPlannerQtyInputByTestId(page, testId);
+  701 |     const currentValue = await input.inputValue();
+  702 |     expect(currentValue).toBeTruthy();
+  703 |     await plannerPage.expectOrderAndDiscardButtonsHidden(page);
+  704 |     await plannerPage.expectOrderAndDiscardButtonsHidden(page);
+  705 | 
+  706 |     await plannerPage.setPlannerQtyAndCommit(page, input, '');
+  707 | 
+  708 |     await page.waitForLoadState('domcontentloaded').catch(() => {});
+  709 | 
+  710 |     input = await plannerPage.getPlannerQtyInputByTestId(page, testId);
+```

@@ -1,0 +1,279 @@
+# Instructions
+
+- Following Playwright test failed.
+- Explain why, be concise, respect Playwright best practices.
+- Provide a snippet of code with the fix, if possible.
+
+# Test info
+
+- Name: orders.spec.ts >> Orders >> TC:19384 - [Order confirmation] Check that order confirmation modal is shown for mixed operations during order edit
+- Location: playwright/specs/orders.spec.ts:2471:7
+
+# Error details
+
+```
+TimeoutError: locator.click: Timeout 30000ms exceeded.
+Call log:
+  - waiting for locator('button[type="submit"]').filter({ hasText: 'Save' })
+    - locator resolved to <button type="submit" class="ant-btn ant-btn-primary" ant-click-animating-without-extra-node="false">…</button>
+  - attempting click action
+    2 × waiting for element to be visible, enabled and stable
+      - element is not enabled
+    - retrying click action
+    - waiting 20ms
+    2 × waiting for element to be visible, enabled and stable
+      - element is not enabled
+    - retrying click action
+      - waiting 100ms
+    58 × waiting for element to be visible, enabled and stable
+       - element is not enabled
+     - retrying click action
+       - waiting 500ms
+
+```
+
+# Page snapshot
+
+```yaml
+- generic [active] [ref=e1]:
+  - generic [ref=e3]:
+    - generic [ref=e4]: You're on DEVELOPMENT OR STAGE
+    - generic [ref=e6]:
+      - img [ref=e7] [cursor=pointer]
+      - generic [ref=e14]:
+        - generic [ref=e15]: 4Innovations Horti B.V.
+        - generic [ref=e16] [cursor=pointer]:
+          - img "user" [ref=e17]:
+            - img [ref=e18]
+          - text: Playwright DudeZKuhxbN
+    - generic [ref=e21]:
+      - generic [ref=e22]:
+        - heading "Hi, Playwright DudeZKuhxbN!" [level=1] [ref=e23]
+        - strong [ref=e25]: Welcome to Koppert One
+        - generic [ref=e26]:
+          - heading "Need help ?" [level=5] [ref=e27]
+          - separator [ref=e28]
+          - generic [ref=e29]:
+            - img [ref=e31]
+            - generic [ref=e32]:
+              - heading "Koppert One support" [level=5] [ref=e33]
+              - link "mail support@koppert.one" [ref=e35] [cursor=pointer]:
+                - /url: mailto:support@koppert.one
+                - img "mail" [ref=e36]:
+                  - img [ref=e37]
+                - text: support@koppert.one
+                - img [ref=e39]
+              - link "phone +31 1 051 405 17" [ref=e43] [cursor=pointer]:
+                - /url: tel:+31105140517
+                - img "phone" [ref=e44]:
+                  - img [ref=e45]
+                - text: +31 1 051 405 17
+                - img [ref=e47]
+      - generic [ref=e51]:
+        - generic [ref=e52] [cursor=pointer]:
+          - img [ref=e54]
+          - generic [ref=e57]: Order
+          - generic [ref=e59]: View, place and manage orders
+          - img [ref=e61]
+        - generic [ref=e63] [cursor=pointer]:
+          - img [ref=e65]
+          - generic [ref=e69]: Knowledge
+          - generic [ref=e71]: Explore chemical compatibility with Koppert's natural enemies and bumblebees
+          - img [ref=e73]
+        - generic [ref=e75] [cursor=pointer]:
+          - img [ref=e77]
+          - generic [ref=e79]: Scout
+          - generic [ref=e81]: Discover trends in pest development and beneficial insect counts to know when to act
+          - img [ref=e83]
+        - generic [ref=e85] [cursor=pointer]:
+          - img [ref=e87]
+          - generic [ref=e89]: Organization
+          - generic [ref=e91]: Manage team members and their access to locations
+          - img [ref=e93]
+  - button "Feedback" [ref=e95] [cursor=pointer]:
+    - generic [ref=e97]: Feedback
+```
+
+# Test source
+
+```ts
+  2463 | 
+  2464 |     await orders.createOrderSubmitButton.click();
+  2465 |     await expect(orders.orderConfirmationModalTitle).toBeVisible();
+  2466 | 
+  2467 |     const deleteQtyModalVisible = await orders.deletingQuantitiesModal.isVisible().catch(() => false);
+  2468 |     expect(deleteQtyModalVisible, 'Expected deleting quantities modal to NOT be displayed').toBeFalsy();
+  2469 |   });
+  2470 | 
+  2471 |   test(`TC:19384 - [Order confirmation] Check that order confirmation modal is shown for mixed operations during order edit`, async ({
+  2472 |     page,
+  2473 |   }) => {
+  2474 |     const user = await ordersPage.setupUserWithEnterpriseAccess(page, corpnav);
+  2475 |     userIdsToDelete.push(user.userId);
+  2476 | 
+  2477 |     await page.goto(urls.orderList);
+  2478 | 
+  2479 |     const orderData = await ordersPage.createOrderWithUniqueData(orders, page);
+  2480 |     await ordersPage.findOrderInList(page, orderData);
+  2481 | 
+  2482 |     await ordersPage.enterEditModeFromDetails(orders, page);
+  2483 | 
+  2484 |     const initialProductCount = await orders.productQtyInputs.count();
+  2485 |     await ordersPage.openAddProductModal(orders);
+  2486 |     const product1 = await ordersPage.addAnyProductFromModal(orders, page);
+  2487 |     await ordersPage.fillQtyInProductRowByName(orders, page, product1, '5', initialProductCount);
+  2488 | 
+  2489 |     const currentProductCount = await orders.productQtyInputs.count();
+  2490 |     await ordersPage.openAddProductModal(orders);
+  2491 |     const product2 = await ordersPage.addAnyProductFromModal(orders, page);
+  2492 |     await ordersPage.fillQtyInProductRowByName(orders, page, product2, '8', currentProductCount);
+  2493 | 
+  2494 |     await orders.saveButton.click();
+  2495 |     await ordersPage.verifyOrderConfirmationModalStructure(orders, page);
+  2496 |     await orders.orderConfirmationConfirmButton.click();
+  2497 |     await expect(orders.successMessage).toBeVisible({ timeout: 10000 });
+  2498 | 
+  2499 |     await ordersPage.findOrderInList(page, orderData);
+  2500 | 
+  2501 |     await ordersPage.enterEditModeFromDetails(orders, page);
+  2502 | 
+  2503 |     const existingProduct = await ordersPage.getAnyExistingProductNameFromOrder(orders, page);
+  2504 |     const productRow = getProductRowByName(orders, page, existingProduct);
+  2505 |     await expect(productRow).toBeVisible();
+  2506 | 
+  2507 |     await productRow.locator('[aria-label="delete"]').click();
+  2508 |     await expect(orders.deleteOrderLineModal).toBeVisible();
+  2509 |     await orders.deleteOrderLineConfirmButton.click();
+  2510 |     await expect(orders.deleteOrderLineModal).toBeHidden();
+  2511 | 
+  2512 |     await orders.saveButton.click();
+  2513 |     await expect(orders.orderConfirmationModalTitle).toBeVisible();
+  2514 | 
+  2515 |     let deleteQtyModalVisible = await orders.deletingQuantitiesModal.isVisible().catch(() => false);
+  2516 |     expect(deleteQtyModalVisible, 'Delete qty modal should NOT be displayed after deleting a product line').toBeFalsy();
+  2517 | 
+  2518 |     await orders.orderConfirmationCancelButton.click();
+  2519 |     await expect(orders.orderConfirmationModalTitle).toBeHidden();
+  2520 | 
+  2521 |     const productsBeforeAdd = await orders.productQtyInputs.count();
+  2522 |     await ordersPage.openAddProductModal(orders);
+  2523 |     const product3 = await ordersPage.addAnyProductFromModal(orders, page);
+  2524 |     await ordersPage.fillQtyInProductRowByName(orders, page, product3, '10', productsBeforeAdd);
+  2525 | 
+  2526 |     await orders.saveButton.click();
+  2527 |     await expect(orders.orderConfirmationModalTitle).toBeVisible();
+  2528 | 
+  2529 |     deleteQtyModalVisible = await orders.deletingQuantitiesModal.isVisible().catch(() => false);
+  2530 |     expect(deleteQtyModalVisible, 'Delete qty modal should NOT be displayed after adding a product').toBeFalsy();
+  2531 | 
+  2532 |     await orders.orderConfirmationCancelButton.click();
+  2533 |     await expect(orders.orderConfirmationModalTitle).toBeHidden();
+  2534 | 
+  2535 |     await ordersPage.openAddProductModal(orders);
+  2536 | 
+  2537 |     const uncheckedProducts = orders.productModalUncheckedProducts;
+  2538 |     const hasUncheckedProduct = await uncheckedProducts
+  2539 |       .first()
+  2540 |       .isVisible({ timeout: 3000 })
+  2541 |       .catch(() => false);
+  2542 | 
+  2543 |     if (hasUncheckedProduct) {
+  2544 |       const label = uncheckedProducts.first();
+  2545 |       const productName = ((await label.textContent()) || '').replace(/\s+/g, ' ').trim();
+  2546 |       await label.click();
+  2547 |       await orders.productAddButton.click();
+  2548 |       await orders.productModal.waitFor({ state: 'hidden', timeout: 10000 });
+  2549 | 
+  2550 |       const productRow = getProductRowByName(orders, page, productName);
+  2551 |       const qtyInput = productRow.locator('input[type="number"], input[type="text"]:not([placeholder])').first();
+  2552 | 
+  2553 |       const isDisabled = await qtyInput.isDisabled().catch(() => false);
+  2554 | 
+  2555 |       if (!isDisabled) {
+  2556 |         await qtyInput.fill('3');
+  2557 |       }
+  2558 |     } else {
+  2559 |       await orders.productModalCancelButton.click();
+  2560 |       await orders.productModal.waitFor({ state: 'hidden', timeout: 5000 });
+  2561 |     }
+  2562 | 
+> 2563 |     await orders.saveButton.click();
+       |                             ^ TimeoutError: locator.click: Timeout 30000ms exceeded.
+  2564 |     await expect(orders.orderConfirmationModalTitle).toBeVisible();
+  2565 | 
+  2566 |     deleteQtyModalVisible = await orders.deletingQuantitiesModal.isVisible().catch(() => false);
+  2567 |     expect(
+  2568 |       deleteQtyModalVisible,
+  2569 |       'Delete qty modal should NOT be displayed after adding a lead time product',
+  2570 |     ).toBeFalsy();
+  2571 |   });
+  2572 | 
+  2573 |   test(`TC:19385 - [Order confirmation] Check that 'delete qty' modal is shown only when previously saved quantities are set to empty or zero`, async ({
+  2574 |     page,
+  2575 |   }) => {
+  2576 |     const user = await ordersPage.setupUserWithEnterpriseAccess(page, corpnav);
+  2577 |     userIdsToDelete.push(user.userId);
+  2578 | 
+  2579 |     await page.goto(urls.orderList);
+  2580 | 
+  2581 |     const orderData = await ordersPage.createOrderWithUniqueData(orders, page);
+  2582 |     await ordersPage.findOrderInList(page, orderData);
+  2583 | 
+  2584 |     await ordersPage.enterEditModeFromDetails(orders, page);
+  2585 | 
+  2586 |     const initialProductCount = await orders.productQtyInputs.count();
+  2587 |     await ordersPage.openAddProductModal(orders);
+  2588 |     const product1 = await ordersPage.addAnyProductFromModal(orders, page);
+  2589 |     await ordersPage.fillQtyInProductRowByName(orders, page, product1, '5', initialProductCount);
+  2590 | 
+  2591 |     const currentProductCount = await orders.productQtyInputs.count();
+  2592 |     await ordersPage.openAddProductModal(orders);
+  2593 |     const product2 = await ordersPage.addAnyProductFromModal(orders, page);
+  2594 |     await ordersPage.fillQtyInProductRowByName(orders, page, product2, '8', currentProductCount);
+  2595 | 
+  2596 |     await orders.saveButton.click();
+  2597 |     await expect(orders.orderConfirmationModalTitle).toBeVisible();
+  2598 |     await orders.orderConfirmationConfirmButton.click();
+  2599 |     await expect(orders.successMessage).toBeVisible({ timeout: 10000 });
+  2600 | 
+  2601 |     await ordersPage.findOrderInList(page, orderData);
+  2602 |     await ordersPage.enterEditModeFromDetails(orders, page);
+  2603 | 
+  2604 |     await ordersPage.setQtyInExistingProductRowByName(orders, page, product1, '');
+  2605 | 
+  2606 |     await orders.saveButton.click();
+  2607 |     await expect(orders.deletingQuantitiesModal).toBeVisible({ timeout: 10000 });
+  2608 | 
+  2609 |     await orders.deletingQuantitiesCancelButton.click();
+  2610 |     await expect(orders.deletingQuantitiesModal).toBeHidden();
+  2611 | 
+  2612 |     await ordersPage.setQtyInExistingProductRowByName(orders, page, product1, '3');
+  2613 | 
+  2614 |     await orders.saveButton.click();
+  2615 |     await expect(orders.orderConfirmationModalTitle).toBeVisible();
+  2616 | 
+  2617 |     let deleteQtyModalVisible = await orders.deletingQuantitiesModal.isVisible().catch(() => false);
+  2618 |     expect(deleteQtyModalVisible, 'Delete qty modal should NOT be displayed after restoring quantity').toBeFalsy();
+  2619 | 
+  2620 |     await orders.orderConfirmationCancelButton.click();
+  2621 |     await expect(orders.orderConfirmationModalTitle).toBeHidden();
+  2622 | 
+  2623 |     await ordersPage.setQtyInExistingProductRowByName(orders, page, product2, '0');
+  2624 | 
+  2625 |     await orders.saveButton.click();
+  2626 |     await expect(orders.deletingQuantitiesModal).toBeVisible({ timeout: 10000 });
+  2627 | 
+  2628 |     await orders.deletingQuantitiesCancelButton.click();
+  2629 |     await expect(orders.deletingQuantitiesModal).toBeHidden();
+  2630 | 
+  2631 |     await ordersPage.setQtyInExistingProductRowByName(orders, page, product2, '7');
+  2632 | 
+  2633 |     await orders.saveButton.click();
+  2634 |     await expect(orders.orderConfirmationModalTitle).toBeVisible();
+  2635 | 
+  2636 |     deleteQtyModalVisible = await orders.deletingQuantitiesModal.isVisible().catch(() => false);
+  2637 |     expect(deleteQtyModalVisible, 'Delete qty modal should NOT be displayed after restoring quantity').toBeFalsy();
+  2638 |   });
+  2639 | });
+  2640 | 
+```

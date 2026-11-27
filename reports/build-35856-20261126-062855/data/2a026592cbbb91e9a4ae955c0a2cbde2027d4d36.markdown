@@ -1,0 +1,403 @@
+# Instructions
+
+- Following Playwright test failed.
+- Explain why, be concise, respect Playwright best practices.
+- Provide a snippet of code with the fix, if possible.
+
+# Test info
+
+- Name: digitalAssistant.spec.ts >> Digital Assistant >> TC:12707 - Check the Digital Assistant can be opened from the Planner page
+- Location: playwright/specs/digitalAssistant.spec.ts:199:7
+
+# Error details
+
+```
+Error: expect(received).toBe(expected) // Object.is equality
+
+Expected: "cfc0f4d4-ce0c-461e-ada2-d527f0e4222c"
+Received: "ab1cc8bd-32d1-4047-bf24-8faebe9643ee"
+```
+
+# Page snapshot
+
+```yaml
+- generic [ref=e3]:
+  - generic [ref=e4]: You're on DEVELOPMENT OR STAGE
+  - generic [ref=e6]:
+    - img [ref=e7] [cursor=pointer]
+    - menu [ref=e14]:
+      - menuitem "Overview" [ref=e15] [cursor=pointer]:
+        - link "Overview" [ref=e17]:
+          - /url: /apps/overview
+      - menuitem "Order" [ref=e18] [cursor=pointer]:
+        - link "Order" [ref=e20]:
+          - /url: /apps/order
+      - menuitem "Knowledge" [ref=e21] [cursor=pointer]:
+        - link "Knowledge" [ref=e23]:
+          - /url: /apps/protect
+      - menuitem "Scout" [ref=e24] [cursor=pointer]:
+        - link "Scout" [ref=e26]:
+          - /url: https://www.natutecscout.com/apps/scout
+      - menuitem "Organization" [ref=e27] [cursor=pointer]:
+        - link "Organization" [ref=e29]:
+          - /url: /apps/organization
+      - menuitem "Admin" [ref=e30] [cursor=pointer]:
+        - link "Admin" [ref=e32]:
+          - /url: /apps/admin
+    - generic [ref=e33]:
+      - generic [ref=e37]:
+        - generic [ref=e39]:
+          - combobox [ref=e41] [cursor=pointer]
+          - generic:
+            - generic:
+              - generic: 2100 E Artesia Blvd LLC
+        - generic:
+          - generic:
+            - img
+      - generic [ref=e42] [cursor=pointer]:
+        - img "user" [ref=e43]:
+          - img [ref=e44]
+        - text: Playwright persistent da_planner_two_enterprises
+  - generic [ref=e46]:
+    - complementary [ref=e48]:
+      - menu [ref=e50]:
+        - menuitem "Planner" [ref=e51] [cursor=pointer]:
+          - img [ref=e52]
+          - link "Planner" [ref=e56]:
+            - /url: /apps/order/planner
+        - menuitem "Order list" [ref=e57] [cursor=pointer]:
+          - img [ref=e58]
+          - link "Order list" [ref=e61]:
+            - /url: /apps/order/order-list
+        - menuitem "file-text Invoices" [ref=e62] [cursor=pointer]:
+          - img "file-text" [ref=e63]:
+            - img [ref=e64]
+          - link "Invoices" [ref=e67]:
+            - /url: /apps/order/invoices
+      - img "left" [ref=e69] [cursor=pointer]:
+        - img [ref=e70]
+    - main [ref=e72]:
+      - generic [ref=e74]:
+        - heading "Planner" [level=2] [ref=e81]
+        - generic [ref=e82]:
+          - separator [ref=e84]
+          - generic [ref=e85]:
+            - generic [ref=e88]:
+              - generic [ref=e89]:
+                - generic [ref=e90]:
+                  - generic [ref=e91]: Locations
+                  - generic [ref=e92]: 2100 E. Artesia Blvd, LLC
+                - generic [ref=e93]:
+                  - generic [ref=e94]: Grouping
+                  - generic [ref=e96]:
+                    - generic [ref=e98]:
+                      - combobox [ref=e100] [cursor=pointer]
+                      - generic "Products"
+                    - generic:
+                      - generic:
+                        - img
+              - generic [ref=e101]:
+                - switch [ref=e102] [cursor=pointer]
+                - generic [ref=e104]: Order mode
+              - generic [ref=e105]:
+                - generic [ref=e107]:
+                  - textbox "Search..." [ref=e108]
+                  - img [ref=e110]
+                - generic [ref=e112]:
+                  - generic [ref=e113]: "Week selection:"
+                  - generic [ref=e115]:
+                    - generic [ref=e117]:
+                      - textbox "week 42 - 2026" [ref=e118]:
+                        - /placeholder: Start week
+                      - generic:
+                        - img "calendar":
+                          - img
+                    - text: "-"
+                    - generic [ref=e120]:
+                      - textbox "week 53 - 2026" [ref=e121]:
+                        - /placeholder: End week
+                      - generic:
+                        - img "calendar":
+                          - img
+            - generic [ref=e125]:
+              - img "empty" [ref=e127]
+              - heading "You don’t have any orders in this week selection." [level=4] [ref=e128]
+      - generic [ref=e129]:
+        - generic [ref=e130]:
+          - generic [ref=e131]: Digital Assistant
+          - iframe [ref=e134]:
+            - generic [active]:
+              - generic:
+                - generic:
+                  - generic:
+                    - generic:
+                      - generic:
+                        - img
+                        - generic:
+                          - generic:
+                            - article:
+                              - generic:
+                                - generic:
+                                  - paragraph: Hello! How can I help you?
+                          - generic:
+                            - button:
+                              - img
+                            - generic:
+                              - button:
+                                - img
+                  - generic:
+                    - generic:
+                      - button: What is the effect of using abamectin in pepper crops on Thripor-L?
+                      - button: What active ingredient is more harmful for Ercal, Azadirachtin or Methiocarb?
+                  - contentinfo:
+                    - generic:
+                      - textbox:
+                        - /placeholder: Ask your question here...
+                      - img
+                    - generic: This assistant can make mistakes. Please verify important information.
+              - dialog "This is the Koppert Digital Assistant" [ref=f3e2]:
+                - generic [ref=f3e3]:
+                  - paragraph [ref=f3e4]: Expertise at your fingertips
+                  - heading "This is the Koppert Digital Assistant" [level=2] [ref=f3e5]
+                  - paragraph [ref=f3e6]: Digital Assistant, offered by Koppert, is a powerful artificial intelligence tool designed to assist you with information and insights. However, please note that Digital Assistant is not a replacement for professional advice. We recommend always double-checking the information provided.
+                  - paragraph [ref=f3e7]:
+                    - text: When using Digital Assistant, Koppert's
+                    - link "Terms of Service" [ref=f3e8] [cursor=pointer]:
+                      - /url: https://www.koppert.one/assets/statements/terms-of-use.pdf
+                    - text: and
+                    - link "General Terms & Conditions" [ref=f3e9] [cursor=pointer]:
+                      - /url: https://www.koppert.com/content/global/General/AboutKoppert/Koppert_-_General_Terms_and_Conditions_EN_01.pdf
+                    - text: apply. We may save the data from your interactions for training and quality assurance purposes to improve the service.
+                  - paragraph [ref=f3e10]: "Currently you can ask the Digital Assistant about:"
+                  - paragraph [ref=f3e11]:
+                    - img "bug icon" [ref=f3e12]
+                    - generic [ref=f3e13]: Learn about the side effects of pesticides on natural enemies and pollinators
+                  - paragraph [ref=f3e14]:
+                    - img "bug icon" [ref=f3e15]
+                    - generic [ref=f3e16]: Get advise on which beneficials to use in your crops
+                  - paragraph [ref=f3e17]:
+                    - img "bug icon" [ref=f3e18]
+                    - generic [ref=f3e19]: Get assistance in identifying pests and diseases in your crops
+                  - paragraph [ref=f3e20]:
+                    - img "bug icon" [ref=f3e21]
+                    - generic [ref=f3e22]: Receive second opinions on product usage and application methods
+                  - paragraph [ref=f3e23]:
+                    - img "bug icon" [ref=f3e24]
+                    - generic [ref=f3e25]: Ask about what total amount of products used in certain location(s), or how many beneficials were released
+                - generic [ref=f3e26]:
+                  - paragraph [ref=f3e27]
+                  - generic [ref=f3e28]:
+                    - checkbox [ref=f3e29] [cursor=pointer]
+                    - generic [ref=f3e30]: I acknowledge and understand that Digital Assistant may occasionally provide incomplete or inaccurate information.
+                  - generic [ref=f3e31]:
+                    - button "Start" [disabled]
+        - button [active] [ref=e135] [cursor=pointer]:
+          - img [ref=e136]
+```
+
+# Test source
+
+```ts
+  154 | 
+  155 |     const languageChangeRequestPromise = page.waitForRequest(
+  156 |       (request) => request.url().includes('custom-auth') && request.method() === 'GET',
+  157 |       { timeout: 60000 },
+  158 |     );
+  159 | 
+  160 |     await userProfile.info.languageDropdown.click();
+  161 |     await userProfile.info.languageDropdownOption(languageDisplayName).click();
+  162 |     await expect(userProfile.info.languageDropdown).toContainText(languageDisplayName);
+  163 | 
+  164 |     await loginPage.goToURL(urls.sideEffects);
+  165 |     await expect(digitalAssistant.digitalAssistantButton).toBeVisible();
+  166 |     await openDigitalAssistant(page);
+  167 | 
+  168 |     const languageChangeRequest = await languageChangeRequestPromise;
+  169 |     const languageChangeUrl = new URL(languageChangeRequest.url());
+  170 |     const languageChangeParams = languageChangeUrl.searchParams;
+  171 | 
+  172 |     expect(languageChangeParams.get('language')).toBe(targetLanguage);
+  173 | 
+  174 |     await digitalAssistant.closeButton.click();
+  175 |     await corpnav.userIcon.click();
+  176 |     await corpnav.myProfile.click();
+  177 |     await userProfile.info.tab.click();
+  178 | 
+  179 |     const countryChangeRequestPromise = page.waitForRequest(
+  180 |       (request) => request.url().includes('custom-auth') && request.method() === 'GET',
+  181 |       { timeout: 60000 },
+  182 |     );
+  183 | 
+  184 |     await loginPage.goToURL(urls.sideEffects);
+  185 |     await expect(digitalAssistant.digitalAssistantButton).toBeVisible();
+  186 |     await openDigitalAssistant(page);
+  187 | 
+  188 |     const finalRequest = await countryChangeRequestPromise;
+  189 |     const finalUrl = new URL(finalRequest.url());
+  190 |     const finalParams = finalUrl.searchParams;
+  191 | 
+  192 |     expect(finalParams.get('enterprise-id')).toBeTruthy();
+  193 |     expect(finalParams.get('user-roles')).toBeTruthy();
+  194 |     expect(finalParams.get('route')).toContain('/apps/protect/side-effects');
+  195 |     expect(finalParams.get('os')).toBeTruthy();
+  196 |     expect(finalParams.get('language')).toBeTruthy();
+  197 |   });
+  198 | 
+  199 |   test('TC:12707 - Check the Digital Assistant can be opened from the Planner page', async ({ loginPage, page }) => {
+  200 |     const user = await ensurePersistentUser(page, daUsers.plannerTwoEnterprises);
+  201 | 
+  202 |     await restoreSession(page, user.refreshToken);
+  203 |     await loginPage.goToURL(urls.planner);
+  204 |     await page.waitForLoadState('domcontentloaded');
+  205 | 
+  206 |     await expect(page).toHaveURL(/.*apps\/order\/planner.*/);
+  207 |     await expect(digitalAssistant.digitalAssistantButton).toBeVisible({ timeout: 20000 });
+  208 | 
+  209 |     await digitalAssistant.digitalAssistantButton.hover();
+  210 |     await openDigitalAssistant(page);
+  211 | 
+  212 |     const customAuthRequestPromise = page.waitForRequest(
+  213 |       (request) => request.url().includes('custom-auth') && request.method() === 'GET',
+  214 |     );
+  215 | 
+  216 |     await page.reload({ waitUntil: 'domcontentloaded' });
+  217 |     await expect(digitalAssistant.digitalAssistantButton).toBeVisible();
+  218 |     await openDigitalAssistant(page);
+  219 | 
+  220 |     const customAuthRequest = await customAuthRequestPromise;
+  221 |     const requestUrl = new URL(customAuthRequest.url());
+  222 |     const queryParams = requestUrl.searchParams;
+  223 | 
+  224 |     expect(queryParams.get('enterprise-id')).toBeTruthy();
+  225 |     expect(queryParams.get('user-roles')).toBeTruthy();
+  226 |     expect(queryParams.get('route')).toContain('/apps/order/planner');
+  227 |     expect(queryParams.get('os')).toBeTruthy();
+  228 |     expect(queryParams.get('language')).toBeTruthy();
+  229 | 
+  230 |     const initialEnterpriseId = queryParams.get('enterprise-id');
+  231 |     const initialLanguage = queryParams.get('language');
+  232 | 
+  233 |     await digitalAssistant.closeButton.click();
+  234 |     await expect(digitalAssistant.digitalAssistantTitle).not.toBeVisible();
+  235 | 
+  236 |     const targetEnterpriseId = initialEnterpriseId === enterprise1Id ? enterprise2Id : enterprise1Id;
+  237 | 
+  238 |     await selectEnterpriseById(page, targetEnterpriseId);
+  239 |     await page.waitForLoadState('networkidle', { timeout: 10000 }).catch(() => {});
+  240 | 
+  241 |     const enterpriseChangeRequestPromise = page.waitForRequest(
+  242 |       (request) => request.url().includes('custom-auth') && request.method() === 'GET',
+  243 |       { timeout: 60000 },
+  244 |     );
+  245 | 
+  246 |     await page.reload({ waitUntil: 'domcontentloaded' });
+  247 |     await expect(digitalAssistant.digitalAssistantButton).toBeVisible();
+  248 |     await openDigitalAssistant(page);
+  249 | 
+  250 |     const enterpriseChangeRequest = await enterpriseChangeRequestPromise;
+  251 |     const enterpriseChangeUrl = new URL(enterpriseChangeRequest.url());
+  252 |     const enterpriseChangeParams = enterpriseChangeUrl.searchParams;
+  253 | 
+> 254 |     expect(enterpriseChangeParams.get('enterprise-id')).toBe(targetEnterpriseId);
+      |                                                         ^ Error: expect(received).toBe(expected) // Object.is equality
+  255 | 
+  256 |     await digitalAssistant.closeButton.click();
+  257 | 
+  258 |     await corpnav.userIcon.click();
+  259 |     await corpnav.myProfile.click();
+  260 |     await expect(page).toHaveURL(/.*apps\/my-profile.*/);
+  261 | 
+  262 |     await userProfile.info.tab.click();
+  263 |     await expect(userProfile.info.languageDropdown).toBeVisible();
+  264 | 
+  265 |     const targetLanguage = initialLanguage === 'en' ? 'nl' : 'en';
+  266 |     const languageDisplayName = targetLanguage === 'nl' ? 'Nederlands' : 'English';
+  267 | 
+  268 |     const languageChangeRequestPromise = page.waitForRequest(
+  269 |       (request) => request.url().includes('custom-auth') && request.method() === 'GET',
+  270 |       { timeout: 60000 },
+  271 |     );
+  272 | 
+  273 |     await userProfile.info.languageDropdown.click();
+  274 |     await userProfile.info.languageDropdownOption(languageDisplayName).click();
+  275 |     await expect(userProfile.info.languageDropdown).toContainText(languageDisplayName);
+  276 | 
+  277 |     await loginPage.goToURL(urls.planner);
+  278 |     await expect(digitalAssistant.digitalAssistantButton).toBeVisible();
+  279 |     await openDigitalAssistant(page);
+  280 | 
+  281 |     const languageChangeRequest = await languageChangeRequestPromise;
+  282 |     const languageChangeUrl = new URL(languageChangeRequest.url());
+  283 |     const languageChangeParams = languageChangeUrl.searchParams;
+  284 | 
+  285 |     expect(languageChangeParams.get('language')).toBe(targetLanguage);
+  286 | 
+  287 |     await digitalAssistant.closeButton.click();
+  288 | 
+  289 |     const finalRequestPromise = page.waitForRequest(
+  290 |       (request) => request.url().includes('custom-auth') && request.method() === 'GET',
+  291 |       { timeout: 60000 },
+  292 |     );
+  293 | 
+  294 |     await loginPage.goToURL(urls.planner);
+  295 |     await expect(digitalAssistant.digitalAssistantButton).toBeVisible();
+  296 |     await openDigitalAssistant(page);
+  297 | 
+  298 |     const finalRequest = await finalRequestPromise;
+  299 |     const finalUrl = new URL(finalRequest.url());
+  300 |     const finalParams = finalUrl.searchParams;
+  301 | 
+  302 |     expect(finalParams.get('enterprise-id')).toBeTruthy();
+  303 |     expect(finalParams.get('user-roles')).toBeTruthy();
+  304 |     expect(finalParams.get('route')).toContain('/apps/order/planner');
+  305 |     expect(finalParams.get('os')).toBeTruthy();
+  306 |     expect(finalParams.get('language')).toBeTruthy();
+  307 |   });
+  308 | 
+  309 |   test('TC:12736 - Check Digital Assistant can be opened from the Side Effects page when there are no enterprises', async ({
+  310 |     loginPage,
+  311 |     page,
+  312 |   }) => {
+  313 |     const user = await ensurePersistentUser(page, daUsers.sideEffectsNoEnterprises);
+  314 | 
+  315 |     await login({ page, acceptCookies: true, email: user.email, password: user.password });
+  316 |     await page.waitForLoadState('load');
+  317 |     await page.waitForLoadState('networkidle', { timeout: 10000 }).catch(() => {});
+  318 | 
+  319 |     await loginPage.goToURL(urls.sideEffects);
+  320 |     await page.waitForLoadState('domcontentloaded');
+  321 | 
+  322 |     await expect(page).toHaveURL(/.*apps\/protect\/side-effects.*/);
+  323 |     await expect(sideEffects.nothingSelected).toBeVisible({ timeout: 20000 });
+  324 |     await expect(digitalAssistant.digitalAssistantButton).toBeVisible({ timeout: 20000 });
+  325 | 
+  326 |     const customAuthRequestPromise = page.waitForRequest(
+  327 |       (request) => request.url().includes('custom-auth') && request.method() === 'GET',
+  328 |     );
+  329 | 
+  330 |     await digitalAssistant.digitalAssistantButton.hover();
+  331 |     await openDigitalAssistant(page);
+  332 | 
+  333 |     const customAuthRequest = await customAuthRequestPromise;
+  334 |     const requestUrl = new URL(customAuthRequest.url());
+  335 |     const queryParams = requestUrl.searchParams;
+  336 | 
+  337 |     expect(queryParams.has('enterprise-id')).toBe(true);
+  338 |     expect(queryParams.get('user-roles')).toBeTruthy();
+  339 |     expect(queryParams.get('route')).toContain('/apps/protect/side-effect');
+  340 |     expect(queryParams.get('os')).toBeTruthy();
+  341 |     expect(queryParams.get('language')).toBeTruthy();
+  342 | 
+  343 |     const initialEnterpriseId = queryParams.get('enterprise-id');
+  344 | 
+  345 |     await digitalAssistant.closeButton.click();
+  346 |     await expect(digitalAssistant.digitalAssistantTitle).not.toBeVisible();
+  347 | 
+  348 |     await login({ page, acceptCookies: false });
+  349 |     await addUserToEnterprise(enterprise1Id, user.userId);
+  350 | 
+  351 |     const enterpriseChangeRequestPromise = page.waitForRequest(
+  352 |       (request) => request.url().includes('custom-auth') && request.method() === 'GET',
+  353 |       { timeout: 60000 },
+  354 |     );
+```

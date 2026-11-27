@@ -1,0 +1,321 @@
+# Instructions
+
+- Following Playwright test failed.
+- Explain why, be concise, respect Playwright best practices.
+- Provide a snippet of code with the fix, if possible.
+
+# Test info
+
+- Name: lagBuster.spec.ts >> Planner - Lag Buster >> TC:14316 - Check if 'Your changes were discarded' modal appears after order Creating for the SAME location
+- Location: playwright/specs/lagBuster.spec.ts:838:7
+
+# Error details
+
+```
+Error: Client 2's edit in a cell Client 1 did not order should be kept
+
+expect(locator).toHaveValue(expected) failed
+
+Locator: locator('input[data-testid="orderable-cell:Anso-Mite/125,000/6l:2026-12-21"]')
+Expected: "44"
+Timeout: 40000ms
+Error: element(s) not found
+
+Call log:
+  - Client 2's edit in a cell Client 1 did not order should be kept with timeout 40000ms
+  - waiting for locator('input[data-testid="orderable-cell:Anso-Mite/125,000/6l:2026-12-21"]')
+
+```
+
+```yaml
+- text: You're on DEVELOPMENT OR STAGE
+- img
+- menu:
+  - menuitem "Order":
+    - link "Order":
+      - /url: /apps/order
+  - menuitem "Knowledge":
+    - link "Knowledge":
+      - /url: /apps/protect
+  - menuitem "Scout":
+    - link "Scout":
+      - /url: https://www.natutecscout.com/apps/scout
+  - menuitem "Organization":
+    - link "Organization":
+      - /url: /apps/organization
+- text: Plkw P. van Geest Maasland B.V.
+- img "user"
+- text: Playwright DudeDvZGaWF
+- complementary:
+  - menu:
+    - menuitem "Planner":
+      - img
+      - link "Planner":
+        - /url: /apps/order/planner
+    - menuitem "Order list":
+      - img
+      - link "Order list":
+        - /url: /apps/order/order-list
+  - img "left"
+- main:
+  - heading "Planner" [level=2]
+  - separator
+  - text: Locations Plkw P. van Geest B.V. - Loc. Gerbera
+  - combobox
+  - switch [checked]
+  - text: Order mode
+  - textbox "Search..."
+  - img
+  - text: "Week selection:"
+  - textbox "week 42 - 2026":
+    - /placeholder: Start week
+  - img "calendar"
+  - text: "-"
+  - textbox "week 53 - 2026":
+    - /placeholder: End week
+  - img "calendar"
+  - img
+  - text: Plkw P. van Geest B.V. - Loc. Gerbera week 53 Mon 28-12 Tue 29-12 Wed 30-12 Thu 31-12 week 52 Mon 21-12
+  - img
+  - text: Tue 22-12 Wed 23-12 Thu 24-12 week 51 Mon 14-12 Tue 15-12 Wed 16-12 Thu 17-12 Fri 18-12 week 50 Mon 07-12
+  - img
+  - text: Tue 08-12
+  - img
+  - text: Wed 09-12
+  - img
+  - text: Thu 10-12
+  - img
+  - text: Fri 11-12
+  - img
+  - text: week 49 Mon 30-11
+  - img
+  - text: Tue 01-12 Wed 02-12 Thu 03-12 Fri 04-12 week 48 week 47 week 46 week 45 week 44 week 43 week 42
+  - img
+  - text: Anso-Mite/125,000/6l + Add product
+  - textbox: "232"
+  - textbox: "5"
+  - textbox: "1"
+  - textbox: "3"
+  - textbox: "5"
+  - textbox: "6"
+  - textbox
+  - textbox
+  - textbox
+  - textbox
+  - text: — — — — — — —
+  - button "Discard changes"
+  - button "Order"
+  - text: 1 location has unsaved changes
+  - button "Order all"
+  - text: All rights reserved. © Koppert 2026
+  - button "Digital Assistant":
+    - img
+    - text: Digital Assistant
+```
+
+# Test source
+
+```ts
+  927  |       if ((await tempInput.inputValue()).trim() !== '') continue;
+  928  |       targetTestId2 = testId;
+  929  |       break;
+  930  |     }
+  931  |     expect(targetTestId2, 'Expected to find a second editable cell for same Product 1').toBeTruthy();
+  932  | 
+  933  |     const targetInput2 = page.locator(`input[data-testid="${targetTestId2}"]`);
+  934  |     await targetInput2.scrollIntoViewIfNeeded();
+  935  |     const currentValue2 = (await targetInput2.inputValue()).trim();
+  936  |     const newValue2 = currentValue2 === '5' ? '15' : '5';
+  937  |     await targetInput2.click();
+  938  |     await targetInput2.fill(newValue2);
+  939  |     await targetInput2.press('Tab');
+  940  |     await page.waitForTimeout(1000);
+  941  | 
+  942  |     // Client 1 keeps editing after this order, so wait for its own order to come back numbered from F&O:
+  943  |     // that live-sync push would otherwise discard Client 1's next edit before it is ordered.
+  944  |     const orderSync2 = plannerPage.trackOwnOrderSync(page);
+  945  |     await plannerPage.clickOrderButton(page);
+  946  |     await page.waitForTimeout(1000);
+  947  |     await expect(planner.orderConfirmationModal).toBeVisible({ timeout: 10000 });
+  948  |     await planner.orderConfirmationModalConfirmButton.click();
+  949  |     await expect(planner.orderConfirmationModal).not.toBeVisible({ timeout: 10000 });
+  950  |     await page.waitForTimeout(3000);
+  951  |     await plannerPage.closeFirstOrderCongratulationsModalIfVisible(page);
+  952  |     await page.waitForTimeout(2000);
+  953  |     await orderSync2.waitForSync();
+  954  | 
+  955  |     await page2.waitForTimeout(5000);
+  956  |     const modalVisibleAfterStep5 = await planner2.changesDiscardedModal.isVisible({ timeout: 5000 }).catch(() => false);
+  957  |     expect(
+  958  |       modalVisibleAfterStep5,
+  959  |       'Step 5: Modal should NOT appear when Client 2 just clicked field without changes',
+  960  |     ).toBe(false);
+  961  | 
+  962  |     const allInputsAfterSecondOrder = planner.orderableInputs;
+  963  |     let targetTestId3 = '';
+  964  |     for (let i = 0; i < Math.min(await allInputsAfterSecondOrder.count(), 200); i++) {
+  965  |       const tempInput = allInputsAfterSecondOrder.nth(i);
+  966  |       const isEditable = await tempInput.isEditable().catch(() => false);
+  967  |       if (!isEditable) continue;
+  968  |       const isDisabled = await tempInput.isDisabled().catch(() => true);
+  969  |       if (isDisabled) continue;
+  970  |       const testId = (await tempInput.getAttribute('data-testid')) || '';
+  971  |       if (!testId) continue;
+  972  |       if (!testId.includes(productNameFromTestId)) continue;
+  973  |       if (testId === targetTestId || testId === targetTestId2) continue;
+  974  |       if ((await tempInput.inputValue()).trim() !== '') continue;
+  975  |       targetTestId3 = testId;
+  976  |       break;
+  977  |     }
+  978  |     expect(targetTestId3, 'Expected to find a third editable cell for same Product 1').toBeTruthy();
+  979  | 
+  980  |     // Client 2 edits the cell Client 1 orders next: since portal PR 4258 (v1.19.0) an update discards only the
+  981  |     // unsaved cells whose server value moved, so an edit in a cell Client 1 leaves alone is kept, with no modal.
+  982  |     await scrollPlannerToCells(page2, [targetTestId3]);
+  983  |     const dirtyInputClient2 = page2.locator(`input[data-testid="${targetTestId3}"]`);
+  984  |     await dirtyInputClient2.scrollIntoViewIfNeeded();
+  985  |     await dirtyInputClient2.click();
+  986  |     await dirtyInputClient2.fill('33');
+  987  |     await page2.waitForTimeout(1000);
+  988  | 
+  989  |     // ...and also edits a cell Client 1 never touches: that edit has to survive Client 1's order (PR 4258).
+  990  |     const keptTestId = await findEmptyEditableCell(page2, planner2, productNameFromTestId, [
+  991  |       targetTestId,
+  992  |       targetTestId2,
+  993  |       targetTestId3,
+  994  |     ]);
+  995  |     const keptInputClient2 = page2.locator(`input[data-testid="${keptTestId}"]`);
+  996  |     await keptInputClient2.scrollIntoViewIfNeeded();
+  997  |     await keptInputClient2.click();
+  998  |     await keptInputClient2.fill('44');
+  999  |     await page2.waitForTimeout(1000);
+  1000 | 
+  1001 |     const targetInput3 = page.locator(`input[data-testid="${targetTestId3}"]`);
+  1002 |     await targetInput3.scrollIntoViewIfNeeded();
+  1003 |     const currentValue3 = (await targetInput3.inputValue()).trim();
+  1004 |     const newValue3 = currentValue3 === '6' ? '20' : '6';
+  1005 |     await targetInput3.click();
+  1006 |     await targetInput3.fill(newValue3);
+  1007 |     await targetInput3.press('Tab');
+  1008 |     await page.waitForTimeout(1000);
+  1009 | 
+  1010 |     await plannerPage.clickOrderButton(page);
+  1011 |     await page.waitForTimeout(1000);
+  1012 |     await expect(planner.orderConfirmationModal).toBeVisible({ timeout: 10000 });
+  1013 |     await planner.orderConfirmationModalConfirmButton.click();
+  1014 |     await expect(planner.orderConfirmationModal).not.toBeVisible({ timeout: 10000 });
+  1015 |     await page.waitForTimeout(3000);
+  1016 |     await plannerPage.closeFirstOrderCongratulationsModalIfVisible(page);
+  1017 |     await page.waitForTimeout(2000);
+  1018 | 
+  1019 |     await verifyDiscardedModal(page2, planner2, locationName);
+  1020 | 
+  1021 |     await page2.waitForTimeout(2000);
+  1022 | 
+  1023 |     await expect(dirtyInputClient2, "Step 8: qty=33 should be replaced by Client 1's ordered qty").toHaveValue(
+  1024 |       newValue3,
+  1025 |       { timeout: 15000 },
+  1026 |     );
+> 1027 |     await expect(keptInputClient2, "Client 2's edit in a cell Client 1 did not order should be kept").toHaveValue('44');
+       |                                                                                                       ^ Error: Client 2's edit in a cell Client 1 did not order should be kept
+  1028 | 
+  1029 |     await context2.close();
+  1030 |   });
+  1031 | 
+  1032 |   test(`TC:14329 - Check if 'Your changes were discarded' modal appears after order Deleting for the SAME location`, async ({
+  1033 |     page,
+  1034 |     browser,
+  1035 |   }) => {
+  1036 |     const user1 = await ordersPage.setupOrdererUserWithEnterpriseAccess(page, corpnav, ENTERPRISE_WITH_DATA_ID);
+  1037 |     userIdsToDelete.push(user1.userId);
+  1038 | 
+  1039 |     await page.goto(urls.orderPlanner);
+  1040 |     await expect(planner.orderModeToggle).toBeVisible({ timeout: 30000 });
+  1041 |     await page.waitForTimeout(3000);
+  1042 | 
+  1043 |     const locationName = await selectSingleLocation(page, planner);
+  1044 | 
+  1045 |     await plannerPage.switchOrderMode(page, true);
+  1046 |     await plannerPage.ensureMatrixHasOrderableProducts(page);
+  1047 |     await expect(planner.weekHeaders.first()).toBeVisible({ timeout: 30000 });
+  1048 |     await page.waitForTimeout(2000);
+  1049 | 
+  1050 |     // Create fresh orders on 2 empty cells for the same product (ensures deletable status)
+  1051 |     const allInputs = planner.orderableInputs;
+  1052 |     const inputCount = await allInputs.count();
+  1053 |     expect(inputCount, 'Expected to have orderable inputs on planner').toBeGreaterThan(0);
+  1054 | 
+  1055 |     let productNameFromTestId = '';
+  1056 |     const createdCells: string[] = [];
+  1057 |     for (let i = 0; i < Math.min(inputCount, 200); i++) {
+  1058 |       const tempInput = allInputs.nth(i);
+  1059 |       const isEditable = await tempInput.isEditable().catch(() => false);
+  1060 |       if (!isEditable) continue;
+  1061 |       const isDisabled = await tempInput.isDisabled().catch(() => true);
+  1062 |       if (isDisabled) continue;
+  1063 |       const value = (await tempInput.inputValue()).trim();
+  1064 |       if (value && value !== '0') continue;
+  1065 |       const testId = (await tempInput.getAttribute('data-testid')) || '';
+  1066 |       if (!testId) continue;
+  1067 |       const productMatch = testId.match(/orderable-cell:([^:]+):/);
+  1068 |       if (!productMatch) continue;
+  1069 |       if (!productNameFromTestId) productNameFromTestId = productMatch[1];
+  1070 |       if (!testId.includes(productNameFromTestId)) continue;
+  1071 | 
+  1072 |       // Dismiss any leftover modal (success / congratulations / first-order tutorial) that may
+  1073 |       // have been triggered by the previous interaction — these intercept clicks on planner cells.
+  1074 |       const visibleModal = page.locator('.ant-modal-wrap:visible').first();
+  1075 |       if (await visibleModal.isVisible({ timeout: 500 }).catch(() => false)) {
+  1076 |         const closeBtn = visibleModal
+  1077 |           .locator('button.ant-btn-circle, button.ant-modal-close, button:has-text("Close")')
+  1078 |           .first();
+  1079 |         await closeBtn.click({ timeout: 2000 }).catch(() => {});
+  1080 |         await visibleModal.waitFor({ state: 'hidden', timeout: 5000 }).catch(() => {});
+  1081 |       }
+  1082 | 
+  1083 |       const inp = page.locator(`input[data-testid="${testId}"]`);
+  1084 |       await inp.scrollIntoViewIfNeeded();
+  1085 |       await inp.click();
+  1086 |       await inp.fill(String(createdCells.length === 0 ? 7 : 9));
+  1087 |       await inp.press('Tab');
+  1088 |       await page.waitForTimeout(500);
+  1089 |       createdCells.push(testId);
+  1090 |       if (createdCells.length >= 2) break;
+  1091 |     }
+  1092 |     expect(createdCells.length, 'Expected at least 2 empty cells for same product').toBeGreaterThanOrEqual(2);
+  1093 | 
+  1094 |     await plannerPage.clickOrderButton(page);
+  1095 |     await page.waitForTimeout(1000);
+  1096 |     await expect(planner.orderConfirmationModal).toBeVisible({ timeout: 10000 });
+  1097 |     await planner.orderConfirmationModalConfirmButton.click();
+  1098 |     await expect(planner.orderConfirmationModal).not.toBeVisible({ timeout: 10000 });
+  1099 |     await page.waitForTimeout(3000);
+  1100 |     await plannerPage.closeFirstOrderCongratulationsModalIfVisible(page);
+  1101 |     await page.waitForTimeout(2000);
+  1102 | 
+  1103 |     const targetTestId = createdCells[0];
+  1104 |     const targetTestId2 = createdCells[1];
+  1105 | 
+  1106 |     const { context2, page2, planner2 } = await setupClient2(browser, user1, locationName);
+  1107 | 
+  1108 |     // Scroll Client 2 planner to show both target date cells (may be in future weeks)
+  1109 |     const scrollRight = page2.locator('[data-testid^="scroll-right"]').first();
+  1110 |     for (let scrollAttempt = 0; scrollAttempt < 15; scrollAttempt++) {
+  1111 |       const cell1 = await page2.locator(`input[data-testid="${targetTestId}"]`).count();
+  1112 |       const cell2 = await page2.locator(`input[data-testid="${targetTestId2}"]`).count();
+  1113 |       if (cell1 > 0 && cell2 > 0) break;
+  1114 |       const arrowVisible = await scrollRight
+  1115 |         .waitFor({ state: 'visible', timeout: 3000 })
+  1116 |         .then(() => true)
+  1117 |         .catch(() => false);
+  1118 |       if (!arrowVisible) break;
+  1119 |       await scrollRight.click({ timeout: 5000 }).catch(() => {});
+  1120 |       await page2.waitForTimeout(1000);
+  1121 |     }
+  1122 | 
+  1123 |     // Step 3: Client 1 deletes the first cell by setting qty to 0
+  1124 |     await scrollPlannerToCells(page, [targetTestId, targetTestId2]);
+  1125 |     const targetInput = page.locator(`input[data-testid="${targetTestId}"]`);
+  1126 |     await targetInput.scrollIntoViewIfNeeded();
+  1127 |     await targetInput.click();
+```
